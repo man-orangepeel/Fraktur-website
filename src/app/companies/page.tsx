@@ -1,6 +1,7 @@
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { DonationDrawer } from "@/components/DonationDrawer";
+import { Hero } from "@/components/Hero";
 import { Slide } from "@/components/Slide";
 import { ShardArt } from "@/components/ShardArt";
 import { CompareBars, FindingsCard } from "@/components/ProofVisual";
@@ -44,16 +45,12 @@ export default async function CompaniesPage() {
       <div className="relative z-10">
         <Header variant="companies" />
 
-        {/* Hero — deliberately NOT part of the problem→solution→proof narrative
-            below (it's the brand promise, not step 1 of the pitch). Kept as
-            the first thing seen, but no eyebrow/id ties it into the story
-            sequence, so nothing reads as "answer, then problem, then answer
-            again." See WEBSITE_BRIEF.md §12. */}
-        <Slide
-          eyebrow="FRAKTUR — for Bitcoin companies who can't afford to look away"
-          headline="Cheaper because smarter."
-          visual={<ShardArt variant="cover" />}
-        />
+        {/* Hero — its own component, not a `Slide` instance (see Hero.tsx for
+            the full UX rationale: full-viewport, centered, biggest type on the
+            page). Deliberately NOT part of the problem→solution→proof
+            narrative below — it's the brand promise, not step 1 of the pitch.
+            See WEBSITE_BRIEF.md §14. */}
+        <Hero />
 
       {/* Problem, 3 beats */}
       <Slide

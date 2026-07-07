@@ -5,6 +5,12 @@ import Script from "next/script";
 import { useDonation } from "./DonationContext";
 import type { AllocationChoice } from "@/lib/types";
 
+const ALLOCATIONS: [AllocationChoice, string][] = [
+  ["Product Dev", "Product development"],
+  ["Specific Wallet", "Audit a specific wallet"],
+  ["Team", "Direct tips to the team"],
+];
+
 /**
  * No amount field anywhere in this form — see WEBSITE_BRIEF.md §7. The donor
  * names their own allocation preference and identity, submits, and is handed
@@ -12,6 +18,12 @@ import type { AllocationChoice } from "@/lib/types";
  * btcpay.js, so the drawer never navigates away). The amount that ends up on
  * the donor's public record is whatever BTCPay's webhook later confirms was
  * actually paid — never anything typed into this form.
+ *
+ * v2 (UX pass): every disclosure line lives in one small-print block under
+ * the submit button — nothing above the form competes with it for attention.
+ * Selection states (allocation card, wallet chips) use the site's night-blue
+ * accent (`fraktur-electric` / `electricDim`) rather than orange, keeping
+ * orange reserved for the one action that matters: the submit button.
  */
 export function DonationDrawer({ walletOptions }: { walletOptions: { id: string; name: string }[] }) {
   const { isOpen, close, prefill } = useDonation();
@@ -31,6 +43,10 @@ export function DonationDrawer({ walletOptions }: { walletOptions: { id: string;
   }, [isOpen, prefill]);
 
   if (!isOpen) return null;
+
+  function toggleWallet(id: string) {
+    setSelectedWallets((cur) => (cur.includes(id) ? cur.filter((w) => w !== id) : [...cur, id]));
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -77,107 +93,96 @@ export function DonationDrawer({ walletOptions }: { walletOptions: { id: string;
       <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/30" onClick={close}>
         <div
           onClick={(e) => e.stopPropagation()}
-          className="max-h-[85vh] w-full max-w-2xl overflow-y-auto rounded-t-2xl border border-fraktur-border bg-fraktur-panel p-6 shadow-2xl"
+          className="max-h-[85vh] w-full max-w-2xl overflow-y-auto rounded-t-2xl border border-fraktur-electricDim bg-fraktur-panel p-6 shadow-2xl"
         >
-          <div className="mb-4 flex items-start justify-between">
+          <div className="mb-5 flex items-start justify-between">
             <h3 className="text-xl font-semibold text-fraktur-text">Support FRAKTUR</h3>
             <button onClick={close} className="text-fraktur-muted hover:text-fraktur-text" aria-label="Close">
               ✕
             </button>
           </div>
 
-          <p className="mb-5 rounded-lg bg-fraktur-bg p-3 text-sm text-fraktur-muted">
-            Donations fund a public good (open Bitcoin security). This is a tip, not an investment — no
-            equity, no token, no expectation of return. The &ldquo;Team&rdquo; option is a direct tip to
-            contributors, not a salary or invoice payment.
-          </p>
-
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <fieldset>
-              <legend className="mb-2 text-sm font-medium text-fraktur-text">Where should this go?</legend>
-              <div className="space-y-2 text-sm">
-                {(
-                  [
-                    ["Product Dev", "Product development — we decide between dev and audit work"],
-                    ["Specific Wallet", "Audit a specific wallet — pick one below, or suggest a new one"],
-                    ["Team", "Team — direct tips to contributors"],
-                  ] as [AllocationChoice, string][]
-                ).map(([value, label]) => (
-                  <label key={value} className="flex items-start gap-2">
+          <form onSubmit={handleSubmit} className="space-y-5">
+            <fieldset className="space-y-2">
+              <legend className="mb-1 text-sm font-medium text-fraktur-text">Where should this go?</legend>
+              {ALLOCATIONS.map(([value, label]) => {
+                const checked = allocation === value;
+                return (
+                  <label
+                    key={value}
+                    className={`flex cursor-pointer items-center gap-3 rounded-lg border p-3 text-sm transition ${
+                      checked
+                        ? "border-fraktur-electric bg-fraktur-electricDim/40 text-fraktur-text"
+                        : "border-fraktur-border text-fraktur-muted hover:border-fraktur-electricDim"
+                    }`}
+                  >
                     <input
                       type="radio"
                       name="allocation"
-                      checked={allocation === value}
+                      checked={checked}
                       onChange={() => setAllocation(value)}
-                      className="mt-1"
+                      className="accent-fraktur-electric"
                     />
-                    <span className="text-fraktur-text">{label}</span>
+                    {label}
                   </label>
-                ))}
-              </div>
+                );
+              })}
             </fieldset>
 
             {allocation === "Specific Wallet" && (
-              <div className="space-y-2 rounded-lg border border-fraktur-border p-3">
-                <label className="block text-xs text-fraktur-muted">Pick from published wallets</label>
-                <select
-                  multiple
-                  value={selectedWallets}
-                  onChange={(e) => setSelectedWallets(Array.from(e.target.selectedOptions, (o) => o.value))}
-                  className="w-full rounded-md border border-fraktur-border bg-fraktur-bg p-2 text-sm text-fraktur-text"
-                >
-                  {walletOptions.map((w) => (
-                    <option key={w.id} value={w.id}>
-                      {w.name}
-                    </option>
-                  ))}
-                </select>
-                <label className="block text-xs text-fraktur-muted">Or suggest a wallet not listed yet</label>
+              <div className="space-y-3 rounded-lg border border-fraktur-border p-3">
+                <p className="text-xs text-fraktur-muted">Published wallets</p>
+                <div className="max-h-40 space-y-1 overflow-y-auto pr-1">
+                  {walletOptions.map((w) => {
+                    const checked = selectedWallets.includes(w.id);
+                    return (
+                      <label
+                        key={w.id}
+                        className={`flex cursor-pointer items-center gap-2 rounded-md border px-3 py-2 text-sm transition ${
+                          checked
+                            ? "border-fraktur-electric bg-fraktur-electricDim/40 text-fraktur-text"
+                            : "border-transparent bg-fraktur-bg text-fraktur-muted hover:border-fraktur-electricDim"
+                        }`}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={checked}
+                          onChange={() => toggleWallet(w.id)}
+                          className="accent-fraktur-electric"
+                        />
+                        {w.name}
+                      </label>
+                    );
+                  })}
+                </div>
                 <input
                   value={newWallet}
                   onChange={(e) => setNewWallet(e.target.value)}
-                  placeholder="Wallet name / repo URL"
-                  className="w-full rounded-md border border-fraktur-border bg-fraktur-bg p-2 text-sm text-fraktur-text"
+                  placeholder="Or suggest one — name / repo URL"
+                  className="w-full rounded-md border border-fraktur-border bg-fraktur-bg p-2 text-sm text-fraktur-text focus:border-fraktur-electric focus:outline-none"
                 />
               </div>
             )}
 
             <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="mb-1 block text-xs text-fraktur-muted">X handle (optional)</label>
-                <input
-                  value={xHandle}
-                  onChange={(e) => setXHandle(e.target.value)}
-                  placeholder="@you"
-                  className="w-full rounded-md border border-fraktur-border bg-fraktur-bg p-2 text-sm text-fraktur-text"
-                />
-              </div>
-              <div>
-                <label className="mb-1 block text-xs text-fraktur-muted">Nostr npub (optional)</label>
-                <input
-                  value={nostrNpub}
-                  onChange={(e) => setNostrNpub(e.target.value)}
-                  placeholder="npub1…"
-                  className="w-full rounded-md border border-fraktur-border bg-fraktur-bg p-2 text-sm text-fraktur-text"
-                />
-              </div>
+              <input
+                value={xHandle}
+                onChange={(e) => setXHandle(e.target.value)}
+                placeholder="X handle (optional)"
+                className="w-full rounded-md border border-fraktur-border bg-fraktur-bg p-2 text-sm text-fraktur-text focus:border-fraktur-electric focus:outline-none"
+              />
+              <input
+                value={nostrNpub}
+                onChange={(e) => setNostrNpub(e.target.value)}
+                placeholder="Nostr npub (optional)"
+                className="w-full rounded-md border border-fraktur-border bg-fraktur-bg p-2 text-sm text-fraktur-text focus:border-fraktur-electric focus:outline-none"
+              />
             </div>
 
             <label className="flex items-start gap-2 text-sm text-fraktur-text">
-              <input type="checkbox" checked={consent} onChange={(e) => setConsent(e.target.checked)} className="mt-1" />
-              I&rsquo;d like to appear in the public supporters gallery if my total reaches the threshold.
+              <input type="checkbox" checked={consent} onChange={(e) => setConsent(e.target.checked)} className="mt-1 accent-fraktur-electric" />
+              Show me in the public supporters gallery.
             </label>
-
-            <p className="text-xs text-fraktur-muted">
-              Only supporters whose total donations reach 212,121 sats appear in the public gallery. This
-              is verified automatically once BTCPay confirms your payment — there&rsquo;s no amount to type
-              in below.
-            </p>
-
-            <p className="text-xs text-fraktur-muted">
-              Your allocation choice is a preference, not a binding contract — FRAKTUR keeps final judgment
-              on audit prioritization to avoid pay-to-audit conflicts of interest.
-            </p>
 
             <button
               type="submit"
@@ -189,6 +194,13 @@ export function DonationDrawer({ walletOptions }: { walletOptions: { id: string;
             {status === "error" && (
               <p className="text-sm text-risk-critical">Something went wrong creating the invoice. Please try again.</p>
             )}
+
+            <p className="text-xs leading-relaxed text-fraktur-muted">
+              Donations are tips for open Bitcoin security — not an investment, equity, or salary; the
+              &ldquo;Team&rdquo; option pays contributors directly, not as wages. Reaching 212,121 sats gets you
+              into the public gallery. Your allocation is a preference, not a contract — FRAKTUR keeps final
+              say on audit priority to avoid pay-to-audit conflicts.
+            </p>
           </form>
         </div>
       </div>
