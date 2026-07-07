@@ -26,6 +26,10 @@ const OBJECTIONS = [
     q: "What if the bug is in the code you didn't review?",
     a: "Nobody claims 100% — that's exactly why every wallet's progress (files audited / files selected) is public on the Wallet Watcher, not asserted in a PDF you can't check.",
   },
+  {
+    q: "Will you publish our vulnerabilities publicly before we can fix them?",
+    a: "No. You get full technical detail — exact file, function, PoC — immediately and for free, always. The public post states that a finding happened and its severity, never exploit-level detail, until you've shipped a fix (or a 90-day embargo expires). Same disclosure model CVEs and Bitcoin Core use.",
+  },
 ];
 
 export default async function CompaniesPage() {

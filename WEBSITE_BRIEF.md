@@ -343,3 +343,27 @@ Not done in this session (see README.md "Deploying"): actual deployment to a hos
 - Allocation labels shortened: "Product development — we decide between dev and audit work" → **"Product development"**; "Audit a specific wallet — pick one below, or suggest a new one" → **"Audit a specific wallet"**; "Team — direct tips to contributors" → **"Direct tips to the team"**.
 - Allocation choices and wallet picker are now selectable cards/chips (not a bare radio + label, not a native `<select multiple>`) — selected state uses the electric/electricDim accent, giving the "which wallet" decision the same verification-adjacent visual language as the rest of the site, instead of looking like an unstyled form control.
 - The wallet multi-select was flagged directly ("très moche") — replaced with a scrollable checkbox-chip list styled consistently with the rest of the site (rounded rows, border/background states), not a native OS `<select>` box.
+
+---
+
+## 15. Disclosure policy (decided 2026-07-07) — what gets published, to whom, and when
+
+**The question:** never disclose finding details unless the company pays; sell the full report; or disclose findings free but keep it general? The founder asked this explicitly, weighing attacker-arming risk against Bitcoin community norms.
+
+**Decision: staged disclosure, not an all-or-nothing choice between "free" and "paid."** Two different recipients, two different levels of detail:
+
+| Recipient | What they get | When |
+|---|---|---|
+| The audited company | Full technical detail — exact file/function, PoC | Immediately, free, always — never gated on payment (that would be leverage/extortion-adjacent, and breaks the existing "never withhold findings" rule) |
+| The public (X, Wallet Watcher) | Existence of the finding + severity + general category (e.g. "Medium — path/filesystem handling") | Immediately |
+| The public (technical write-up) | Exact vulnerable code path, working PoC | Embargoed — after the company ships a fix, or a default 90-day window (extendable while a fix is actively in progress) expires, whichever first |
+| Anyone, as a paid product | Continuous coverage across every file (not just the one free-tier finding), speed, ongoing engagement | Subscription — this sells the *service*, not information already owed to the affected company for free |
+
+**Why this, not the other two options considered:**
+- *"Nothing without payment"* was ruled out — it directly contradicts the standing rule against withholding findings as leverage, and reads as a shakedown ("pay us to learn if you're vulnerable") that would be reputationally toxic in a reputation-driven community.
+- *"Sell the full report to end users"* was ruled out — retail users don't buy technical audit reports (the Wallet Watcher's public score already serves that audience), and selling a company's own vulnerability details to its users without the company's involvement reads as leverage against the company via its own users, not responsible disclosure.
+- The Bitcoin/crypto security community's actual norm (Bitcoin Core, Lightning) is coordinated disclosure with an embargo — not immediate full technical publication. A vendor that leaks a live 0-day publicly loses credibility, it doesn't earn it. "Don't Trust. Verify." (the site's own proof-of-audit slide) is about verifying that a real audit happened, not about publishing exploit code before it's safe.
+
+**Where this shows up in the actual copy:** Annex A5 (`FRAKTUR_Pitch_Brief.md`) tightened — "Disclose vulnerabilities in full, for free" was ambiguous and read as "publish full technical detail immediately," which is exactly the risky reading this decision rules out. New Annex A10 risk row added. `CLAUDE.md` (recreated — see note below) carries the same policy as a standing project rule. Companies page FAQ gets a new objection addressing this directly, since "will you dump my vulnerability details publicly?" is a real, high-stakes question for any B2B prospect evaluating a security vendor. `/legal` gets a short disclosure-policy paragraph alongside the donation terms.
+
+**Note:** `CLAUDE.md` was found missing from the project root while making this change (not flagged as a parallel-session edit) and was recreated with this policy folded in — flag to the founder in case their other session moved or restructured it deliberately rather than it having been deleted by accident.

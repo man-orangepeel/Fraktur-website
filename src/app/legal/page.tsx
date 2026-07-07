@@ -26,6 +26,18 @@ export default function LegalPage() {
           responsible for the security of their own wallets and payment methods. Nothing on this site constitutes
           financial, investment, tax, or legal advice.
         </p>
+
+        <h2 className="mb-4 mt-12 text-xl font-semibold text-fraktur-text">Vulnerability Disclosure Policy</h2>
+        <p className="leading-relaxed text-fraktur-muted">
+          The company we audit receives full technical detail of every finding — exact file, function, and a
+          proof-of-concept — immediately and free of charge, regardless of subscription status. This is never
+          withheld pending payment. What we publish publicly (on X, on the Wallet Watcher) is the existence of a
+          finding along with its severity and general category — never exploit-level detail. The technical
+          write-up is embargoed until the affected company ships a fix, or a default 90-day window expires
+          (extendable while a fix is actively in progress), whichever comes first. This mirrors standard CVE and
+          Bitcoin Core/Lightning disclosure practice: coordinated timing protects users without ever gating a
+          company&rsquo;s own information about its own product on payment.
+        </p>
       </main>
       <Footer />
     </>
