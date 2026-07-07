@@ -11,7 +11,7 @@ export function Header({ variant }: { variant: "home" | "companies" }) {
     variant === "home"
       ? [
           { href: "#wallets", label: "Wallets" },
-          { href: "#supporters", label: "The Cast" },
+          { href: "#supporters", label: "the Kast" },
         ]
       : [
           { href: "#problem", label: "Problem" },
@@ -22,7 +22,7 @@ export function Header({ variant }: { variant: "home" | "companies" }) {
         ];
 
   return (
-    <header className="sticky top-0 z-40 border-b border-fraktur-border bg-fraktur-bg/95 backdrop-blur">
+    <header className="sticky top-0 z-40 bg-fraktur-bg/95 backdrop-blur">
       <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4 sm:py-5">
         <Link href="/" className="flex items-center gap-2">
           <Image src="/logo-full.png" alt="FRAKTUR" width={320} height={64} priority className="h-16 w-auto sm:h-20" />
@@ -52,6 +52,8 @@ export function Header({ variant }: { variant: "home" | "companies" }) {
           ⚡ Help us fraKtur it
         </button>
       </div>
+      {/* Thin electric-blue accent line — solid, no gradient. */}
+      <div className="h-[2px] w-full bg-fraktur-electric" />
     </header>
   );
 }

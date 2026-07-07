@@ -1,11 +1,12 @@
-import type { Severity } from "@/lib/types";
+import type { Finding, Severity } from "@/lib/types";
 import { reductionPct, severityHex } from "@/lib/format";
 
-const FRAKTUR_ORANGE = "#f5891a";
-const FRAKTUR_ORANGE_DIM = "#c96f14";
+const FRAKTUR_ELECTRIC = "#3b6fed";
+const FRAKTUR_ELECTRIC_DIM = "#1b2a5c";
 const FRAKTUR_TEXT = "#e6e9ee";
 const FRAKTUR_MUTED = "#8a94a3";
 const FRAKTUR_BORDER = "#1c232c";
+const SEVERITY_NONE_HEX = "#3ba55d";
 
 export interface AuditFlowDiagramProps {
   testsRun?: number;
@@ -14,8 +15,10 @@ export interface AuditFlowDiagramProps {
   filesAudited: number;
   maxTestsRun: number;
   maxFilesScanned: number;
-  riskBadge: Severity | "None";
+  findings: Finding[];
 }
+
+const SEVERITY_RANK: Record<Severity, number> = { Critical: 3, High: 2, Medium: 1, Low: 0 };
 
 function scaleWidth(value: number, max: number, min = 6, cap = 40): number {
   if (max <= 0) return min;
@@ -32,6 +35,14 @@ function taperBand(x0: number, yc0: number, w0: number, x1: number, yc1: number,
   return `M ${x0} ${topStart} C ${x0 + dx} ${topStart}, ${x1 - dx} ${topEnd}, ${x1} ${topEnd} L ${x1} ${botEnd} C ${x1 - dx} ${botEnd}, ${x0 + dx} ${botStart}, ${x0} ${botStart} Z`;
 }
 
+const RIGHT_EDGE = 496;
+const MAX_BLOCKS = 10;
+const BLOCK_W = 14;
+const GAP = 3;
+const DOT_R = 3.2;
+const DOT_STEP = 8;
+const MIN_MERGE_X = 140; // floor so the ribbons never fully disappear when there's just one block
+
 export function AuditFlowDiagram({
   testsRun,
   filesScanned,
@@ -39,10 +50,9 @@ export function AuditFlowDiagram({
   filesAudited,
   maxTestsRun,
   maxFilesScanned,
-  riskBadge,
+  findings,
 }: AuditFlowDiagramProps) {
   const l1Pct = reductionPct(filesScanned, filesSelected);
-  const riskHex = severityHex(riskBadge);
 
   const filesW0 = scaleWidth(filesScanned, maxFilesScanned);
   const filesW1 = scaleWidth(filesSelected, maxFilesScanned);
@@ -50,37 +60,60 @@ export function AuditFlowDiagram({
 
   const mergedW = Math.max(filesW1, testsW || filesW1 * 0.5) * 0.85;
 
-  const filesPath = taperBand(10, 30, filesW0, 340, 65, filesW1 * 0.85);
-  const testsPath = testsRun !== undefined ? taperBand(10, 96, testsW, 340, 65, testsW * 0.85) : null;
-  const outputPath = taperBand(340, 65, mergedW, 500, 65, mergedW);
+  const totalFindings = findings.length;
 
-  const gradId = `flow-${riskBadge}-${filesScanned}-${filesSelected}`;
+  // Keep the 10 most severe findings (Critical first); anything beyond that
+  // is summarized as a dot-run rather than shrunk to fit.
+  const sortedDesc = [...findings].sort((a, b) => SEVERITY_RANK[b.severity] - SEVERITY_RANK[a.severity]);
+  const kept = sortedDesc.slice(0, MAX_BLOCKS);
+  const overflowCount = Math.max(totalFindings - MAX_BLOCKS, 0);
+  const displaySeverities: (Severity | "None")[] =
+    totalFindings === 0 ? ["None"] : [...kept].sort((a, b) => SEVERITY_RANK[a.severity] - SEVERITY_RANK[b.severity]).map((f) => f.severity);
+
+  const blocksTotalWidth = displaySeverities.length * BLOCK_W + (displaySeverities.length - 1) * GAP;
+  const dotsSpace = overflowCount > 0 ? 3 * DOT_STEP + GAP * 2 : 0;
+
+  // The fusion point sits just before the leftmost block (or dot-run) —
+  // its width adjusts to how many vulnerabilities there are, it isn't fixed.
+  const mergeStartX = Math.max(RIGHT_EDGE - blocksTotalWidth - dotsSpace, MIN_MERGE_X);
+  const blocksStartX = RIGHT_EDGE - blocksTotalWidth;
+  const blocks = displaySeverities.map((sev, i) => ({ x: blocksStartX + i * (BLOCK_W + GAP), sev }));
+  const dotsX = overflowCount > 0 ? mergeStartX + GAP : null;
+
+  const filesPath = taperBand(10, 30, filesW0, mergeStartX, 65, filesW1 * 0.85);
+  const testsPath = testsRun !== undefined ? taperBand(10, 96, testsW, mergeStartX, 65, testsW * 0.85) : null;
+  // Width now equals exactly what's needed to reach the blocks — the fusion
+  // rectangle hugs its content instead of always spanning the full card.
+  const mergePath = taperBand(mergeStartX, 65, mergedW, RIGHT_EDGE + 4, 65, mergedW);
+
+  const auditPct = filesSelected > 0 ? (filesAudited / filesSelected) * 100 : 0;
+  const isComplete = filesSelected > 0 && filesAudited >= filesSelected;
+  const gaugeFill = isComplete ? SEVERITY_NONE_HEX : FRAKTUR_ELECTRIC;
+
+  const gradId = `flow-${filesScanned}-${filesSelected}-${totalFindings}`;
 
   return (
     <div>
       <svg viewBox="0 0 520 130" preserveAspectRatio="none" className="h-[100px] w-full sm:h-[120px]" aria-hidden>
         <defs>
           <linearGradient id={`${gradId}-files`} x1="0" y1="0" x2="1" y2="0">
-            <stop offset="0%" stopColor={FRAKTUR_ORANGE} stopOpacity={0.5} />
-            <stop offset="100%" stopColor={FRAKTUR_ORANGE} stopOpacity={0.95} />
+            <stop offset="0%" stopColor={FRAKTUR_ELECTRIC} stopOpacity={0.5} />
+            <stop offset="100%" stopColor={FRAKTUR_ELECTRIC} stopOpacity={0.95} />
           </linearGradient>
           <linearGradient id={`${gradId}-tests`} x1="0" y1="0" x2="1" y2="0">
-            <stop offset="0%" stopColor={FRAKTUR_ORANGE_DIM} stopOpacity={0.35} />
-            <stop offset="100%" stopColor={FRAKTUR_ORANGE_DIM} stopOpacity={0.7} />
-          </linearGradient>
-          <linearGradient id={`${gradId}-merge`} x1="0" y1="0" x2="1" y2="0">
-            <stop offset="0%" stopColor={FRAKTUR_ORANGE} />
-            <stop offset="100%" stopColor={riskHex} />
+            <stop offset="0%" stopColor={FRAKTUR_ELECTRIC_DIM} stopOpacity={0.5} />
+            <stop offset="100%" stopColor={FRAKTUR_ELECTRIC_DIM} stopOpacity={0.85} />
           </linearGradient>
         </defs>
 
         {testsPath && <path d={testsPath} fill={`url(#${gradId}-tests)`} />}
         <path d={filesPath} fill={`url(#${gradId}-files)`} />
-        <path d={outputPath} fill={`url(#${gradId}-merge)`} />
+        {/* Always full width, independent of finding count. */}
+        <path d={mergePath} fill={FRAKTUR_ELECTRIC} />
 
         {!testsPath && (
           <path
-            d={taperBand(10, 96, 10, 340, 65, 6)}
+            d={taperBand(10, 96, 10, mergeStartX, 65, 6)}
             fill="none"
             stroke={FRAKTUR_MUTED}
             strokeOpacity={0.4}
@@ -88,15 +121,19 @@ export function AuditFlowDiagram({
           />
         )}
 
-        {/* Files lane labels */}
+        {/* Up to 10 fixed-width blocks, most severe kept, ordered low (left)
+            -> critical (right), right-aligned to the card edge. Anything
+            beyond 10 collapses into a dot-run just before the first block —
+            the fusion rectangle's width adjusts to reach exactly there. */}
+        {blocks.map((b, i) => (
+          <rect key={i} x={b.x} y={65 - 15} width={BLOCK_W} height={30} rx={2} fill={severityHex(b.sev)} />
+        ))}
+        {dotsX !== null &&
+          [0, 1, 2].map((j) => <circle key={j} cx={dotsX + j * DOT_STEP} cy={65} r={DOT_R} fill={FRAKTUR_TEXT} opacity={0.9} />)}
+
+        {/* Files lane label */}
         <text x="12" y="20" fontSize="11" fontWeight={600} fill={FRAKTUR_TEXT}>
           {filesScanned.toLocaleString("en-US")} files
-        </text>
-        <text x="248" y="52" fontSize="11" fontWeight={700} fill={FRAKTUR_TEXT}>
-          {filesSelected.toLocaleString("en-US")} selected
-        </text>
-        <text x="248" y="66" fontSize="10" fill={FRAKTUR_ORANGE}>
-          -{l1Pct}% noise cut
         </text>
 
         {/* Tests lane label */}
@@ -109,21 +146,30 @@ export function AuditFlowDiagram({
             No dynamic test data yet
           </text>
         )}
-
-        {/* Output label */}
-        <text x="352" y="60" fontSize="11" fontWeight={700} fill={FRAKTUR_TEXT}>
-          Findings
-        </text>
       </svg>
+
+      {/* Plain HTML, not SVG text — this row's width always matches the
+          diagram's own width, so the finding count is guaranteed to sit at
+          the graphic's right edge, and neither label can ever land on top
+          of the ribbons no matter how the fusion point shifts. */}
+      <div className="mt-1 flex items-center justify-between text-xs">
+        <span className="font-bold text-fraktur-electric">-{l1Pct}% noise cut</span>
+        <span className="text-fraktur-muted">
+          {totalFindings === 0 ? "0 findings" : `${totalFindings} finding${totalFindings === 1 ? "" : "s"}`}
+        </span>
+      </div>
 
       <div className="mt-2 flex items-center gap-2 text-xs">
         <span className="shrink-0 text-fraktur-muted">Audited</span>
-        <div className="h-2 flex-1 overflow-hidden rounded-full" style={{ backgroundColor: FRAKTUR_BORDER }}>
+        <div
+          className="h-2 flex-1 overflow-hidden rounded-full border"
+          style={{ backgroundColor: FRAKTUR_BORDER, borderColor: FRAKTUR_ELECTRIC }}
+        >
           <div
-            className="h-full rounded-full"
+            className="h-full rounded-full transition-colors"
             style={{
-              width: `${Math.max((filesAudited / Math.max(filesSelected, 1)) * 100, filesAudited > 0 ? 3 : 0)}%`,
-              backgroundColor: FRAKTUR_ORANGE,
+              width: `${Math.max(auditPct, filesAudited > 0 ? 3 : 0)}%`,
+              backgroundColor: gaugeFill,
             }}
           />
         </div>

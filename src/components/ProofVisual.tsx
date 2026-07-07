@@ -41,12 +41,12 @@ export function CompareBars({
       <div className="mb-5">
         <div className="mb-1 flex items-baseline justify-between text-sm">
           <span className="text-fraktur-muted">{afterLabel}</span>
-          <span className="font-display text-2xl text-fraktur-orange">
+          <span className="font-display text-2xl text-fraktur-electric">
             {afterValue.toLocaleString()}
             {unit}
           </span>
         </div>
-        <div className="h-3 rounded-full bg-risk-low" style={{ width: `${afterPct}%` }} />
+        <div className="h-3 rounded-full bg-fraktur-electric" style={{ width: `${afterPct}%` }} />
       </div>
 
       <p className="font-display text-3xl text-fraktur-text">{result}</p>

@@ -15,7 +15,7 @@ export function Footer() {
               target="_blank"
               rel="noreferrer"
               aria-label="FRAKTUR on X"
-              className="text-fraktur-muted hover:text-fraktur-orange"
+              className="text-fraktur-muted hover:text-fraktur-electric"
             >
               <XIcon className="h-5 w-5" />
             </a>
@@ -24,7 +24,7 @@ export function Footer() {
               target="_blank"
               rel="noreferrer"
               aria-label="FRAKTUR on GitHub"
-              className="text-fraktur-muted hover:text-fraktur-orange"
+              className="text-fraktur-muted hover:text-fraktur-electric"
             >
               <GithubIcon className="h-5 w-5" />
             </a>
@@ -33,11 +33,11 @@ export function Footer() {
               target="_blank"
               rel="noreferrer"
               aria-label="Verify an OpenTimestamp proof"
-              className="text-fraktur-muted hover:text-fraktur-orange"
+              className="text-fraktur-muted hover:text-fraktur-electric"
             >
               <VerifyIcon className="h-5 w-5" />
             </a>
-            <a href="mailto:contact@fraktur.io" aria-label="Email FRAKTUR" className="text-fraktur-muted hover:text-fraktur-orange">
+            <a href="mailto:contact@fraktur.io" aria-label="Email FRAKTUR" className="text-fraktur-muted hover:text-fraktur-electric">
               <MailIcon className="h-5 w-5" />
             </a>
           </div>

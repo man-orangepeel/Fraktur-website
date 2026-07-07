@@ -106,10 +106,13 @@ export function ShardArt({ variant, className }: { variant: ShardVariant; classN
 
       {variant === "verify" && (
         <>
-          {/* A shard sealed inside a timestamp ring — the on-chain proof idea, drawn. */}
-          <circle cx="200" cy="200" r="120" fill="none" stroke="#f5891a" strokeOpacity="0.35" strokeWidth="1.5" strokeDasharray="2 8" />
-          <circle cx="200" cy="200" r="150" fill="none" stroke="#f5891a" strokeOpacity="0.15" strokeWidth="1" strokeDasharray="1 10" />
-          <Shard x={190} y={230} scale={1.5} rotate={0} opacity={1} color="#f5891a" />
+          {/* A shard sealed inside a timestamp ring — the on-chain proof idea,
+              drawn in electric blue rather than brand orange: this is the one
+              deliberate exception, reserved for verification/trust imagery
+              (matches the "Verify" links elsewhere on the site). */}
+          <circle cx="200" cy="200" r="120" fill="none" stroke="#3b6fed" strokeOpacity="0.35" strokeWidth="1.5" strokeDasharray="2 8" />
+          <circle cx="200" cy="200" r="150" fill="none" stroke="#3b6fed" strokeOpacity="0.15" strokeWidth="1" strokeDasharray="1 10" />
+          <Shard x={190} y={230} scale={1.5} rotate={0} opacity={1} color="#3b6fed" />
         </>
       )}
 

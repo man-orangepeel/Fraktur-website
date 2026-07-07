@@ -25,7 +25,6 @@ export default async function HomePage() {
         </h1>
         <p className="mx-auto mt-3 max-w-xl text-fraktur-muted">Audited, timestamped, public.</p>
         <p className="mt-6 text-sm text-fraktur-muted">
-          Run a Bitcoin company?{" "}
           <Link href="/companies" className="font-medium text-fraktur-orange hover:underline">
             For Companies →
           </Link>

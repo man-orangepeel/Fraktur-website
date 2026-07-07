@@ -1,6 +1,6 @@
-export type WalletStatus = "Monitoring" | "Audit in progress" | "Completed";
+export type WalletStatus = "In progress" | "Completed";
 
-export type Severity = "Critical" | "High" | "Medium-High" | "Medium" | "Low";
+export type Severity = "Critical" | "High" | "Medium" | "Low";
 
 export interface Finding {
   id: string;
@@ -16,6 +16,8 @@ export interface Wallet {
   id: string;
   name: string;
   repoUrl?: string;
+  iconInitials?: string; // 1-2 letter monogram shown before the name (real logo art not embedded — see icon note)
+  iconColor?: string; // approximate real-world brand color for the monogram avatar
   status: WalletStatus;
   lastReviewDate: string; // ISO date
   auditToolVersion: string;

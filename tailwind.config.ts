@@ -15,13 +15,34 @@ const config: Config = {
           muted: "#8a94a3",
           orange: "#f5891a",
           orangeDim: "#c96f14",
+          // Electric midnight blue — second brand accent, used for the audit /
+          // verification visual language (flow diagram, progress gauges,
+          // "Verify" links), kept distinct from orange's donation/CTA role.
+          electric: "#3b6fed",
+          electricDim: "#1b2a5c",
         },
+        // Legacy risk.* tokens — kept as-is for the Companies page proof
+        // table (ProofVisual.tsx), which still uses the original 5-tier
+        // model including "Medium-High". Not used by the new Home severity
+        // system below.
         risk: {
           low: "#3ba55d",
           medium: "#e8b339",
           mediumHigh: "#e88a2f",
           high: "#e2542c",
           critical: "#d63b3b",
+        },
+        // Home page's simplified 4-tier severity scale (+ "none" for zero
+        // findings) — green reserved exclusively for a clean wallet.
+        severity: {
+          none: "#3ba55d",
+          low: "#e8b339",
+          medium: "#e88a2f",
+          high: "#e2542c",
+          // Vivid magenta-crimson rather than a near-black purple — reads as
+          // "beyond red" at a glance against dark panels, doesn't recede into
+          // the background the way a very dark tone would.
+          critical: "#c81e6e",
         },
       },
       fontFamily: {

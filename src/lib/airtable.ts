@@ -227,7 +227,7 @@ export async function fetchPublishedWallets() {
         id: r.id,
         name: r.fields.Name || "Unnamed wallet",
         repoUrl: r.fields["Logo/Repo URL"],
-        status: (r.fields.Status as any) || "Monitoring",
+        status: (r.fields.Status as any) || "In progress",
         lastReviewDate: r.fields["Last Review Date"] || "",
         auditToolVersion: r.fields["Audit Tool Version"] || "",
         otsHash: r.fields["OpenTimestamp Hash"],
