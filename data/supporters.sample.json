@@ -1,5 +1,15 @@
 [
   { "handle": "@example_supporter", "network": "x", "totalSats": 500000, "tier": "Backer", "lastDonationDate": "2026-06-30", "activeLast30Days": true, "galleryEligible": true },
   { "handle": "npub1exampleplaceholder", "network": "nostr", "totalSats": 1200000, "tier": "Patron", "lastDonationDate": "2026-06-20", "activeLast30Days": true, "galleryEligible": true },
-  { "handle": "@another_supporter", "network": "x", "totalSats": 220000, "tier": "Supporter", "lastDonationDate": "2026-05-10", "activeLast30Days": false, "galleryEligible": true }
+  { "handle": "@another_supporter", "network": "x", "totalSats": 220000, "tier": "Supporter", "lastDonationDate": "2026-05-10", "activeLast30Days": false, "galleryEligible": true },
+  { "handle": "@satoshi_fan99", "network": "x", "totalSats": 350000, "tier": "Supporter", "lastDonationDate": "2026-07-01", "activeLast30Days": true, "galleryEligible": true },
+  { "handle": "npub1cryptoknight", "network": "nostr", "totalSats": 890000, "tier": "Backer", "lastDonationDate": "2026-06-25", "activeLast30Days": true, "galleryEligible": true },
+  { "handle": "@lightning_larry", "network": "x", "totalSats": 2500000, "tier": "Patron", "lastDonationDate": "2026-07-03", "activeLast30Days": true, "galleryEligible": true },
+  { "handle": "@hodl_hannah", "network": "x", "totalSats": 215000, "tier": "Supporter", "lastDonationDate": "2026-06-10", "activeLast30Days": false, "galleryEligible": true },
+  { "handle": "npub1blockbuilder", "network": "nostr", "totalSats": 610000, "tier": "Backer", "lastDonationDate": "2026-06-28", "activeLast30Days": true, "galleryEligible": true },
+  { "handle": "@sat_stacker", "network": "x", "totalSats": 1750000, "tier": "Patron", "lastDonationDate": "2026-05-15", "activeLast30Days": false, "galleryEligible": true },
+  { "handle": "@orange_pill_omar", "network": "x", "totalSats": 300000, "tier": "Supporter", "lastDonationDate": "2026-07-04", "activeLast30Days": true, "galleryEligible": true },
+  { "handle": "npub1nodeoperator", "network": "nostr", "totalSats": 425000, "tier": "Supporter", "lastDonationDate": "2026-06-05", "activeLast30Days": false, "galleryEligible": true },
+  { "handle": "@cypherpunk_casey", "network": "x", "totalSats": 980000, "tier": "Backer", "lastDonationDate": "2026-06-22", "activeLast30Days": true, "galleryEligible": true },
+  { "handle": "@multisig_maria", "network": "x", "totalSats": 1350000, "tier": "Patron", "lastDonationDate": "2026-06-18", "activeLast30Days": true, "galleryEligible": true }
 ]

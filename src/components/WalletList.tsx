@@ -156,15 +156,12 @@ export function WalletList({ wallets }: { wallets: Wallet[] }) {
 
               <button
                 onClick={() => open({ allocationChoice: "Specific Wallet", walletId: wallet.id, walletName: wallet.name })}
-                className="block text-sm font-medium text-fraktur-orange hover:underline"
+                className="block text-xs text-fraktur-orange hover:underline"
               >
-                Go deeper →
+                Help us go deeper, faster →
               </button>
-              <Link
-                href="/companies"
-                className="mt-2 block text-xs text-fraktur-muted hover:text-fraktur-electric"
-              >
-                Is this your wallet? Get continuous coverage of every file, every commit →{" "}
+              <Link href="/companies" className="mt-1 block text-xs text-fraktur-muted hover:text-fraktur-electric">
+                Your wallet? Get continuous coverage →{" "}
                 <span className="font-medium text-fraktur-electric">For Companies</span>
               </Link>
             </article>
