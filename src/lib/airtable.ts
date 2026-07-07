@@ -206,6 +206,7 @@ interface WalletFields {
   "Audit Tool Version"?: string;
   "OpenTimestamp Hash"?: string;
   "OTS Proof URL"?: string;
+  "Tests Run"?: number;
   "Files Scanned (L1 input)"?: number;
   "Files Selected (L1 output)"?: number;
   "Files Audited (L2 progress)"?: number;
@@ -231,6 +232,7 @@ export async function fetchPublishedWallets() {
         auditToolVersion: r.fields["Audit Tool Version"] || "",
         otsHash: r.fields["OpenTimestamp Hash"],
         otsProofUrl: r.fields["OTS Proof URL"],
+        testsRun: r.fields["Tests Run"] || undefined,
         filesScanned: r.fields["Files Scanned (L1 input)"] || 0,
         filesSelected: r.fields["Files Selected (L1 output)"] || 0,
         filesAudited: r.fields["Files Audited (L2 progress)"] || 0,

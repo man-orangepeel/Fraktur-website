@@ -17,6 +17,23 @@ export function severityColorClass(severity: Severity | "None"): string {
   }
 }
 
+export function severityHex(severity: Severity | "None"): string {
+  switch (severity) {
+    case "Critical":
+      return "#d63b3b";
+    case "High":
+      return "#e2542c";
+    case "Medium-High":
+      return "#e88a2f";
+    case "Medium":
+      return "#e8b339";
+    case "Low":
+      return "#3ba55d";
+    default:
+      return "#1c232c";
+  }
+}
+
 export function formatSats(sats: number): string {
   return `${sats.toLocaleString("en-US")} sats`;
 }

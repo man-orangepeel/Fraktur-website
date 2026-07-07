@@ -8,6 +8,7 @@
     "auditToolVersion": "v0.3.1",
     "otsHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
     "otsProofUrl": "https://opentimestamps.org/",
+    "testsRun": 18,
     "filesScanned": 1300,
     "filesSelected": 63,
     "filesAudited": 6,
@@ -20,5 +21,105 @@
       { "id": "f4", "walletId": "wallet-sample-01", "cwe": "CWE-362", "title": "Concurrency / race condition", "severity": "Low", "status": "Open" },
       { "id": "f5", "walletId": "wallet-sample-01", "cwe": "CWE-362", "title": "Concurrency / race condition", "severity": "Low", "status": "Open" }
     ]
+  },
+  {
+    "id": "wallet-wasabi-01",
+    "name": "Wasabi Wallet",
+    "repoUrl": "https://github.com/zkSNACKs/WalletWasabi",
+    "status": "Completed",
+    "lastReviewDate": "2026-07-02",
+    "auditToolVersion": "v0.4.0",
+    "otsHash": "316c868582c61d30032c3dc7a292f52517c89f48a5d2016ea6ae5b2b5da5620",
+    "otsProofUrl": "https://opentimestamps.org/",
+    "testsRun": 72,
+    "filesScanned": 2450,
+    "filesSelected": 134,
+    "filesAudited": 134,
+    "riskBadge": "Low",
+    "published": true,
+    "findings": [
+      { "id": "wf1", "walletId": "wallet-wasabi-01", "cwe": "CWE-330", "title": "Insufficient entropy in coinjoin output shuffling", "severity": "High", "status": "Fixed" },
+      { "id": "wf2", "walletId": "wallet-wasabi-01", "cwe": "CWE-362", "title": "Race condition during chain-reorg handling", "severity": "Medium-High", "status": "Fixed" },
+      { "id": "wf3", "walletId": "wallet-wasabi-01", "cwe": "CWE-20", "title": "Improper validation of PSBT input fields", "severity": "Medium", "status": "Fixed" },
+      { "id": "wf4", "walletId": "wallet-wasabi-01", "cwe": "CWE-704", "title": "Type confusion in wallet-state deserialization", "severity": "Medium", "status": "Fixed" },
+      { "id": "wf5", "walletId": "wallet-wasabi-01", "cwe": "CWE-1188", "title": "Insecure default RPC binding in regtest harness", "severity": "Low", "status": "Fixed" },
+      { "id": "wf6", "walletId": "wallet-wasabi-01", "cwe": "CWE-401", "title": "Key material not cleared after derivation", "severity": "Low", "status": "Open" }
+    ]
+  },
+  {
+    "id": "wallet-ember-01",
+    "name": "Ember Wallet",
+    "repoUrl": "https://github.com/example/ember-wallet",
+    "status": "Monitoring",
+    "lastReviewDate": "2026-06-15",
+    "auditToolVersion": "v0.3.1",
+    "testsRun": 24,
+    "filesScanned": 410,
+    "filesSelected": 22,
+    "filesAudited": 22,
+    "riskBadge": "Low",
+    "published": true,
+    "findings": [
+      { "id": "ef1", "walletId": "wallet-ember-01", "cwe": "CWE-209", "title": "Verbose error message leaks internal path", "severity": "Low", "status": "Open" }
+    ]
+  },
+  {
+    "id": "wallet-fenwick-01",
+    "name": "Fenwick Wallet",
+    "repoUrl": "https://github.com/example/fenwick-wallet",
+    "status": "Audit in progress",
+    "lastReviewDate": "2026-06-30",
+    "auditToolVersion": "v0.4.0",
+    "otsHash": "3930d76f3747b2fd9bdcaa4c15d060cc4768a38e8624a43bf54c7fef16de0a7",
+    "otsProofUrl": "https://opentimestamps.org/",
+    "testsRun": 45,
+    "filesScanned": 3100,
+    "filesSelected": 210,
+    "filesAudited": 40,
+    "riskBadge": "High",
+    "published": true,
+    "findings": [
+      { "id": "ff1", "walletId": "wallet-fenwick-01", "cwe": "CWE-287", "title": "Authentication bypass in watch-only import flow", "severity": "High", "status": "Open" },
+      { "id": "ff2", "walletId": "wallet-fenwick-01", "cwe": "CWE-347", "title": "Improper signature verification on update manifest", "severity": "Medium-High", "status": "Open" },
+      { "id": "ff3", "walletId": "wallet-fenwick-01", "cwe": "CWE-798", "title": "Hardcoded API credential in build config", "severity": "Medium-High", "status": "Fixed" },
+      { "id": "ff4", "walletId": "wallet-fenwick-01", "cwe": "CWE-190", "title": "Integer overflow in fee calculation", "severity": "Medium", "status": "Open" },
+      { "id": "ff5", "walletId": "wallet-fenwick-01", "cwe": "CWE-330", "title": "Predictable change-address derivation under low entropy", "severity": "Low", "status": "Open" }
+    ]
+  },
+  {
+    "id": "wallet-thistle-01",
+    "name": "Thistle Wallet",
+    "repoUrl": "https://github.com/example/thistle-wallet",
+    "status": "Completed",
+    "lastReviewDate": "2026-05-20",
+    "auditToolVersion": "v0.3.1",
+    "otsHash": "48274741f34171327b6ee235128c5cdc825f1e8106ac6a9eb7348472c51625b",
+    "otsProofUrl": "https://opentimestamps.org/",
+    "testsRun": 60,
+    "filesScanned": 890,
+    "filesSelected": 51,
+    "filesAudited": 51,
+    "riskBadge": "Critical",
+    "published": true,
+    "findings": [
+      { "id": "tf1", "walletId": "wallet-thistle-01", "cwe": "CWE-321", "title": "Hardcoded cryptographic key used across all installs", "severity": "Critical", "status": "Open", "disclosureUrl": "https://example.com/disclosure/thistle-cwe-321" },
+      { "id": "tf2", "walletId": "wallet-thistle-01", "cwe": "CWE-522", "title": "Insufficiently protected credentials in backup export", "severity": "High", "status": "Open" },
+      { "id": "tf3", "walletId": "wallet-thistle-01", "cwe": "CWE-732", "title": "Incorrect permission assignment for wallet.dat", "severity": "Medium", "status": "Fixed" }
+    ]
+  },
+  {
+    "id": "wallet-solace-01",
+    "name": "Solace Wallet",
+    "repoUrl": "https://github.com/example/solace-wallet",
+    "status": "Monitoring",
+    "lastReviewDate": "2026-07-05",
+    "auditToolVersion": "v0.4.0",
+    "testsRun": 12,
+    "filesScanned": 150,
+    "filesSelected": 9,
+    "filesAudited": 9,
+    "riskBadge": "None",
+    "published": true,
+    "findings": []
   }
 ]

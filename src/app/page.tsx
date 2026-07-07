@@ -5,12 +5,12 @@ import { TickerBanner } from "@/components/TickerBanner";
 import { WalletList } from "@/components/WalletList";
 import { SupportersGallery } from "@/components/SupportersGallery";
 import { DonationDrawer } from "@/components/DonationDrawer";
-import { getWallets, getSupporters, getSettings } from "@/lib/data";
+import { getWallets, getSupporters } from "@/lib/data";
 
 export const revalidate = 60;
 
 export default async function HomePage() {
-  const [wallets, supporters, settings] = await Promise.all([getWallets(), getSupporters(), getSettings()]);
+  const [wallets, supporters] = await Promise.all([getWallets(), getSupporters()]);
 
   return (
     <>
@@ -18,7 +18,8 @@ export default async function HomePage() {
 
       {/* Hero — intentionally minimal. No pitch content lives here; that's
           exclusively on /companies. See WEBSITE_BRIEF.md §2.1. */}
-      <section className="mx-auto max-w-6xl px-4 py-14 text-center">
+      <section className="border-b border-fraktur-border/60 bg-fraktur-bg">
+      <div className="mx-auto max-w-6xl px-4 py-14 text-center">
         <h1 className="text-3xl font-semibold text-fraktur-text sm:text-4xl">
           Live, verifiable security scores for Bitcoin wallets.
         </h1>
@@ -29,11 +30,12 @@ export default async function HomePage() {
             For Companies →
           </Link>
         </p>
+      </div>
       </section>
 
-      <TickerBanner supporters={supporters} settings={settings} />
+      <TickerBanner supporters={supporters} />
       <WalletList wallets={wallets} />
-      <SupportersGallery supporters={supporters} settings={settings} />
+      <SupportersGallery supporters={supporters} />
 
       <Footer />
       <DonationDrawer walletOptions={wallets.map((w) => ({ id: w.id, name: w.name }))} />

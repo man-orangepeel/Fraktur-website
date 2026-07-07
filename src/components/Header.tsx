@@ -11,7 +11,7 @@ export function Header({ variant }: { variant: "home" | "companies" }) {
     variant === "home"
       ? [
           { href: "#wallets", label: "Wallets" },
-          { href: "#supporters", label: "Supporters" },
+          { href: "#supporters", label: "The Cast" },
         ]
       : [
           { href: "#problem", label: "Problem" },
@@ -23,9 +23,9 @@ export function Header({ variant }: { variant: "home" | "companies" }) {
 
   return (
     <header className="sticky top-0 z-40 border-b border-fraktur-border bg-fraktur-bg/95 backdrop-blur">
-      <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
+      <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4 sm:py-5">
         <Link href="/" className="flex items-center gap-2">
-          <Image src="/logo-full.png" alt="FRAKTUR" width={160} height={32} priority className="h-8 w-auto" />
+          <Image src="/logo-full.png" alt="FRAKTUR" width={320} height={64} priority className="h-16 w-auto sm:h-20" />
         </Link>
 
         <nav className="hidden items-center gap-6 text-sm text-fraktur-muted md:flex">
@@ -49,7 +49,7 @@ export function Header({ variant }: { variant: "home" | "companies" }) {
           onClick={() => open()}
           className="rounded-full bg-fraktur-orange px-4 py-1.5 text-sm font-semibold text-black transition hover:bg-fraktur-orangeDim"
         >
-          ⚡ Donate
+          ⚡ Help us fraKtur it
         </button>
       </div>
     </header>

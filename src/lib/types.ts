@@ -21,6 +21,7 @@ export interface Wallet {
   auditToolVersion: string;
   otsHash?: string;
   otsProofUrl?: string;
+  testsRun?: number; // dynamic: deterministic regtest/mainnet + LLM fuzz tests run pre-Loupe (optional — not yet in Airtable)
   filesScanned: number; // Layer 1 input
   filesSelected: number; // Layer 1 output
   filesAudited: number; // Layer 2 progress (out of filesSelected)

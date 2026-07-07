@@ -1,21 +1,24 @@
-import type { Supporter, SiteSettings } from "@/lib/types";
+import type { Supporter } from "@/lib/types";
 
-export function TickerBanner({ supporters, settings }: { supporters: Supporter[]; settings: SiteSettings }) {
+export function TickerBanner({ supporters }: { supporters: Supporter[] }) {
   const active = supporters.filter((s) => s.activeLast30Days);
   const loop = [...active, ...active]; // duplicated for a seamless CSS marquee loop
 
   return (
-    <div className="border-y border-fraktur-border bg-fraktur-panel py-3">
-      <div className="mx-auto mb-2 max-w-6xl px-4 text-xs text-fraktur-muted">
-        <span className="font-semibold text-fraktur-orange">Supporters active this month</span>
-        {" — "}
-        Only supporters of {settings.galleryThresholdSats.toLocaleString("en-US")} sats or more appear here.
+    <div className="relative overflow-hidden border-y-2 border-fraktur-orange/40 bg-fraktur-panel py-5 sm:py-6">
+      <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
+        <div className="absolute left-1/2 top-1/2 h-32 w-[130%] -translate-x-1/2 -translate-y-1/2 rounded-full bg-fraktur-orange/10 blur-3xl" />
+      </div>
+
+      <div className="relative mx-auto mb-2 max-w-6xl px-4 text-xs text-fraktur-muted sm:text-sm">
+        <span className="font-bold uppercase tracking-wide text-fraktur-orange">The Cast</span>
+        {" — active this month."}
       </div>
 
       {active.length === 0 ? (
-        <p className="px-4 text-sm text-fraktur-muted">Be the first supporter active this month. →</p>
+        <p className="relative px-4 text-sm text-fraktur-muted">Be the first supporter active this month. →</p>
       ) : (
-        <div className="group overflow-hidden">
+        <div className="group relative overflow-hidden">
           <div className="flex w-max animate-marquee gap-8 group-hover:[animation-play-state:paused] motion-reduce:animate-none">
             {loop.map((s, i) => (
               <span key={`${s.handle}-${i}`} className="flex items-center gap-2 whitespace-nowrap text-sm">

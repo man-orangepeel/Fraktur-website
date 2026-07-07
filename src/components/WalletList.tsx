@@ -2,8 +2,9 @@
 
 import { useMemo, useState } from "react";
 import type { Wallet } from "@/lib/types";
-import { severityColorClass, reductionPct, countBySeverity } from "@/lib/format";
+import { severityColorClass, countBySeverity } from "@/lib/format";
 import { useDonation } from "./DonationContext";
+import { AuditFlowDiagram } from "./AuditFlowDiagram";
 
 type SortKey = "status" | "risk" | "recent";
 
@@ -26,10 +27,14 @@ export function WalletList({ wallets }: { wallets: Wallet[] }) {
     });
   }, [wallets, query, statusFilter, sortKey]);
 
+  const maxTestsRun = useMemo(() => Math.max(...wallets.map((w) => w.testsRun ?? 0), 1), [wallets]);
+  const maxFilesScanned = useMemo(() => Math.max(...wallets.map((w) => w.filesScanned), 1), [wallets]);
+
   return (
-    <section id="wallets" className="mx-auto max-w-6xl px-4 py-12">
+    <section id="wallets" className="border-b border-fraktur-border bg-fraktur-bg">
+    <div className="mx-auto max-w-6xl px-4 py-12">
       <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
-        <h2 className="text-2xl font-semibold text-fraktur-text">Wallets audités</h2>
+        <h2 className="text-2xl font-semibold text-fraktur-text">Audited Wallets</h2>
         <div className="flex flex-wrap gap-3 text-sm">
           <input
             value={query}
@@ -62,7 +67,6 @@ export function WalletList({ wallets }: { wallets: Wallet[] }) {
       <div className="grid gap-4 md:grid-cols-2">
         {filtered.map((wallet) => {
           const counts = countBySeverity(wallet.findings);
-          const l1Pct = reductionPct(wallet.filesScanned, wallet.filesSelected);
           return (
             <article key={wallet.id} className="rounded-xl border border-fraktur-border bg-fraktur-panel p-5">
               <div className="mb-3 flex items-start justify-between gap-3">
@@ -98,14 +102,16 @@ export function WalletList({ wallets }: { wallets: Wallet[] }) {
                 )}
               </dl>
 
-              <div className="mb-3 rounded-lg bg-fraktur-bg p-3 text-sm">
-                <p className="text-fraktur-text">
-                  Layer 1: <strong>{wallet.filesScanned.toLocaleString()} → {wallet.filesSelected.toLocaleString()} files</strong>{" "}
-                  <span className="text-fraktur-orange">(-{l1Pct}% noise cut)</span>
-                </p>
-                <p className="text-fraktur-text">
-                  Layer 2: <strong>{wallet.filesAudited} / {wallet.filesSelected} audited</strong>
-                </p>
+              <div className="mb-3 rounded-lg bg-fraktur-bg p-3">
+                <AuditFlowDiagram
+                  testsRun={wallet.testsRun}
+                  filesScanned={wallet.filesScanned}
+                  filesSelected={wallet.filesSelected}
+                  filesAudited={wallet.filesAudited}
+                  maxTestsRun={maxTestsRun}
+                  maxFilesScanned={maxFilesScanned}
+                  riskBadge={wallet.riskBadge}
+                />
               </div>
 
               <div className="mb-4 flex flex-wrap gap-2 text-xs">
@@ -131,6 +137,7 @@ export function WalletList({ wallets }: { wallets: Wallet[] }) {
           );
         })}
       </div>
+    </div>
     </section>
   );
 }

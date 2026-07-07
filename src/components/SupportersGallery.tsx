@@ -1,11 +1,11 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import type { Supporter, SiteSettings } from "@/lib/types";
+import type { Supporter } from "@/lib/types";
 
 type SortMode = "rank" | "recent" | "alpha";
 
-export function SupportersGallery({ supporters, settings }: { supporters: Supporter[]; settings: SiteSettings }) {
+export function SupportersGallery({ supporters }: { supporters: Supporter[] }) {
   const [expanded, setExpanded] = useState(false);
   const [sortMode, setSortMode] = useState<SortMode>("rank");
 
@@ -24,14 +24,11 @@ export function SupportersGallery({ supporters, settings }: { supporters: Suppor
   const paged = expanded ? visible.slice(page * pageSize, page * pageSize + pageSize) : visible;
 
   return (
-    <section id="supporters" className="mx-auto max-w-6xl px-4 py-12">
+    <section id="supporters" className="border-b border-fraktur-border bg-fraktur-panel">
+    <div className="mx-auto max-w-6xl px-4 py-12">
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h2 className="text-2xl font-semibold text-fraktur-text">Supporters</h2>
-          <p className="text-sm text-fraktur-muted">
-            Only supporters of {settings.galleryThresholdSats.toLocaleString("en-US")} sats or more appear here. This
-            gallery is permanent once you&rsquo;re in — nobody gets removed.
-          </p>
+          <h2 className="text-2xl font-semibold text-fraktur-text">The Cast</h2>
         </div>
         {expanded && (
           <select
@@ -95,6 +92,7 @@ export function SupportersGallery({ supporters, settings }: { supporters: Suppor
           )}
         </>
       )}
+    </div>
     </section>
   );
 }
