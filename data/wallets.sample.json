@@ -1,0 +1,24 @@
+[
+  {
+    "id": "wallet-sample-01",
+    "name": "Sample Bitcoin Wallet",
+    "repoUrl": "https://github.com/example/sample-wallet",
+    "status": "Audit in progress",
+    "lastReviewDate": "2026-06-28",
+    "auditToolVersion": "v0.3.1",
+    "otsHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "otsProofUrl": "https://opentimestamps.org/",
+    "filesScanned": 1300,
+    "filesSelected": 63,
+    "filesAudited": 6,
+    "riskBadge": "Medium-High",
+    "published": true,
+    "findings": [
+      { "id": "f1", "walletId": "wallet-sample-01", "cwe": "CWE-476", "title": "Signature verification — null client", "severity": "Medium", "status": "Open" },
+      { "id": "f2", "walletId": "wallet-sample-01", "cwe": "CWE-22", "title": "Path / filesystem handling", "severity": "Medium", "status": "Open" },
+      { "id": "f3", "walletId": "wallet-sample-01", "cwe": "CWE-23", "title": "Path / filesystem handling", "severity": "Medium-High", "status": "Open" },
+      { "id": "f4", "walletId": "wallet-sample-01", "cwe": "CWE-362", "title": "Concurrency / race condition", "severity": "Low", "status": "Open" },
+      { "id": "f5", "walletId": "wallet-sample-01", "cwe": "CWE-362", "title": "Concurrency / race condition", "severity": "Low", "status": "Open" }
+    ]
+  }
+]

@@ -1,0 +1,5 @@
+[
+  { "handle": "@example_supporter", "network": "x", "totalSats": 500000, "tier": "Backer", "lastDonationDate": "2026-06-30", "activeLast30Days": true, "galleryEligible": true },
+  { "handle": "npub1exampleplaceholder", "network": "nostr", "totalSats": 1200000, "tier": "Patron", "lastDonationDate": "2026-06-20", "activeLast30Days": true, "galleryEligible": true },
+  { "handle": "@another_supporter", "network": "x", "totalSats": 220000, "tier": "Supporter", "lastDonationDate": "2026-05-10", "activeLast30Days": false, "galleryEligible": true }
+]

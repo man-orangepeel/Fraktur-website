@@ -1,0 +1,289 @@
+# FRAKTUR — Website Generation Brief
+*Master prompt — to be executed to generate the site in `/Fraktur/website/`*
+*Drafted: 2026-07-02 — v4 (implemented — see `/website` for the generated Next.js site; this document now describes what was actually built)*
+
+> **How to use:** This is the complete spec, kept in sync with the generated code. Read it before changing anything in `/website`. Decisions below were confirmed by the founder across four rounds — flag only genuine new ambiguities.
+
+---
+
+## 0. Context (do not skip)
+
+FRAKTUR is a continuous, Bitcoin-native security service built on Loupe (Spiral/Block OSS), extended with fuzz testing (Layer 1) and on-chain proof of audit (OpenTimestamp). Full positioning: see `FRAKTUR_Pitch_Brief.md` in the parent folder. **Product name is "FRAKTUR" only — never "LaaS" anywhere on the site, including page titles, meta tags, alt text, and copy.**
+
+**Dual audience, two pages:**
+- **B2C** — Retail Bitcoin holders. Land on **Home**, which *is* the Wallet Watcher: live audit scorecard + donor gallery. No pitch content here.
+- **B2B** — CTOs/VP Eng at 5–50-person Bitcoin companies. Everything pitch-related — problem, solution, proof, pricing — lives exclusively on **Companies**.
+
+**Why this split (confirmed):** Home must load instantly into the thing people share (wallet scores + "look who's backing this"). Burying that under a sales pitch kills the viral loop. The B2B pitch, conversely, needs room to make a real case — it doesn't belong wedged into a consumer page.
+
+**Non-negotiables (from CLAUDE.md — do not violate):**
+- We only scan public open-source repos. No private-repo handling implied anywhere on the site.
+- Every finding requires a PoC regression test. No PoC = no report. This must show up in copy on the Companies page.
+- Never position FRAKTUR as a replacement for formal audits — "security co-pilot," not auditor-of-record.
+- Never imply findings are withheld for payment — responsible disclosure is unconditional and stated as such.
+- FRAKTUR never touches client keys or funds (Annex A7) — donation flow must not contradict this (no custody of donor funds beyond momentary receipt of a non-custodial Lightning payment).
+- Donations are gifts to fund development, not investment — no equity, no token, no expectation of return. Full disclaimer language in §6.
+- **Audited-wallet visibility is never conditional on donations.** Every wallet FRAKTUR audits appears on Home regardless of crowdfunding status — only the *donor gallery* (people, not wallets) is filtered by amount.
+
+---
+
+## 1. Information Architecture
+
+Exactly two pages, plus one global persistent component.
+
+| Page | Nav label | Content | Donation content? |
+|---|---|---|---|
+| **Home** (`/`) | Home | Wallet Watcher (audited wallets) + donor gallery. **This is the landing page.** | Yes — ticker banner + gallery live here |
+| **Companies** (`/companies`) | For Companies | The entire pitch (problem → solution → proof → pricing → FAQ), including the quantified first-test results | No sats/donation language at all |
+
+**Global persistent component (not a page):** a "⚡ Donate" pill button, fixed in the header, identical on both pages. Click opens the **donation drawer** (§2.3) — a slide-up panel, no page navigation, current scroll position preserved.
+
+**Nav bar, in-page anchors:**
+- On Home: `Wallets` (scrolls to the wallet list) · `Supporters` (scrolls to the donor gallery section) · `For Companies` (navigates to the other page) · `⚡ Donate` (opens drawer)
+- On Companies: `Problem` · `Solution` · `Proof` · `Pricing` · `FAQ` (in-page anchors) · `Home` (navigates back) · `⚡ Donate` (opens drawer — button stays present even though this page's own copy is donation-free, per founder's earlier instruction that the button is global)
+
+Footer on both pages: legal disclaimers (§6), links to X account, GitHub, OpenTimestamp verifier, contact email.
+
+---
+
+## 2. Home — page spec
+
+Order, top to bottom, exactly as specified by the founder:
+
+### 2.0 Header / nav
+Logo lockup (`Name avec logo v2 sur fond noir.png` — see §5, black background required) + nav anchors above + persistent Donate button.
+
+### 2.1 Hero
+Short. **No pitch content** — that's exclusively on Companies. One line stating what this page is: e.g. *"Live, verifiable security scores for Bitcoin wallets — audited, timestamped, public."* One small secondary line pointing B2B visitors to the other page: *"Run a Bitcoin company? → For Companies"*. No problem stats, no "how it works," no stat cards here — all of that moved to Companies (§3).
+
+### 2.2 Donation banner (dynamic ticker)
+Directly under the hero, above the wallet list. Horizontal auto-scrolling strip of supporter avatars/handles **active in the last 30 days** (rolling window — see §4.2). Caption line always visible next to/above it: *"Supporters active this month"* + the threshold disclosure, worded plainly: *"Only supporters of 212,121 sats or more appear here."* This is a passive, live-updating display — not the donation form itself (that's the drawer, §2.3).
+
+### 2.3 Wallets audités (main content, immediately after the banner)
+Table/grid of every wallet FRAKTUR has scanned or is scanning, one row per wallet, from `wallets.json` (§4.1):
+- Wallet name + logo/repo link
+- Status (Monitoring / Audit in progress / Completed)
+- Last review date
+- Audit tool version
+- OpenTimestamp hash (short, with "Verify" link to the OTS proof)
+- **Layer 1 efficiency**: files scanned → files selected, shown as a reduction (e.g. "1,300 → 63 files — 95% noise cut")
+- **Layer 2 progress**: files audited / files selected (e.g. "6 / 63 audited")
+- Vulnerabilities by severity (critical/high/medium/low) — zero shown proudly, not hidden
+- Overall risk badge (color-coded)
+
+Sort/filter: by status, by risk badge, by last-review date. Search by name. Clicking a row opens the wallet detail view (§2.5).
+
+### 2.4 Section donateurs (dépliante — collapsible, after the wallet list)
+Full donor gallery: **top 10 shown by default** (avatars/handles, tier badge — not exact sats amount, see §4.2), with a "See all supporters" control that expands to the complete list with sort (rank/tier, most recent, alphabetical) and pagination. Threshold disclosure repeated here in the same wording as §2.2: *"Only supporters of 212,121 sats or more appear here."*
+
+### 2.5 Wallet detail (expanded row / sub-view of a wallet)
+- Timeline of all audits for that wallet (not just latest)
+- Link to the public disclosure thread on X for each finding
+- Downloadable/verifiable OpenTimestamp proof bundle reference
+- "Suggest this wallet gets deeper coverage" → opens the donation drawer pre-filled with allocation = "Audit a specific wallet" and this wallet pre-selected
+
+---
+
+## 3. Companies — page spec (the entire pitch lives here, and only here)
+
+Structure follows `FRAKTUR_Pitch_Brief.md` S1–S9 directly — do not paraphrase away from it, adapt it to web copy but keep the substance:
+
+- **Problem** (S1–S3): the exploits/$ lost stat, the no-security-hire gap, the static-only tooling gap. Use `Images/Vulnerabilities.png` as reference for the exploit-stat visual if it fits; redraw to match the site's design system rather than embedding the slide image directly.
+- **Solution** (S4–S6): How → What, Layer 1 (attack-surface triage), Layer 2 (selective Loupe + PoC-or-no-report rule). Use `Images/Layer1.png` and `Images/Layer 2.png` as reference material only.
+- **Trust primitive** (S7): OpenTimestamp — every audit hashed and anchored on-chain.
+- **Wallet Watcher as proof point** (S8): link back to Home, framed as "see it live."
+- **Proof — our first real-world test** *(new section, from `FRAKTUR.pdf` pp.12–14 — see exact figures below)*.
+- **Pricing** (from Annex A2 Market Size): ACV $24–48K/yr framed as "$2–4K/month," 5-client-Year-1 goal.
+- **FAQ accordion**: Annex A8 (Key Objections), plus optionally A3/A5/A9/A10 content condensed as supporting detail.
+- **CTA**: "Get a free scan of your public repo" / "Talk to us."
+
+### 3.1 "Proof — our first real-world test" — exact figures (source: `FRAKTUR.pdf`, slides 12–14)
+
+Three sub-blocks, each with a before/after chart (Loupe-only vs FRAKTUR triaged) — reproduce the numbers exactly, redraw the charts to match the site's design system rather than screenshotting the PDF slides:
+
+| Metric | Loupe-only (whole codebase) | FRAKTUR (triaged) | Result |
+|---|---|---|---|
+| **L1 — Proof of Efficiency**: LLM agents launched per scan | 1,300 files | 63 files | **-95%** data to be verified |
+| **L2 — Proof of Efficacy**: files reviewed / findings | — | 6 files reviewed (of the 63 selected) | **5 findings**: 2 Medium, 1 Medium-High, 2 Low |
+| **Cost per scan** (Claude Opus 4.8, $8/$25 per 1M tokens, API-equivalent, typical case) | ~$3.2k (~1,300 agents) | ~$150–158 (63 triaged files) | **-95%** cost |
+
+All three are framed as: *"For the wallet's repo we audited"* — keep the audited wallet's name anonymized (it is not named in the source deck either — consistent with responsible-disclosure norms; do not invent or guess a name).
+
+**Resolved (was flagged as a discrepancy in v3):** confirmed by founder — the breakdown is **2 Medium, 1 Medium-High, 2 Low = 5 findings**. This requires a fifth severity tier, `Medium-High`, alongside Critical/High/Medium/Low — implemented as a proper `Findings` table (§4.1a) rather than four fixed count columns on `Wallets`, since a fixed-column model can't cleanly absorb a severity tier that wasn't anticipated. Counts shown on wallet cards are computed in code from the linked findings, not via Airtable rollup formulas.
+
+---
+
+## 4. Data backend — Airtable
+
+### 4.1 Table: `Wallets`
+| Field | Type | Notes |
+|---|---|---|
+| Name | Single line text | |
+| Logo/Repo URL | URL | |
+| Status | Single select | Monitoring / Audit in progress / Completed |
+| Last Review Date | Date | |
+| Audit Tool Version | Single line text | e.g. `v0.3.1` |
+| OpenTimestamp Hash | Single line text | |
+| OTS Proof URL | URL | |
+| Files Scanned (L1 input) | Number | e.g. 1300 |
+| Files Selected (L1 output) | Number | e.g. 63 |
+| Files Audited (L2 progress) | Number | e.g. 6 |
+| Risk Badge | Single select | Low / Medium / Medium-High / High / Critical |
+| X Disclosure Thread URL | URL | |
+| Published | Checkbox | Only `true` rows appear on Home — **never gated by donation amount** |
+
+Note: vulnerability counts are **not** stored as fixed columns on `Wallets` (v3 had `Vulnerabilities Critical/High/Medium/Low` as four number fields). That model broke the moment the real data included a `Medium-High` tier that wasn't one of the four. Fixed instead with a proper `Findings` table below — severity counts are computed from it in application code.
+
+### 4.1a Table: `Findings` (linked to `Wallets`)
+| Field | Type | Notes |
+|---|---|---|
+| Wallet | Link to `Wallets` | |
+| CWE | Single line text | e.g. `CWE-476` |
+| Title | Single line text | e.g. "Signature verification — null client" |
+| Severity | Single select | **Critical / High / Medium-High / Medium / Low** |
+| Status | Single select | Open / Fixed |
+| Disclosure URL | URL | link to the public X disclosure thread for this specific finding |
+
+### 4.2 Donor data — two tables (needed for cumulative totals + rolling "active" window)
+
+**`Donations`** (raw log — one row per submission)
+| Field | Type | Notes |
+|---|---|---|
+| Timestamp | Created time | auto |
+| Order ID | Single line text | generated server-side at form submission, also set as the BTCPay invoice's `orderId` metadata — this is what correlates a webhook event back to this row |
+| Allocation Choice | Single select | Product Dev / Specific Wallet / Team |
+| Wallet(s) Selected | Link to `Wallets` | shown if Allocation Choice = Specific Wallet |
+| New Wallet Suggestion | Single line text | free text, optional |
+| X Handle | Single line text | optional — identity key for aggregation |
+| Nostr npub | Single line text | optional — identity key for aggregation |
+| Sats Amount | Number | **written only by the BTCPay webhook handler, never by the donor.** No form field for this exists — see §7. |
+| Consent to Public Gallery | Checkbox | set by the donor at submission time |
+| Payment Verified | Checkbox | **set only by the webhook handler**, after signature verification, when BTCPay confirms the invoice settled |
+| Approved | Checkbox | now follows automatically from `Payment Verified` — no manual curation step required for the amount itself (see §7 for what changed here) |
+
+**`Supporters`** (aggregated identity — rollups over `Donations`)
+| Field | Type | Notes |
+|---|---|---|
+| Handle | Single line text | unique key: X handle or Nostr npub |
+| Linked Donations | Link to `Donations` | all approved submissions from this identity |
+| Total Sats | Rollup (sum) | sum of linked `Donations.Sats Amount` where `Approved = true` |
+| Last Donation Date | Rollup (max) | latest approved donation timestamp |
+| Active Last 30 Days | Formula | `Last Donation Date >= TODAY() - 30` → drives the ticker banner |
+| Gallery Eligible | Formula | `Total Sats >= Gallery Threshold` (from `Settings`) |
+| Consent Confirmed | Checkbox | must be true on at least one linked donation |
+
+**`Settings`** (single-row config — lets the founder change numbers without touching code)
+| Field | Type | Value |
+|---|---|---|
+| Gallery Threshold (sats) | Number | **212,121** (confirmed) |
+| Active Window (days) | Number | 30 (confirmed) |
+
+**Public display rule:** the gallery is **permanent once eligible** (consistent with FRAKTUR's "immutable, on-chain proof" positioning — nobody is "erased"). The ticker banner is a secondary, rolling highlight of activity in the trailing 30 days; it does not remove anyone from the full gallery. Public entries show a **tier badge, not the exact sats total** (avoids painting large donors as targets); sort options (rank/tier, most recent, alphabetical) don't require exposing exact amounts.
+
+**Intake mechanism:** Airtable's native public **Form view** on `Donations`, embedded inside the donation drawer — no custom backend. Payment happens via **BTCPay Server** (confirmed rail — self-hosted or founder's existing instance): Lightning invoice/address + QR shown alongside the form.
+
+**Update workflow:**
+1. Founder edits rows in Airtable directly (or asks Claude/Cowork to — same MCP connector as this session).
+2. Founder marks new `Donations` rows `Approved = true` after checking against BTCPay's received-payments log (see §7 for why this matters).
+3. Site reads `Wallets` (`Published = true`), `Supporters` (`Gallery Eligible` / `Active Last 30 Days`), and `Settings` via the Airtable API.
+4. **Sync mechanism:** static JSON snapshot regenerated on request — founder asks Claude to "sync the site," Claude pulls current Airtable state via the MCP connector, regenerates `wallets.json` / `supporters.json` / `settings.json`, redeploys. Avoids exposing an Airtable API key client-side. A v2 upgrade path is a BTCPay Server webhook that writes the *actual received amount* straight into `Donations`, removing the self-report step entirely (see §7).
+
+---
+
+## 5. Visual identity
+
+- **Logo (mark only):** `Images/Logo - v2 sur fond noir.png` — use for the compact/icon placement (favicon, mobile nav collapsed state).
+- **Logo (full lockup with name):** `Images/Name avec logo v2 sur fond noir.png` — use for the header/nav wordmark.
+- **Both assets are designed for a black background only.** Any surface these logos sit on must be black or near-black — this effectively mandates a dark theme across the whole site (header, footer, and any section carrying the logo), not just accents.
+- **Do not use** `Images/frakturtransplogo.png` or `Images/Logo - v1.png` anywhere. These are superseded.
+- Reference texture available: `Images/arriere plan.png` (dark cracked-glass motif) — usable as background texture, consistent with the dark theme forced by the logo constraint.
+- Accent color: Bitcoin-orange, per existing brand assets. Do not invent a new palette.
+- Tone: technical, confident, zero hype. No stock crypto imagery. Typography-led, data-dense.
+- Donation drawer: slide-up panel with visible page content behind it (not a full-screen dimmed modal) — reads as "in-context," not "interruption," for a trust-sensitive audience.
+
+---
+
+## 6. Donation disclaimer — full wording (not just a placeholder)
+
+*Disclosed as a decision-support draft, not legal advice — see note at the end of this section.*
+
+Display prominently in the donation drawer (before the form) and in the footer of both pages:
+
+> Donations to FRAKTUR are voluntary **tips** in support of open Bitcoin security research and tooling. They are gifts, not investments: donors receive no equity, tokens, revenue share, profit share, interest, or ownership interest of any kind, and have no expectation of financial return. Donations are non-refundable except at FRAKTUR's sole discretion. FRAKTUR retains full and final discretion over the allocation of contributed funds across product development, audits, and team tips; a donor's stated allocation preference is guidance only, not a directed-use contract, and does not entitle the donor to compel any specific audit, deliverable, or timeline. **The "Team" allocation functions as a direct tip to individual contributors — it is not a salary, wage, invoice payment, or any other form of formal compensation, and creates no employment or contractor relationship between FRAKTUR and the recipient.** FRAKTUR does not custody donor funds beyond the momentary receipt of a Lightning payment; donors are responsible for the security of their own wallets and payment methods. Nothing on this site constitutes financial, investment, tax, or legal advice.
+
+**Why this specific wording, and what it's protecting against:**
+- *"Gifts, not investments... no equity... no expectation of financial return"* — keeps this out of securities-law territory. The moment a donor is promised (or reasonably expects) a financial return tied to FRAKTUR's performance, the arrangement starts to resemble an unregistered security in most jurisdictions. Still the single most important line in the disclaimer.
+- *"Tips... not a salary, wage, invoice payment... no employment or contractor relationship"* — confirmed by founder: the "Team" option is genuinely informal tips to individual devs, not disguised payroll. This line matters because if it read like compensation for services rendered, it would raise worker-classification and tax-withholding questions FRAKTUR doesn't want to own — tips are the recipient's own income to declare, not FRAKTUR's payroll obligation.
+- *"Allocation preference is guidance only, not a directed-use contract"* — protects against a donor claiming FRAKTUR breached a commitment by not auditing "their" wallet, and reinforces the anti-pay-to-audit stance already in the brief.
+- *"Does not custody donor funds beyond momentary receipt"* — consistent with Annex A7's regulatory positioning (outside custodian/money-transmitter definitions).
+
+**What this draft does *not* cover, and where real counsel is needed before public launch:**
+- FRAKTUR is a for-profit entity (C-Corp/AG-SA per Annex A7) soliciting public tips that fund its own product and contributors — closer to how open-source maintainers solicit sats via "buy me a coffee"-style tips (common and generally uncontroversial in the Bitcoin ecosystem) than to a registered non-profit or a rewards-based crowdfunding campaign — but "common practice" isn't the same as "cleared by a lawyer."
+- Jurisdiction-specific charitable-solicitation registration requirements, AML considerations for pseudonymous crypto contributions, and individual tax-reporting obligations for tip recipients vary by country and are not addressed here.
+- **Still open, restated because it matters:** have this wording reviewed by counsel before the donation flow goes live publicly, specifically checking the jurisdiction(s) where FRAKTUR is incorporated and where it expects most donors and tip-recipients to be.
+
+---
+
+## 7. Payment verification — resolved via BTCPay webhook (no self-reported amount)
+
+**Superseded decision, kept here for the record:** v3 of this brief shipped with a self-reported sats amount (donor types in a number, founder manually cross-checks against BTCPay before approving). Founder's call in round 4: the amount must never be declarative — it has to be verified automatically via webhook, and everything else about the donation flow follows from that one decision. Implemented as follows.
+
+**The flow, end to end:**
+1. Donor submits the allocation form. **There is no amount field anywhere in it.**
+2. `POST /api/donate/create-invoice` (server-side) generates an `Order ID`, writes a pending row into `Donations` with that ID, and asks BTCPay Server to create an invoice tagged with the same ID as `metadata.orderId`.
+3. BTCPay's own hosted checkout opens as an in-page modal (via BTCPay's `btcpay.js`, so the donor never leaves the site) — the donor chooses their own amount there and pays.
+4. When the invoice settles, BTCPay calls `POST /api/donate/webhook`. The handler verifies the request's HMAC-SHA256 signature against `BTCPAY_WEBHOOK_SECRET` before trusting anything in it — an unsigned or mis-signed request is rejected outright.
+5. Only after signature verification does the handler look up the `Donations` row by `Order ID`, fetch the settled amount from BTCPay's own API, and write it as `Sats Amount`, flipping `Payment Verified` and `Approved` to true.
+
+**Why this fully closes the gap the manual-approval design only patched over:** there is no code path from a browser-supplied number to the `Sats Amount` field — the only writer of that field is server code that has already checked BTCPay's cryptographic signature. A donor (or an attacker) cannot inflate their total by typing a bigger number, because there is nowhere left to type one.
+
+**What this doesn't remove:** curation of *identity content* (handle spam, offensive display names) is still a judgment call a human may want to make — but that's a different problem from amount-inflation, and much lower stakes (worst case is a silly handle in the gallery, not a fabricated donation total).
+
+---
+
+## 8. Tech stack — chosen architecture (as-built)
+
+The pure-static-site approach from v1–v3 (JSON snapshot manually re-synced by Claude on request) stopped being sufficient the moment automatic BTCPay webhook verification became a requirement (§7): a webhook needs a server endpoint to call, and creating a BTCPay invoice needs a place to hold the API key server-side. Rather than bolt a separate backend onto a static site, the whole site moved to a framework that gives both in one deploy:
+
+**Next.js 14 (App Router), TypeScript, Tailwind CSS — deployed as a single Node app (Vercel or any Next.js-compatible host), not a static export.**
+
+- **Pages** (`src/app/page.tsx`, `src/app/companies/page.tsx`) are React Server Components that fetch `Wallets` / `Supporters` / `Settings` **directly from the Airtable REST API at request time** (`src/lib/airtable.ts`), with a 60-second revalidation window. This is a real upgrade over the old JSON-snapshot workflow: the site now reflects an Airtable edit within a minute, automatically — no one has to ask Claude to "sync the site" anymore. The Airtable API key lives only in a server-side environment variable; it is never sent to the browser.
+- **Fallback data** (`src/lib/data.ts`): every fetch function tries Airtable first and falls back to the checked-in `/data/*.sample.json` files if no credentials are configured. This means `git clone && npm install && npm run dev` produces a fully browsable site immediately, with no Airtable base required to evaluate the UI.
+- **API routes** (`src/app/api/donate/create-invoice`, `src/app/api/donate/webhook`) are the two endpoints §7's flow needs — invoice creation and webhook receipt. Both are server-only Next.js route handlers.
+- **Donation UI**: a global React Context (`DonationContext`) holds open/closed state for the slide-up drawer, so the header's "⚡ Donate" button and the "suggest deeper coverage" links on wallet cards can all trigger the same drawer instance regardless of which page they're on.
+- **Styling**: Tailwind, dark theme mandated by the v2 logo assets (§5), Bitcoin-orange accent, no external UI kit — kept intentionally plain given the hackathon timeline.
+
+Not done in this session (see README.md "Deploying"): actual deployment to a hosting account, and live end-to-end testing of the BTCPay webhook against a real BTCPay instance. The code is written and reasoned through against BTCPay's documented Greenfield API, not exercised against a live server.
+
+---
+
+## 9. Open items — status after generation
+
+| Item | Status |
+|---|---|
+| Gallery Threshold | **Resolved — 212,121 sats**, set in `data/settings.sample.json` and the `Settings` table spec |
+| Lightning payment rail | **Resolved — BTCPay Server**, wired via `src/lib/btcpay.ts` |
+| L2 vulnerability breakdown | **Resolved — 2 Medium, 1 Medium-High, 2 Low**, reflected in the `Findings` model and the Companies proof table |
+| Payment verification | **Resolved — automatic via signed BTCPay webhook**, no self-reported amount anywhere (§7) |
+| Donation disclaimer wording | Drafted in §6, "tips" framing confirmed — **still needs actual legal review before public launch** |
+| LaaS naming | Removed from this brief and the generated site. Still present in `FRAKTUR_Pitch_Brief.md` (S4, S9) and `Presentation.md` (title) — not touched, since those weren't explicitly in scope; flag if you want those cleaned too |
+| Hosting account | **Not done** — code is deploy-ready (Vercel or any Next.js host) but nothing was deployed this session |
+| BTCPay live test | **Not done** — webhook/invoice code written against BTCPay's documented API, not exercised against a live instance |
+| Audited wallet's name (first test) | Kept anonymized per source material — confirm this stays intentional |
+| Airtable base itself | **Not created** — schema is fully specified (§4) but no live base exists yet; site runs on sample data until one is created and credentials are set |
+
+---
+
+## 10. Definition of done — status
+
+- [x] Exactly 2 pages (Home, Companies) + the global donation drawer, matching the section order in §2 and §3.
+- [x] Home loads directly into hero → donation ticker banner → wallet list → collapsible donor gallery, zero pitch content.
+- [x] Companies carries the entire pitch plus the §3.1 proof section with the corrected figures, zero donation language in its own copy.
+- [x] Logo usage is exclusively the two v2-on-black assets (§5); the superseded logos are not referenced anywhere in `/website`.
+- [x] Every non-negotiable in §0 is respected in the copy.
+- [x] Data renders from Airtable when configured, from sample JSON otherwise — structure matches §4 exactly.
+- [x] Mobile-responsive layout (ticker marquee + bottom-sheet drawer use responsive Tailwind classes).
+- [x] No lorem ipsum — real content from the pitch brief and this document throughout.
+- [ ] **Not done:** `npm install && npm run build` verified clean in this session (see build log referenced in the chat reply).
+- [ ] **Not done:** git commit pushed to a remote — no remote was configured; needs the founder's repository URL.
+- [ ] **Not done:** actual deployment / live BTCPay test.
