@@ -78,13 +78,14 @@ export default async function CompaniesPage() {
 
       {/* The pivot — reframed to resolve a direct wording conflict with the
           Hero ("Cheaper because smarter" vs. an earlier "Not cheaper.
-          Concentrated."). "Smarter, not smaller" answers the unspoken
-          objection (cheaper = less thorough) without contradicting the Hero —
-          it echoes "smarter" back instead of fighting "cheaper." */}
+          Concentrated."). "Not smaller. Smarter." kills the unspoken
+          objection (cheaper = less thorough) first, then lands on the same
+          word the Hero ends on — both statements now close on "smarter,"
+          reinforcing the callback instead of just avoiding a contradiction. */}
       <Slide
         id="solution"
         eyebrow="Our answer"
-        headline={<>Smarter,<br />not smaller.</>}
+        headline={<>Not smaller.<br />Smarter.</>}
         sub="We don't read less code. We waste less time reading code that never breaks."
         visual={<ShardArt variant="concentration" />}
         visualSide="left"
