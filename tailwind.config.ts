@@ -27,6 +27,9 @@ const config: Config = {
       fontFamily: {
         sans: ["ui-sans-serif", "system-ui", "sans-serif"],
         mono: ["ui-monospace", "SFMono-Regular", "monospace"],
+        // Editorial serif for every headline on the Companies page — a
+        // web-safe stack, not a Google Fonts fetch (see layout.tsx for why).
+        display: ["Iowan Old Style", "Palatino Linotype", "Palatino", "Georgia", "serif"],
       },
       keyframes: {
         marquee: {

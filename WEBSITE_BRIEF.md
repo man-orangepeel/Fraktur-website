@@ -1,8 +1,8 @@
 # FRAKTUR — Website Generation Brief
 *Master prompt — to be executed to generate the site in `/Fraktur/website/`*
-*Drafted: 2026-07-02 — v4 (implemented — see `/website` for the generated Next.js site; this document now describes what was actually built)*
+*Drafted: 2026-07-02 — v5 (Companies page rebuilt as a visual-first "slide deck," 2026-07-07)*
 
-> **How to use:** This is the complete spec, kept in sync with the generated code. Read it before changing anything in `/website`. Decisions below were confirmed by the founder across four rounds — flag only genuine new ambiguities.
+> **How to use:** This is the complete spec, kept in sync with the generated code. Read it before changing anything in `/website`. Decisions below were confirmed by the founder across five rounds — flag only genuine new ambiguities.
 
 ---
 
@@ -284,6 +284,27 @@ Not done in this session (see README.md "Deploying"): actual deployment to a hos
 - [x] Data renders from Airtable when configured, from sample JSON otherwise — structure matches §4 exactly.
 - [x] Mobile-responsive layout (ticker marquee + bottom-sheet drawer use responsive Tailwind classes).
 - [x] No lorem ipsum — real content from the pitch brief and this document throughout.
-- [ ] **Not done:** `npm install && npm run build` verified clean in this session (see build log referenced in the chat reply).
+- [x] `npm install && npm run build` verified clean (re-verified after the v5 redesign and the Next.js security patch — see §11).
 - [ ] **Not done:** git commit pushed to a remote — no remote was configured; needs the founder's repository URL.
 - [ ] **Not done:** actual deployment / live BTCPay test.
+
+---
+
+## 11. Companies page redesign (v5) — positioning + visual system
+
+**Positioning, refined and confirmed:** the target buyer isn't choosing FRAKTUR over a full manual audit on price — a $50–250K audit was never actually reachable for a 5–50-engineer, often pre-Series-A company. The real competitor is *no security review at all*. This reframes the whole page: FRAKTUR isn't pitched as "audit, but cheaper" (a claim that would contradict the standing rule that FRAKTUR is a co-pilot, not a replacement for a formal audit) — it's pitched as the thing that exists in the gap where a full audit was never on the table to begin with. Two taglines came out of that reframe and anchor the page:
+
+- **Cover:** *"Cheaper because smarter."* — opens the page, right under the eyebrow line.
+- **Closing bookend:** *"Full audits weren't built for you. This is."* — the last thing said before pricing/CTA.
+
+**Important distinction carried through the copy:** the -95% file/cost reduction numbers (§3.1) are measured facts from the first real test. The claim that this captures "90% of exploitable vulnerabilities" is *not* proven the same way — no controlled side-by-side against a full manual audit exists yet. The redesigned page does not state a vulnerability-capture percentage anywhere; it states the measured numbers (files, cost, findings) and lets the reader draw the inference. **Recommended next investment, not yet done:** commission one full manual audit on a wallet FRAKTUR has already triaged, and publish the diff. That single experiment would convert "smarter" from a claim into a proven number — the strongest asset FRAKTUR could produce.
+
+**Visual system — why it changed:** the founder's brief was direct: `FRAKTUR.pdf` is "ultra visuel — une image puissante, 2 lignes de texte," and the original Companies page (dense paragraphs, an HTML comparison table) didn't meet that bar. The rebuild follows the deck's actual structure — one full-viewport "slide" per idea, one strong visual, a 1–2 line serif headline, almost no body text — but does **not** reuse the deck's stock photography (glass, Atlas statue, cow, bees, scales). Two reasons: licensing (those images aren't ours to ship), and brand fit (a proof-based security product is better served by visuals built from real data and the brand's own mark than generic metaphor photos). Concretely:
+
+- `src/components/ShardArt.tsx` — six original SVG compositions, all built from the same wedge silhouette as the FRAKTUR mark, repeated/scaled/blurred to carry a specific idea (e.g. `burden`: one solid shard under a tall stack of faint ones, for "One Engineer, Millions at Stake"; `concentration`: scattered faint fragments funneling into one bright shard, for "Not cheaper. Concentrated." — literally drawing the 1,300→63 idea instead of just charting it).
+- `src/components/ProofVisual.tsx` — recreates the deck's actual proof-slide language (a floating dark card, one bold bar, the result stated as a single number) for the L1/L2/cost figures, replacing the old plain HTML table.
+- `src/components/Slide.tsx` — the reusable full-viewport split-screen (or centered, for the cover/closing bookends) layout every idea now goes through.
+- Headlines now use a serif display stack (`font-display` in `tailwind.config.ts`) to match the deck's editorial voice, sans-serif everywhere else. **Deliberately a system font stack (Iowan Old Style/Palatino/Georgia), not a Google Fonts fetch** — `next/font/google` was tried first and failed at build time in this sandbox (no egress to `fonts.googleapis.com`), which is itself a good reason to avoid a network dependency at build time in general. Self-hosting a specific serif file (shipped in `/public`, no fetch) is the right upgrade if a particular typeface matters later — revisit if this is worth doing.
+- FAQ stayed as plain utility content below the visual sections — it's reference material, not part of the emotional arc, and forcing it into "slide" format would have been the wrong instinct (the philosophy calls for restraint, not decoration for its own sake).
+
+**Security patch applied in passing:** `npm install` flagged Next.js 14.2.5 with a critical advisory. Bumped to **14.2.35** (the latest 14.2.x patch) and dropped an unused `tsx` devDependency (a leftover `sync-data` script referencing a file that was never created — dead weight, and it pulled in a vulnerable `esbuild`). Residual: `npm audit` still flags a few advisories only fully resolved in the Next.js 15/16 line (image optimizer, middleware/i18n, WebSocket upgrades) — none of the affected features (`next/image`, `middleware.ts`, i18n config, WebSocket upgrades) are used anywhere in this codebase, so exposure is low, but a major-version upgrade wasn't attempted blind in this session and is worth scheduling deliberately, with its own test pass, rather than folding into this change.

@@ -1,0 +1,27 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(gh auth *)",
+      "Bash(vercel --version)",
+      "Bash(vercel whoami *)",
+      "Bash(git remote *)",
+      "Bash(git ls-remote *)",
+      "Bash(git push *)",
+      "Bash(git config *)",
+      "Bash(ssh -T git@github.com -o BatchMode=yes -o ConnectTimeout=5)",
+      "Bash(echo \"exit:$?\")",
+      "Bash(npx --yes vercel --version)",
+      "Bash(npm --version)",
+      "Read(//Users/orange/**)",
+      "Bash(ls /opt/homebrew/bin/ 2>&1 | grep -i -E \"node|vercel|npm\"; ls /usr/local/bin/ 2>&1 | grep -i -E \"node|vercel|npm\"; find / -maxdepth 4 -iname \"node\" -type f 2>/dev/null)",
+      "Read(//opt/homebrew/**)",
+      "Read(//usr/local/**)",
+      "Bash(zsh -lic \"which node npm && node --version\")",
+      "Skill(run)",
+      "Skill(run:*)",
+      "Bash(ls -la /pkg/env/global/bin 2>&1 | head -30)",
+      "Read(//pkg/env/global/**)",
+      "Bash(brew --version)"
+    ]
+  }
+}
