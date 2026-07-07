@@ -1,10 +1,12 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import Link from "next/link";
 import type { Wallet } from "@/lib/types";
-import { severityColorClass, countBySeverity } from "@/lib/format";
+import { countBySeverity } from "@/lib/format";
 import { useDonation } from "./DonationContext";
 import { AuditFlowDiagram } from "./AuditFlowDiagram";
+import { SeverityBadge } from "./SeverityBadge";
 
 type SortKey = "risk" | "recent";
 
@@ -144,9 +146,7 @@ export function WalletList({ wallets }: { wallets: Wallet[] }) {
               <div className="mb-4 flex flex-wrap gap-2 text-xs">
                 {(["Critical", "High", "Medium", "Low"] as const).map((sev) =>
                   counts[sev] > 0 ? (
-                    <span key={sev} className={`rounded-full px-2 py-0.5 font-medium ${severityColorClass(sev)}`}>
-                      {counts[sev]} {sev}
-                    </span>
+                    <SeverityBadge key={sev} severity={sev} count={counts[sev]} walletName={wallet.name} />
                   ) : null
                 )}
                 {wallet.findings.length === 0 && (
@@ -156,10 +156,17 @@ export function WalletList({ wallets }: { wallets: Wallet[] }) {
 
               <button
                 onClick={() => open({ allocationChoice: "Specific Wallet", walletId: wallet.id, walletName: wallet.name })}
-                className="text-sm font-medium text-fraktur-orange hover:underline"
+                className="block text-sm font-medium text-fraktur-orange hover:underline"
               >
                 Go deeper →
               </button>
+              <Link
+                href="/companies"
+                className="mt-2 block text-xs text-fraktur-muted hover:text-fraktur-electric"
+              >
+                Is this your wallet? Get continuous coverage of every file, every commit →{" "}
+                <span className="font-medium text-fraktur-electric">For Companies</span>
+              </Link>
             </article>
           );
         })}

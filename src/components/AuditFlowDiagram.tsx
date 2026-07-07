@@ -146,18 +146,20 @@ export function AuditFlowDiagram({
             No dynamic test data yet
           </text>
         )}
-      </svg>
 
-      {/* Plain HTML, not SVG text — this row's width always matches the
-          diagram's own width, so the finding count is guaranteed to sit at
-          the graphic's right edge, and neither label can ever land on top
-          of the ribbons no matter how the fusion point shifts. */}
-      <div className="mt-1 flex items-center justify-between text-xs">
-        <span className="font-bold text-fraktur-electric">-{l1Pct}% noise cut</span>
-        <span className="text-fraktur-muted">
+        {/* Sits right at the fusion point, in the strip above both ribbons —
+            by the time the ribbons reach mergeStartX they've already
+            narrowed well below y=20, so this never overlaps the traits. */}
+        <text x={mergeStartX + 4} y="20" fontSize="11" fontWeight={700} fill={FRAKTUR_ELECTRIC}>
+          -{l1Pct}% noise cut
+        </text>
+
+        {/* Right-aligned to match the blocks' own right edge, sitting just
+            above them regardless of how many there are. */}
+        <text x={RIGHT_EDGE} y="44" textAnchor="end" fontSize="10" fill={FRAKTUR_MUTED}>
           {totalFindings === 0 ? "0 findings" : `${totalFindings} finding${totalFindings === 1 ? "" : "s"}`}
-        </span>
-      </div>
+        </text>
+      </svg>
 
       <div className="mt-2 flex items-center gap-2 text-xs">
         <span className="shrink-0 text-fraktur-muted">Audited</span>
