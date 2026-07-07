@@ -33,7 +33,7 @@ function Shard({
   );
 }
 
-export type ShardVariant = "cover" | "loss" | "burden" | "stillmotion" | "concentration" | "closing";
+export type ShardVariant = "cover" | "loss" | "burden" | "stillmotion" | "concentration" | "verify" | "closing";
 
 export function ShardArt({ variant, className }: { variant: ShardVariant; className?: string }) {
   return (
@@ -101,6 +101,15 @@ export function ShardArt({ variant, className }: { variant: ShardVariant; classN
             <Shard key={i} x={x} y={y} scale={0.28} rotate={rot} opacity={op} color="#8a94a3" />
           ))}
           <Shard x={175} y={225} scale={1.3} rotate={0} opacity={1} color="#f5891a" />
+        </>
+      )}
+
+      {variant === "verify" && (
+        <>
+          {/* A shard sealed inside a timestamp ring — the on-chain proof idea, drawn. */}
+          <circle cx="200" cy="200" r="120" fill="none" stroke="#f5891a" strokeOpacity="0.35" strokeWidth="1.5" strokeDasharray="2 8" />
+          <circle cx="200" cy="200" r="150" fill="none" stroke="#f5891a" strokeOpacity="0.15" strokeWidth="1" strokeDasharray="1 10" />
+          <Shard x={190} y={230} scale={1.5} rotate={0} opacity={1} color="#f5891a" />
         </>
       )}
 

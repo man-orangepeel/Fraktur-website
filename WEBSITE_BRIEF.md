@@ -1,6 +1,8 @@
 # FRAKTUR — Website Generation Brief
 *Master prompt — to be executed to generate the site in `/Fraktur/website/`*
-*Drafted: 2026-07-02 — v5 (Companies page rebuilt as a visual-first "slide deck," 2026-07-07)*
+*Drafted: 2026-07-02 — v6 (Companies copy pass: hero decoupled from narrative, cheaper/smarter conflict resolved, proof reframed around the Layer 1/2 mechanism — 2026-07-07)*
+
+> **Parallel work notice:** as of 2026-07-07, the founder is running a second Claude Code session (VS Code) on the Home page and shared components at the same time this session works on Companies. If you're picking this project back up, check `git status`/`git log` before assuming this document is the only source of truth for the whole site — Home-side decisions (e.g. `testsRun`, `AuditFlowDiagram`, the `/legal` page, "The Cast" naming) may have been made in that other session and are real even if not documented here. Commit scoped to the files you actually changed, not `git add -A`, while two sessions are active on the same repo.
 
 > **How to use:** This is the complete spec, kept in sync with the generated code. Read it before changing anything in `/website`. Decisions below were confirmed by the founder across five rounds — flag only genuine new ambiguities.
 
@@ -308,3 +310,22 @@ Not done in this session (see README.md "Deploying"): actual deployment to a hos
 - FAQ stayed as plain utility content below the visual sections — it's reference material, not part of the emotional arc, and forcing it into "slide" format would have been the wrong instinct (the philosophy calls for restraint, not decoration for its own sake).
 
 **Security patch applied in passing:** `npm install` flagged Next.js 14.2.5 with a critical advisory. Bumped to **14.2.35** (the latest 14.2.x patch) and dropped an unused `tsx` devDependency (a leftover `sync-data` script referencing a file that was never created — dead weight, and it pulled in a vulnerable `esbuild`). Residual: `npm audit` still flags a few advisories only fully resolved in the Next.js 15/16 line (image optimizer, middleware/i18n, WebSocket upgrades) — none of the affected features (`next/image`, `middleware.ts`, i18n config, WebSocket upgrades) are used anywhere in this codebase, so exposure is low, but a major-version upgrade wasn't attempted blind in this session and is worth scheduling deliberately, with its own test pass, rather than folding into this change.
+
+---
+
+## 13. Companies copy pass (v6) — hero decoupled, conflict resolved, proof reframed
+
+**The Hero is not slide 1 of the pitch.** It states the brand promise ("Cheaper because smarter") and stops there — no `eyebrow`/`id` ties it into the problem→solution→proof sequence that follows. Reasoning (founder's catch): a hero that states the answer, immediately followed by slides that state the problem, immediately followed by another slide re-stating an answer, reads as incoherent — "we solved it… here's the problem… we solved it." Decoupling the Hero visually and structurally (no eyebrow, not part of the nav-anchored sequence) fixes that without removing it from being the first thing seen.
+
+**Direct wording conflict, resolved.** The Hero promises "cheaper." An earlier draft of the pivot slide said "**Not** cheaper. Concentrated." — a literal contradiction sitting two scrolls apart. Fixed by changing the pivot headline to **"Smarter, not smaller."** — it answers the same unspoken objection (cheaper must mean less thorough) without negating the word the Hero just used. It also echoes "smarter" back from the Hero, which is a deliberate callback, not a coincidence.
+
+**Proof slides now lead with mechanism, not raw numbers.** The previous version led with "1,300 files. Down to 63." and "6 files. 5 real findings." as headlines — accurate, but it buried *why* the numbers exist. Founder's framing: show the secret sauce. Rewritten using the original pitch deck's own language:
+- Layer 1 slide headline is now **"1,000 Attackers. Automated."** with a sub explaining attack-surface triage (random/malformed/adversarial inputs at scale, crash sites mapping the risk landscape for Layer 2). The measured -95% file reduction is still there, but as the *supporting visual* (`CompareBars`), not the headline claim.
+- Layer 2 slide headline is now **"Bitcoin-Native AI. Targeted by Fuzz."**, with the 6-files/5-findings `FindingsCard` demoted to supporting visual the same way.
+- Cost slide (**"$3.2k. Down to $150."**) was left as-is per founder's call ("me semble pas mal"), sub tightened to explicitly land the original pitch line "Better signal, at a lower cost."
+
+**Known limitation, intentional:** the founder shared a live update from whoever is building FRAKTUR's Layer 1/2 pipeline — a first complete test on Wasabi wallet just started (70+ tests excluding Loupe, run in regtest + mainnet, deterministic tools first to keep token usage low, then LLM fuzz, then Loupe). That real number isn't ready yet, so this pass keeps the existing first-test figures (1,300→63 files, $3.2k→$150, the 5-finding breakdown) as the illustrative proof, with the *concept* (Layer 1/2 mechanism) carrying the headlines instead. **When the Wasabi numbers land, swap the `CompareBars`/`FindingsCard` values — the headlines and subs describing the mechanism don't need to change.**
+
+**New slide added — verification, in resonance with Home.** Home's hero states: *"Live, verifiable security scores for Bitcoin wallets. Audited, timestamped, public."* Companies had nothing that echoed this. Added a slide, headline **"Don't Trust. Verify."** (reused verbatim from the source pitch deck — it's the Bitcoin-native mantra, not a paraphrase), sub ties directly back to OpenTimestamp and explicitly points at the Wallet Watcher on Home ("the same proof your users can check... not a PDF you take our word for"). Positioned after the three Layer 1/2/cost proof slides, before the closing/pricing bookend. New `ShardArt` variant `verify` (a shard sealed inside a dashed timestamp ring) supports it — no stock imagery, same rationale as §11.
+
+**Nav anchor bug fixed in passing:** `id="problem"` was sitting on the Hero slide, not the first actual problem slide — meant clicking "Problem" in the nav scrolled to the brand tagline, not the problem statement. Moved to the "83 Exploits..." slide where it belongs.

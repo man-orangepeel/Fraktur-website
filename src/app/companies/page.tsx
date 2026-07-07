@@ -44,58 +44,86 @@ export default async function CompaniesPage() {
       <div className="relative z-10">
         <Header variant="companies" />
 
-        {/* Cover */}
+        {/* Hero — deliberately NOT part of the problem→solution→proof narrative
+            below (it's the brand promise, not step 1 of the pitch). Kept as
+            the first thing seen, but no eyebrow/id ties it into the story
+            sequence, so nothing reads as "answer, then problem, then answer
+            again." See WEBSITE_BRIEF.md §12. */}
+        <Slide
+          eyebrow="FRAKTUR — for Bitcoin companies who can't afford to look away"
+          headline="Cheaper because smarter."
+          visual={<ShardArt variant="cover" />}
+        />
+
+      {/* Problem, 3 beats */}
       <Slide
         id="problem"
-        eyebrow="FRAKTUR — for Bitcoin companies who can't afford to look away"
-        headline="Cheaper because smarter."
-        visual={<ShardArt variant="cover" />}
+        headline={<>83 Exploits since April 2026.<br />$755M Lost.<br />No Refund.</>}
+        sub="Every one of those dollars is gone for good. Bitcoin has no chargeback, no support ticket, no do-over."
+        visual={<ShardArt variant="loss" />}
       />
 
-      {/* Problem, 3 beats — headline only, exactly like the source deck */}
-      <Slide headline={<>83 Exploits since April 2026.<br />$755M Lost.<br />No Refund.</>} visual={<ShardArt variant="loss" />} />
+      <Slide
+        headline={<>One Engineer.<br />Millions at Stake.</>}
+        sub="1–50 person teams protecting millions in user funds. No dedicated security hire. Audits too slow. Too expensive."
+        visual={<ShardArt variant="burden" />}
+        visualSide="left"
+      />
 
-      <Slide headline={<>One Engineer.<br />Millions at Stake.</>} visual={<ShardArt variant="burden" />} visualSide="left" />
+      <Slide
+        headline={<>Static Eyes.<br />Dynamic Threats.</>}
+        sub="Generic scanners read code. They don't run it. Attacks happen at runtime. Static analysis alone leaves the door open."
+        visual={<ShardArt variant="stillmotion" />}
+      />
 
-      <Slide headline={<>Static Eyes.<br />Dynamic Threats.</>} visual={<ShardArt variant="stillmotion" />} />
-
-      {/* The pivot — the reframed value proposition */}
+      {/* The pivot — reframed to resolve a direct wording conflict with the
+          Hero ("Cheaper because smarter" vs. an earlier "Not cheaper.
+          Concentrated."). "Smarter, not smaller" answers the unspoken
+          objection (cheaper = less thorough) without contradicting the Hero —
+          it echoes "smarter" back instead of fighting "cheaper." */}
       <Slide
         id="solution"
         eyebrow="Our answer"
-        headline={<>Not cheaper.<br />Concentrated.</>}
+        headline={<>Smarter,<br />not smaller.</>}
         sub="We don't read less code. We waste less time reading code that never breaks."
         visual={<ShardArt variant="concentration" />}
         visualSide="left"
       />
 
-      {/* Proof — our first real-world test, exact figures from FRAKTUR.pdf pp.12-14 */}
+      {/* Proof, part 1 — Layer 1 concept leads, the measured -95% is the
+          supporting visual, not the headline. The concrete Wasabi numbers
+          (70+ tests, regtest + mainnet, deterministic-first) are still
+          running as of this writing — this slide states the mechanism, which
+          doesn't change once real numbers are ready to swap in. */}
       <Slide
         id="proof"
-        eyebrow="Proof — our first real-world test"
-        headline={<>1,300 files.<br />Down to 63.</>}
-        sub="For the wallet's repo we audited."
+        eyebrow="How we're different from a full audit — Layer 1"
+        headline={<>1,000 Attackers.<br />Automated.</>}
+        sub="Random, malformed, adversarial inputs at scale — the same way real attackers probe a system, just automated. Crash sites map the risk landscape and tell Layer 2 exactly where to look."
         visual={
           <CompareBars
-            title="L1 — LLM agents launched per scan"
+            title="L1 — LLM agents launched per scan (first test)"
             beforeLabel="Loupe-only (whole codebase)"
             beforeValue={1300}
             afterLabel="FRAKTUR (triaged)"
             afterValue={63}
-            result="-95% data to verify"
+            result="-95% noise cut"
           />
         }
       />
 
+      {/* Proof, part 2 — Layer 2 concept leads; the concrete finding count
+          from our first test is the supporting visual. */}
       <Slide
-        headline={<>6 files.<br />5 real findings.</>}
+        headline={<>Bitcoin-Native AI.<br />Targeted by Fuzz.</>}
+        sub="Layer 2 runs AI agents with real Bitcoin protocol knowledge — BIPs, BOLTs, NUTs — laser-focused only on what Layer 1 already flagged as risky."
         visual={<FindingsCard />}
         visualSide="left"
       />
 
       <Slide
         headline={<>$3.2k.<br />Down to $150.</>}
-        sub="Same Bitcoin-specific rigor — BIPs, BOLTs, NUTs — via Loupe. We cut the reading, not the standard."
+        sub="Better signal, at a lower cost. Same Bitcoin-specific rigor via Loupe — we cut the reading, not the standard."
         visual={
           <CompareBars
             title="Cost per scan (Claude Opus 4.8, API-equivalent)"
@@ -107,6 +135,16 @@ export default async function CompaniesPage() {
             result="-95% cost"
           />
         }
+      />
+
+      {/* Proof, part 4 — verification, deliberately echoing the Home hero
+          ("Live, verifiable security scores... Audited, timestamped,
+          public.") so both pages tell the same story about proof. */}
+      <Slide
+        headline="Don't Trust. Verify."
+        sub="Every audit is hashed and anchored on-chain via OpenTimestamp — live, verifiable, public. The same proof your users can check on the Wallet Watcher, not a PDF you take our word for."
+        visual={<ShardArt variant="verify" />}
+        visualSide="left"
       />
 
       {/* Closing punch + pricing + CTA */}
