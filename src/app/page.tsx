@@ -25,7 +25,7 @@ export default async function HomePage() {
         </h1>
         <p className="mx-auto mt-3 max-w-xl text-fraktur-muted">Audited, timestamped, public.</p>
         <p className="mt-6 text-sm text-fraktur-muted">
-          <Link href="/companies" className="font-medium text-fraktur-orange hover:underline">
+          <Link href="/companies" className="font-medium text-fraktur-electric hover:underline">
             For Companies →
           </Link>
         </p>

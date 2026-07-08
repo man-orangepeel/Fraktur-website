@@ -41,6 +41,18 @@ export function reductionPct(before: number, after: number): number {
   return Math.round((1 - after / before) * 100);
 }
 
+const SEVERITY_ORDER_DESC: Severity[] = ["Critical", "High", "Medium", "Low"];
+
+// The wallet's actual highest severity across all its findings — matches
+// what the visible per-severity badges show (which count Fixed findings
+// too), unlike the separately-curated `riskBadge` field.
+export function highestSeverity(findings: { severity: Severity }[]): Severity | "None" {
+  for (const s of SEVERITY_ORDER_DESC) {
+    if (findings.some((f) => f.severity === s)) return s;
+  }
+  return "None";
+}
+
 export function countBySeverity(findings: { severity: Severity }[]) {
   const counts: Record<Severity, number> = {
     Critical: 0,

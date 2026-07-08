@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import type { Wallet } from "@/lib/types";
-import { countBySeverity } from "@/lib/format";
+import { countBySeverity, highestSeverity } from "@/lib/format";
 import { useDonation } from "./DonationContext";
 import { AuditFlowDiagram } from "./AuditFlowDiagram";
 import { SeverityBadge } from "./SeverityBadge";
@@ -20,10 +20,10 @@ export function WalletList({ wallets }: { wallets: Wallet[] }) {
 
   const filtered = useMemo(() => {
     let list = wallets.filter((w) => w.name.toLowerCase().includes(query.toLowerCase()));
-    if (riskFilter !== "All") list = list.filter((w) => w.riskBadge === riskFilter);
+    if (riskFilter !== "All") list = list.filter((w) => highestSeverity(w.findings) === riskFilter);
 
     return [...list].sort((a, b) => {
-      if (sortKey === "risk") return RISK_ORDER.indexOf(a.riskBadge) - RISK_ORDER.indexOf(b.riskBadge);
+      if (sortKey === "risk") return RISK_ORDER.indexOf(highestSeverity(a.findings)) - RISK_ORDER.indexOf(highestSeverity(b.findings));
       return new Date(b.lastReviewDate).getTime() - new Date(a.lastReviewDate).getTime();
     });
   }, [wallets, query, riskFilter, sortKey]);
@@ -107,7 +107,14 @@ export function WalletList({ wallets }: { wallets: Wallet[] }) {
                 <dd className="text-right text-fraktur-text">{wallet.status}</dd>
                 <dt>Last review</dt>
                 <dd className="text-right text-fraktur-text">
-                  {wallet.lastReviewDate}
+                  <a
+                    href="https://mempool.space/"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="hover:text-fraktur-electric hover:underline"
+                  >
+                    {wallet.lastReviewDate}
+                  </a>
                   {isStale && (
                     <span
                       className="ml-1 cursor-help text-fraktur-orange"
@@ -117,18 +124,17 @@ export function WalletList({ wallets }: { wallets: Wallet[] }) {
                     </span>
                   )}
                 </dd>
-                <dt>Audit tool</dt>
-                <dd className="text-right text-fraktur-text">{wallet.auditToolVersion}</dd>
-                {wallet.otsHash && (
-                  <>
-                    <dt>OpenTimestamp</dt>
-                    <dd className="text-right">
-                      <a href={wallet.otsProofUrl || "#"} target="_blank" rel="noreferrer" className="text-fraktur-electric hover:underline">
-                        Verify ↗
-                      </a>
-                    </dd>
-                  </>
-                )}
+                <dt>fraKtur</dt>
+                <dd className="text-right text-fraktur-text">
+                  <a
+                    href="https://github.com/fraktur"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="hover:text-fraktur-electric hover:underline"
+                  >
+                    {wallet.auditToolVersion}
+                  </a>
+                </dd>
               </dl>
 
               <div className="mb-3 rounded-lg bg-fraktur-bg p-3">
@@ -156,13 +162,12 @@ export function WalletList({ wallets }: { wallets: Wallet[] }) {
 
               <button
                 onClick={() => open({ allocationChoice: "Specific Wallet", walletId: wallet.id, walletName: wallet.name })}
-                className="block text-xs text-fraktur-orange hover:underline"
+                className="block w-full text-right text-xs text-fraktur-orange hover:underline"
               >
                 Help us go deeper, faster →
               </button>
-              <Link href="/companies" className="mt-1 block text-xs text-fraktur-muted hover:text-fraktur-electric">
-                Your wallet? Get continuous coverage →{" "}
-                <span className="font-medium text-fraktur-electric">For Companies</span>
+              <Link href="/companies" className="mt-1 block w-full text-right text-xs text-fraktur-electric hover:underline">
+                In charge of this wallet? → For Companies
               </Link>
             </article>
           );

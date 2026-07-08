@@ -6,9 +6,9 @@ export function TickerBanner({ supporters }: { supporters: Supporter[] }) {
   const loop = [...active, ...active]; // duplicated for a seamless CSS marquee loop
 
   return (
-    <div className="relative overflow-hidden border-y-2 border-fraktur-electric/50 bg-fraktur-electric/10 py-5 sm:py-6">
+    <div className="relative overflow-hidden border-y-2 border-fraktur-electric/30 bg-fraktur-electric/5 py-5 sm:py-6">
       <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
-        <div className="absolute left-1/2 top-1/2 h-32 w-[130%] -translate-x-1/2 -translate-y-1/2 rounded-full bg-fraktur-electric/10 blur-3xl" />
+        <div className="absolute left-1/2 top-1/2 h-32 w-[130%] -translate-x-1/2 -translate-y-1/2 rounded-full bg-fraktur-electric/5 blur-3xl" />
       </div>
 
       <div className="relative mx-auto mb-3 flex max-w-6xl items-center gap-2 px-4 text-sm text-fraktur-muted sm:text-base">

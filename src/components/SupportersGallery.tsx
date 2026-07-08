@@ -25,11 +25,14 @@ export function SupportersGallery({ supporters }: { supporters: Supporter[] }) {
   const paged = expanded ? visible.slice(page * pageSize, page * pageSize + pageSize) : visible;
 
   return (
-    <section id="supporters" className="border-b border-fraktur-border bg-fraktur-panel">
+    <section id="supporters" className="border-b border-fraktur-border bg-fraktur-electric/10">
     <div className="mx-auto max-w-6xl px-4 py-12">
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
         <div>
           <h2 className="text-3xl font-bold text-fraktur-text">the Kast</h2>
+          <p className="mt-1 text-sm text-fraktur-muted">
+            A fracture heals because someone holds it together. This is who&rsquo;s holding ours.
+          </p>
         </div>
         {expanded && (
           <select
