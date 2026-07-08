@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import type { Wallet } from "@/lib/types";
 import { countBySeverity, highestSeverity } from "@/lib/format";
@@ -11,6 +11,73 @@ import { SeverityBadge } from "./SeverityBadge";
 type SortKey = "risk" | "recent";
 
 const RISK_ORDER = ["Critical", "High", "Medium", "Low", "None"];
+
+// Single info trigger for the whole "Fractures" row — replaces the old
+// per-badge tooltip (same disclosure-policy paragraph was repeating on
+// every colored pill, which was the actual complaint). Hover-intent close:
+// leaving the trigger OR the panel starts a short timer instead of closing
+// instantly, so crossing the small gap between them doesn't dismiss it.
+function DisclosureInfo({ walletName }: { walletName: string }) {
+  const [open, setOpen] = useState(false);
+  const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const containerRef = useRef<HTMLSpanElement>(null);
+
+  const cancelClose = () => {
+    if (closeTimer.current) {
+      clearTimeout(closeTimer.current);
+      closeTimer.current = null;
+    }
+  };
+  const scheduleClose = () => {
+    cancelClose();
+    closeTimer.current = setTimeout(() => setOpen(false), 250);
+  };
+
+  useEffect(() => {
+    if (!open) return;
+    function handleOutside(e: MouseEvent) {
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) setOpen(false);
+    }
+    document.addEventListener("mousedown", handleOutside);
+    return () => document.removeEventListener("mousedown", handleOutside);
+  }, [open]);
+
+  useEffect(() => () => cancelClose(), []);
+
+  return (
+    <span
+      ref={containerRef}
+      className="relative inline-flex"
+      onMouseEnter={cancelClose}
+      onMouseLeave={scheduleClose}
+    >
+      <button
+        type="button"
+        onClick={() => setOpen(true)}
+        aria-expanded={open}
+        aria-label="How we disclose findings"
+        className="flex h-4 w-4 items-center justify-center rounded-full text-fraktur-muted hover:text-fraktur-electric focus:outline-none focus:ring-2 focus:ring-fraktur-electric"
+      >
+        ⓘ
+      </button>
+      {open && (
+        <div
+          role="tooltip"
+          className="absolute left-0 top-full z-20 mt-2 w-64 rounded-lg border border-fraktur-electric/40 bg-fraktur-panel p-3 text-xs font-normal normal-case leading-relaxed text-fraktur-muted shadow-xl"
+        >
+          <p>
+            Full technical detail on any finding is shared with the{" "}
+            <span className="text-fraktur-text">{walletName}</span> team immediately, free of charge. Public
+            write-up follows once they ship a fix, or after a 90-day window — never before.
+          </p>
+          <a href="/legal" className="mt-2 inline-block font-medium text-fraktur-electric hover:underline">
+            How we disclose →
+          </a>
+        </div>
+      )}
+    </span>
+  );
+}
 
 export function WalletList({ wallets }: { wallets: Wallet[] }) {
   const [query, setQuery] = useState("");
@@ -149,15 +216,19 @@ export function WalletList({ wallets }: { wallets: Wallet[] }) {
                 />
               </div>
 
-              <div className="mb-4 flex flex-wrap gap-2 text-xs">
-                {(["Critical", "High", "Medium", "Low"] as const).map((sev) =>
-                  counts[sev] > 0 ? (
-                    <SeverityBadge key={sev} severity={sev} count={counts[sev]} walletName={wallet.name} />
-                  ) : null
-                )}
-                {wallet.findings.length === 0 && (
-                  <span className="rounded-full bg-severity-none px-2 py-0.5 font-medium text-white">0 findings</span>
-                )}
+              <div className="mb-4">
+                <div className="mb-1.5 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-fraktur-muted">
+                  <span>Fractures</span>
+                  <DisclosureInfo walletName={wallet.name} />
+                </div>
+                <div className="flex flex-wrap gap-2 text-xs">
+                  {(["Critical", "High", "Medium", "Low"] as const).map((sev) =>
+                    counts[sev] > 0 ? <SeverityBadge key={sev} severity={sev} count={counts[sev]} /> : null
+                  )}
+                  {wallet.findings.length === 0 && (
+                    <span className="rounded-full bg-severity-none px-2 py-0.5 font-medium text-white">0 findings</span>
+                  )}
+                </div>
               </div>
 
               <button
@@ -166,8 +237,11 @@ export function WalletList({ wallets }: { wallets: Wallet[] }) {
               >
                 Help us go deeper, faster →
               </button>
-              <Link href="/companies" className="mt-1 block w-full text-right text-xs text-fraktur-electric hover:underline">
-                In charge of this wallet? → For Companies
+              <Link
+                href={`/companies?wallet=${encodeURIComponent(wallet.name)}${isStale ? "&reason=stale" : ""}`}
+                className="mt-1 block w-full text-right text-xs text-fraktur-electric hover:underline"
+              >
+                For Companies →
               </Link>
             </article>
           );
