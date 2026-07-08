@@ -24,20 +24,32 @@ const ALLOCATIONS: [AllocationChoice, string][] = [
  * Selection states (allocation card, wallet chips) use the site's night-blue
  * accent (`fraktur-electric` / `electricDim`) rather than orange, keeping
  * orange reserved for the one action that matters: the submit button.
+ *
+ * v3: no allocation is preselected, ever — the founder's call was that even
+ * arriving via a wallet card's "Help us go deeper" link shouldn't force
+ * "Specific Wallet" as the answer before the donor has chosen anything. What
+ * *is* carried over from that click is which wallet to pre-check — but only
+ * once the donor picks "Specific Wallet" themselves; it stays dormant until
+ * then. `prefill.allocationChoice` (still sent by WalletList.tsx) is
+ * therefore deliberately ignored here rather than requiring a change on the
+ * Home side.
  */
 export function DonationDrawer({ walletOptions }: { walletOptions: { id: string; name: string }[] }) {
   const { isOpen, close, prefill } = useDonation();
-  const [allocation, setAllocation] = useState<AllocationChoice>(prefill.allocationChoice || "Product Dev");
+  const [allocation, setAllocation] = useState<AllocationChoice | undefined>(undefined);
   const [selectedWallets, setSelectedWallets] = useState<string[]>(prefill.walletId ? [prefill.walletId] : []);
   const [newWallet, setNewWallet] = useState("");
   const [xHandle, setXHandle] = useState("");
   const [nostrNpub, setNostrNpub] = useState("");
   const [consent, setConsent] = useState(true);
-  const [status, setStatus] = useState<"idle" | "loading" | "error">("idle");
+  const [status, setStatus] = useState<"idle" | "loading" | "error" | "needs-allocation">("idle");
 
   useEffect(() => {
     if (isOpen) {
-      setAllocation(prefill.allocationChoice || "Product Dev");
+      // Deliberately NOT prefill.allocationChoice — see v3 note above. Only
+      // the wallet selection is carried over, dormant until the donor picks
+      // "Specific Wallet" on their own.
+      setAllocation(undefined);
       setSelectedWallets(prefill.walletId ? [prefill.walletId] : []);
     }
   }, [isOpen, prefill]);
@@ -50,6 +62,10 @@ export function DonationDrawer({ walletOptions }: { walletOptions: { id: string;
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (!allocation) {
+      setStatus("needs-allocation");
+      return;
+    }
     setStatus("loading");
     try {
       const res = await fetch("/api/donate/create-invoice", {
@@ -193,6 +209,9 @@ export function DonationDrawer({ walletOptions }: { walletOptions: { id: string;
             </button>
             {status === "error" && (
               <p className="text-sm text-risk-critical">Something went wrong creating the invoice. Please try again.</p>
+            )}
+            {status === "needs-allocation" && (
+              <p className="text-sm text-risk-critical">Please choose where this should go, above.</p>
             )}
 
             <p className="text-xs leading-relaxed text-fraktur-muted">

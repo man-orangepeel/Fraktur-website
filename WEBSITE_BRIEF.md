@@ -1,6 +1,6 @@
 # FRAKTUR — Website Generation Brief
 *Master prompt — to be executed to generate the site in `/Fraktur/website/`*
-*Drafted: 2026-07-02 — v9 (Companies page rebuilt from scratch as a conventional B2B page, not a slide deck — 2026-07-07)*
+*Drafted: 2026-07-02 — v10 (sample wallet names anonymized; donation-drawer allocation no longer preselected — 2026-07-07)*
 
 > **Parallel work notice:** as of 2026-07-07, the founder is running a second Claude Code session (VS Code) on the Home page and shared components at the same time this session works on Companies. If you're picking this project back up, check `git status`/`git log` before assuming this document is the only source of truth for the whole site — Home-side decisions (e.g. `testsRun`, `AuditFlowDiagram`, the `/legal` page, "The Cast" naming) may have been made in that other session and are real even if not documented here. Commit scoped to the files you actually changed, not `git add -A`, while two sessions are active on the same repo.
 
@@ -440,3 +440,21 @@ Third pass on this one CTA, each version fixing a real problem the previous one 
 - **Problem section headline reframed.** "Bitcoin software is under attack. Most teams have no one watching." implicitly excluded any team that already has *some* security practice, even inadequate ones — which is most of the addressable market, not an edge case. Replaced with "Whatever you're doing today, it doesn't feel like enough," plus a sub-line naming the actual answer (key-file focus + Bitcoin-native AI, a fraction of a full audit's cost) — inclusive of any starting point, still validates the underlying anxiety.
 - Problem-card and pricing-tier subtitle lines recolored from orange to electric blue (founder's direct call).
 - The "Public Disclosure Report vs. paid tiers" paragraph was too much inline text on the pricing section — cut from there and turned into a new FAQ entry instead; the distinction (already established in §15/§16) is preserved, just relocated to where reference detail belongs.
+
+---
+
+## 19. Sample data anonymized — this is a public site, urgent fix
+
+**`data/wallets.sample.json` named six real, identifiable Bitcoin wallets** (Wasabi Wallet, BlueWallet, Sparrow Wallet, Electrum, Specter Desktop, Muun) — real GitHub repo links, real project names — each carrying entirely fabricated vulnerability findings ("hardcoded cryptographic key used across all installs," "insufficiently protected credentials in backup export," etc.). On a site the public can actually visit, that's not a placeholder problem, it's publishing invented security claims against named, real projects who never agreed to any of this — a real reputational/legal exposure, independent of anything the disclosure policy (§15) covers, because it isn't even a real audit.
+
+**Fixed:** every wallet renamed to a fictional equivalent (Kestrel Wallet, Harbor Wallet, Thornwood Wallet, Ferrowatch, Lantern Desktop, Rowan), repo URLs pointed at a clearly placeholder `example-wallets` GitHub org, all internal ids and finding-id cross-references (`auditHistory.findingIds`) renamed consistently within each wallet block. Data shape, severities, dates, and finding counts are unchanged — only the identifying names are fictional now.
+
+**Standing rule going forward: never put a real, named, identifiable project into this file** (or any other public-facing sample data) with invented findings attached — sample/illustrative data needs invented names by default, not real ones with a mental note to anonymize later. This file is shared between the Home and Companies pages and gets edited by both the founder's Cowork and VS Code sessions — worth either session flagging immediately if a real name shows up in it again, rather than assuming the other session will catch it.
+
+---
+
+## 20. Donation drawer — no preselected allocation
+
+`DonationDrawer.tsx` defaulted `allocation` to `"Product Dev"` on open, and to `"Specific Wallet"` whenever a visitor arrived via a wallet card's "Help us go deeper" link (`WalletList.tsx` passes `allocationChoice: "Specific Wallet"` in the prefill). Founder's call: never preselect — let the donor actively choose every time, including after clicking a wallet-specific link. What should carry over from that click is *which wallet to offer*, not *that "Specific Wallet" is the answer*.
+
+Fixed entirely inside `DonationDrawer.tsx` (no change needed on the Home side): `allocation` now starts as `undefined` and is reset to `undefined` every time the drawer opens, regardless of what `prefill.allocationChoice` says — that field is now deliberately ignored. `selectedWallets` still gets pre-populated from `prefill.walletId`, but stays dormant (the wallet-picker panel only renders once the donor manually selects "Specific Wallet") — so clicking "Help us go deeper" on a given wallet still saves the donor a step *if* they end up choosing that allocation, without forcing the choice. Submit is blocked with an inline message ("Please choose where this should go, above.") if no allocation was picked.
