@@ -2,8 +2,23 @@ import Link from "next/link";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { DonationDrawer } from "@/components/DonationDrawer";
+import { AuditFlowDiagram } from "@/components/AuditFlowDiagram";
+import { SeverityBadge } from "@/components/SeverityBadge";
 import { CompareBars, FindingsCard } from "@/components/ProofVisual";
 import { getWallets } from "@/lib/data";
+import type { Finding } from "@/lib/types";
+
+// Illustrative-only data for the hero preview card below — rendered through
+// the exact same components (AuditFlowDiagram, SeverityBadge) the real
+// Wallet Watcher cards use on Home, not a simplified lookalike. See
+// WEBSITE_BRIEF.md §18 (revision note) for why this replaced a custom mockup.
+const HERO_PREVIEW_FINDINGS: Finding[] = [
+  { id: "h1", walletId: "preview", cwe: "CWE-476", title: "Signature verification — null client", severity: "High" },
+  { id: "h2", walletId: "preview", cwe: "CWE-22", title: "Path / filesystem handling", severity: "Medium" },
+  { id: "h3", walletId: "preview", cwe: "CWE-23", title: "Path / filesystem handling", severity: "Medium" },
+  { id: "h4", walletId: "preview", cwe: "CWE-362", title: "Concurrency / race condition", severity: "Low" },
+  { id: "h5", walletId: "preview", cwe: "CWE-362", title: "Concurrency / race condition", severity: "Low" },
+];
 
 export const revalidate = 60;
 
@@ -84,6 +99,10 @@ const OBJECTIONS = [
     q: "Will you publish our vulnerabilities publicly before we can fix them?",
     a: "No. You get full technical detail — exact file, function, PoC — immediately and for free, always. The public post states that a finding happened and its severity, never exploit-level detail, until you've shipped a fix (or a 90-day embargo expires). Same disclosure model CVEs and Bitcoin Core use.",
   },
+  {
+    q: "What's the difference between the free Public Disclosure Report and these paid tiers?",
+    a: "The Public Disclosure Report — a specific finding, made public once it's fixed or its 90-day embargo lapses — is always free on the Wallet Watcher. These three tiers are for complete, current, or ongoing coverage, not for information already owed to you for free.",
+  },
 ];
 
 export default async function CompaniesPage({
@@ -105,10 +124,10 @@ export default async function CompaniesPage({
           <div className="mx-auto grid max-w-6xl gap-10 px-4 py-16 lg:grid-cols-[1.1fr_0.9fr] lg:items-center lg:py-24">
             <div>
               <p className="mb-4 text-xs font-semibold uppercase tracking-[0.2em] text-fraktur-orange">
-                For Bitcoin companies without a security team
+                For Bitcoin companies without a full time security team
               </p>
               <h1 className="font-display text-4xl font-medium leading-[1.1] text-fraktur-text sm:text-5xl">
-                You can&rsquo;t hire a dedicated security engineer.
+                You can&rsquo;t hire a dedicated security team.
                 <br />
                 You can still ship like one exists.
               </h1>
@@ -116,6 +135,26 @@ export default async function CompaniesPage({
                 FRAKTUR runs your code instead of just reading it — Bitcoin-native AI, triaged by real attack
                 simulation, every finding proof-backed and verified on-chain.
               </p>
+
+              {/* Trust bar — moved directly under the pitch line it supports,
+                  and rebuilt as discrete badges (the inline dot-separated
+                  version was illegible/cramped at most widths). */}
+              <div className="mt-5 flex flex-wrap gap-2">
+                {[
+                  "Built on Loupe (Spiral / Block)",
+                  "Bitcoin-aware: BIPs · BOLTs · NUTs · BLIPs",
+                  "No PoC, no report",
+                  "OpenTimestamp-verified",
+                ].map((label) => (
+                  <span
+                    key={label}
+                    className="rounded-full border border-fraktur-border bg-fraktur-panel px-3 py-1.5 text-xs text-fraktur-muted"
+                  >
+                    {label}
+                  </span>
+                ))}
+              </div>
+
               <div className="mt-8 flex flex-wrap gap-3">
                 <a
                   href="/apply"
@@ -132,54 +171,52 @@ export default async function CompaniesPage({
               </div>
             </div>
 
-            {/* Illustrative product preview — a real card, not abstract art.
-                Static/mocked data, clearly labeled as such. */}
-            <div className="rounded-2xl border border-fraktur-electric/30 bg-fraktur-panel p-5 shadow-2xl shadow-black/40">
-              <div className="mb-4 flex items-center justify-between">
-                <div>
-                  <p className="font-display text-lg text-fraktur-text">your-org/your-wallet</p>
-                  <p className="text-xs text-fraktur-muted">Last verified 3 days ago</p>
-                </div>
-                <span className="rounded-full bg-risk-medium px-3 py-1 text-xs font-semibold text-black">Medium</span>
-              </div>
-              <div className="mb-4 space-y-2 text-sm">
-                <div className="flex items-center justify-between">
-                  <span className="text-fraktur-muted">Layer 1 — files triaged</span>
-                  <span className="font-display text-fraktur-text">1,300 → 63</span>
-                </div>
-                <div className="h-2 rounded-full bg-fraktur-bg">
-                  <div className="h-2 w-[5%] rounded-full bg-fraktur-electric" />
-                </div>
-                <div className="flex items-center justify-between pt-1">
-                  <span className="text-fraktur-muted">Layer 2 — files audited</span>
-                  <span className="font-display text-fraktur-text">6 / 63</span>
-                </div>
-                <div className="h-2 rounded-full bg-fraktur-bg">
-                  <div className="h-2 w-[10%] rounded-full bg-fraktur-orange" />
+            {/* Illustrative product preview — rendered through the real
+                Wallet Watcher card components (AuditFlowDiagram,
+                SeverityBadge), not a simplified custom mockup. Static data,
+                clearly labeled. */}
+            <article className="rounded-xl border border-fraktur-electric/25 bg-fraktur-panel p-5">
+              <div className="mb-3 flex items-start justify-between gap-3">
+                <div className="flex items-center gap-3">
+                  <span
+                    className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-xs font-bold text-white"
+                    style={{ backgroundColor: "#8a94a3" }}
+                    aria-hidden
+                  >
+                    YW
+                  </span>
+                  <h3 className="text-lg font-semibold text-fraktur-text">your-org/your-wallet</h3>
                 </div>
               </div>
-              <div className="flex flex-wrap gap-2 text-xs">
-                <span className="rounded-full bg-risk-medium px-2 py-0.5 font-medium text-black">2 Medium</span>
-                <span className="rounded-full bg-risk-mediumHigh px-2 py-0.5 font-medium text-black">1 Medium-High</span>
-                <span className="rounded-full bg-risk-low px-2 py-0.5 font-medium text-white">2 Low</span>
-              </div>
-              <p className="mt-4 text-xs text-fraktur-muted">
-                Illustrative — from our first real scan. Every finding ships with a proof-of-concept.
-              </p>
-            </div>
-          </div>
 
-          {/* Trust bar */}
-          <div className="border-t border-fraktur-border/60 bg-fraktur-panel">
-            <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-center gap-x-8 gap-y-3 px-4 py-4 text-xs text-fraktur-muted">
-              <span>Built on <span className="text-fraktur-text">Loupe</span> — Spiral / Block, open-source</span>
-              <span className="hidden sm:inline">·</span>
-              <span>Bitcoin-aware: BIPs · BOLTs · NUTs · BLIPs</span>
-              <span className="hidden sm:inline">·</span>
-              <span>No PoC, no report</span>
-              <span className="hidden sm:inline">·</span>
-              <span>OpenTimestamp-verified</span>
-            </div>
+              <dl className="mb-4 grid grid-cols-2 gap-y-1 text-xs text-fraktur-muted">
+                <dt>Status</dt>
+                <dd className="text-right text-fraktur-text">In progress</dd>
+                <dt>Last review</dt>
+                <dd className="text-right text-fraktur-text">3 days ago</dd>
+                <dt>fraKtur</dt>
+                <dd className="text-right text-fraktur-text">v0.4.2</dd>
+              </dl>
+
+              <div className="mb-3 rounded-lg bg-fraktur-bg p-3">
+                <AuditFlowDiagram
+                  filesScanned={1300}
+                  filesSelected={63}
+                  filesAudited={6}
+                  maxTestsRun={1}
+                  maxFilesScanned={1300}
+                  findings={HERO_PREVIEW_FINDINGS}
+                />
+              </div>
+
+              <div className="mb-2 flex flex-wrap gap-2 text-xs">
+                <SeverityBadge severity="High" count={1} walletName="your-org/your-wallet" />
+                <SeverityBadge severity="Medium" count={2} walletName="your-org/your-wallet" />
+                <SeverityBadge severity="Low" count={2} walletName="your-org/your-wallet" />
+              </div>
+
+              <p className="mt-3 text-xs text-fraktur-muted">Illustrative — same display as the real Wallet Watcher.</p>
+            </article>
           </div>
         </section>
 
@@ -187,27 +224,31 @@ export default async function CompaniesPage({
         <section id="problem" className="border-b border-fraktur-border py-16">
           <div className="mx-auto max-w-6xl px-4">
             <p className="mb-2 text-xs font-semibold uppercase tracking-[0.2em] text-fraktur-orange">The problem</p>
-            <h2 className="mb-10 max-w-2xl font-display text-3xl text-fraktur-text sm:text-4xl">
-              Bitcoin software is under attack. Most teams have no one watching.
+            <h2 className="mb-3 max-w-2xl font-display text-3xl text-fraktur-text sm:text-4xl">
+              Whatever you&rsquo;re doing today, it doesn&rsquo;t feel like enough.
             </h2>
+            <p className="mb-10 max-w-2xl text-sm text-fraktur-muted">
+              A full audit is out of reach for most teams. FRAKTUR covers the files that actually matter — with
+              Bitcoin-native AI — for a fraction of the cost.
+            </p>
             <div className="grid gap-4 sm:grid-cols-3">
               <div className="rounded-2xl border border-fraktur-border bg-fraktur-panel p-6">
                 <p className="font-display text-3xl text-fraktur-text">$755M lost</p>
-                <p className="mt-1 text-sm text-fraktur-orange">since April 2026</p>
+                <p className="mt-1 text-sm text-fraktur-electric">since April 2026</p>
                 <p className="mt-3 text-sm text-fraktur-muted">
                   83+ exploits. No undo, no chargeback, no refund — a single bug is permanent, unrecoverable loss.
                 </p>
               </div>
               <div className="rounded-2xl border border-fraktur-border bg-fraktur-panel p-6">
                 <p className="font-display text-3xl text-fraktur-text">$50–200K</p>
-                <p className="mt-1 text-sm text-fraktur-orange">and stale tomorrow</p>
+                <p className="mt-1 text-sm text-fraktur-electric">and stale tomorrow</p>
                 <p className="mt-3 text-sm text-fraktur-muted">
                   Formal audits are slow and expensive, and cover a snapshot. The next commit ships unaudited.
                 </p>
               </div>
               <div className="rounded-2xl border border-fraktur-border bg-fraktur-panel p-6">
                 <p className="font-display text-3xl text-fraktur-text">Reads, doesn&rsquo;t run</p>
-                <p className="mt-1 text-sm text-fraktur-orange">static tools miss runtime bugs</p>
+                <p className="mt-1 text-sm text-fraktur-electric">static tools miss runtime bugs</p>
                 <p className="mt-3 text-sm text-fraktur-muted">
                   Even Bitcoin-aware scanners like Loupe stop at reading the code. Attacks happen when it runs.
                 </p>
@@ -313,7 +354,7 @@ export default async function CompaniesPage({
                     }`}
                   >
                     <p className="font-display text-lg text-fraktur-text">{tier.name}</p>
-                    <p className="mt-1 text-sm font-semibold text-fraktur-orange">{tier.price}</p>
+                    <p className="mt-1 text-sm font-semibold text-fraktur-electric">{tier.price}</p>
                     <p className="mt-3 flex-1 text-sm text-fraktur-muted">{tier.description}</p>
                     <a
                       href={`mailto:contact@fraktur.io?subject=${encodeURIComponent(
@@ -331,12 +372,6 @@ export default async function CompaniesPage({
                 );
               })}
             </div>
-
-            <p className="mt-6 max-w-2xl text-xs text-fraktur-muted">
-              The free Public Disclosure Report (a specific finding, once it&rsquo;s fixed or its 90-day embargo
-              lapses) is always free on the Wallet Watcher — these three tiers are for complete, current, or
-              ongoing coverage, not for information already owed to you for free.
-            </p>
 
             <div className="mt-8 flex flex-col items-start gap-2 rounded-2xl border border-fraktur-border bg-fraktur-bg p-5 sm:flex-row sm:items-center sm:justify-between">
               <p className="max-w-md text-sm text-fraktur-muted">
