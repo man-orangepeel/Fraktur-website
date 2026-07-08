@@ -35,18 +35,21 @@ export function Header({ variant }: { variant: "home" | "companies" }) {
           </nav>
         )}
 
-        <div className="flex flex-col items-end gap-1">
+        <div className="flex items-center gap-3">
+          {variant === "home" && (
+            <Link
+              href="/companies"
+              className="rounded-full border border-fraktur-electric bg-transparent px-4 py-1.5 text-sm font-semibold text-fraktur-electric transition hover:bg-fraktur-electric/10"
+            >
+              For Companies
+            </Link>
+          )}
           <button
             onClick={() => open()}
             className="rounded-full bg-fraktur-orange px-4 py-1.5 text-sm font-semibold text-black transition hover:bg-fraktur-orangeDim"
           >
             ⚡ Help us fraKtur it before they do
           </button>
-          {variant === "home" && (
-            <Link href="/companies" className="text-xs text-fraktur-electric hover:underline">
-              For Companies
-            </Link>
-          )}
         </div>
       </div>
       {/* Thin electric-blue accent line — solid, no gradient. */}
