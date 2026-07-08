@@ -29,7 +29,7 @@ const PRICING_TIERS = [
     name: "Complete Findings Report",
     price: "One-time, no commitment",
     description:
-      "A full scan across every file, right now — every finding, not just the one free disclosure. No ongoing subscription required.",
+      "Your whole repo triaged at Layer 1, every high-risk file flagged (and why), every Layer 2 finding on those files with a working proof-of-concept. Not a line-by-line audit of everything — the same concentration, made complete instead of single-finding.",
     cta: "Get the report",
     subject: "Complete Findings Report request",
   },
@@ -38,7 +38,7 @@ const PRICING_TIERS = [
     name: "Continuous coverage",
     price: "$2K–4K / month",
     description:
-      "Every commit scanned, every file, ongoing. The only tier that keeps your Wallet Watcher badge fresh instead of aging.",
+      "Every commit triaged at Layer 1 in full, every high-risk file re-audited at Layer 2, ongoing. The only tier that keeps your Wallet Watcher badge fresh instead of aging.",
     cta: "Start a subscription",
     subject: "Subscription request",
   },
@@ -211,7 +211,7 @@ export default async function CompaniesPage({
       <Slide
         id="pricing"
         center
-        eyebrow={walletName ? `Checking in about ${walletName}?` : "$2K–4K / month · free scan to start"}
+        eyebrow={walletName ? `Checking in about ${walletName}?` : "$2K–4K / month, or a one-time report"}
         headline="Full audits weren't built for you. This is."
         visual={<ShardArt variant="closing" className="mx-auto max-w-xs opacity-80" />}
       >
@@ -255,12 +255,23 @@ export default async function CompaniesPage({
           not for information already owed to you for free.
         </p>
 
-        <div className="mt-6 flex flex-wrap justify-center gap-3">
+        {/* No open "request a free scan" invitation here — see
+            WEBSITE_BRIEF.md §16. The free-scan motion in this business is
+            FRAKTUR-initiated (Annex A5: "Scan public Bitcoin repos
+            proactively"), not something any visitor can trigger on demand —
+            an unqualified self-serve invite would be an unbounded cost
+            center. This is a low-commitment nomination queue instead: it
+            costs FRAKTUR nothing to receive, and commits to nothing. */}
+        <div className="mt-6 flex flex-wrap items-center justify-center gap-3 text-center">
+          <p className="max-w-sm text-xs text-fraktur-muted">
+            We choose what to scan next based on our own roadmap and community impact — not on request. Still,
+            worth telling us you exist:
+          </p>
           <a
-            href="mailto:contact@fraktur.io?subject=Free%20scan%20request"
+            href="mailto:contact@fraktur.io?subject=Repo%20nomination%20%28not%20a%20scan%20request%29"
             className="rounded-full border border-fraktur-border px-5 py-2 text-sm font-medium text-fraktur-text hover:border-fraktur-orange"
           >
-            Not sure yet? Get a free scan of your public repo
+            Suggest your repo →
           </a>
         </div>
       </Slide>
