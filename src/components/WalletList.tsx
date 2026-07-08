@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import type { Wallet } from "@/lib/types";
-import { companiesHref, countBySeverity, freshnessInfo, highestSeverity } from "@/lib/format";
+import { companiesHref, countBySeverity, daysSinceReview, freshnessInfo, highestSeverity } from "@/lib/format";
 import { useDonation } from "./DonationContext";
 import { AuditFlowDiagram } from "./AuditFlowDiagram";
 import { SeverityBadge } from "./SeverityBadge";
@@ -139,7 +139,10 @@ export function WalletList({ wallets }: { wallets: Wallet[] }) {
         {filtered.map((wallet) => {
           const counts = countBySeverity(wallet.findings);
           const freshness = freshnessInfo(wallet.lastReviewDate);
-          const hasPublicReport = (wallet.auditHistory ?? []).some((h) => h.publiclyDisclosed);
+          const scanLabel = freshness.label.replace(/^Verified/, "Scanned").replace(/^Last verified/, "Last scanned");
+          const days = daysSinceReview(wallet.lastReviewDate);
+          const scanColorClass = days <= 7 ? "text-fraktur-electric" : days <= 90 ? "text-fraktur-text" : "text-fraktur-muted";
+          const isCompleted = wallet.status === "Completed";
           const walletHeader = (
             <>
               {wallet.iconInitials && (
@@ -156,7 +159,8 @@ export function WalletList({ wallets }: { wallets: Wallet[] }) {
           );
           return (
             <article key={wallet.id} className="rounded-xl border border-fraktur-electric/25 bg-fraktur-panel p-5">
-              <div className="mb-3 flex items-start justify-between gap-3">
+              {/* 1. Header — icon + name, repo link */}
+              <div className="mb-3 flex items-start gap-3">
                 {wallet.repoUrl ? (
                   <a
                     href={wallet.repoUrl}
@@ -169,50 +173,44 @@ export function WalletList({ wallets }: { wallets: Wallet[] }) {
                 ) : (
                   <div className="flex items-center gap-3">{walletHeader}</div>
                 )}
-                <span className={`shrink-0 whitespace-nowrap rounded-full px-2.5 py-1 text-[10px] font-semibold ${freshness.className}`}>
-                  {freshness.label}
+              </div>
+
+              {/* 2. Fact 1 — scan date, plain text (deliberately not a filled
+                  pill — this is a date, not a verdict), colored by
+                  freshness, clickable straight into the audit history. */}
+              <button
+                onClick={() => setHistoryWalletId(wallet.id)}
+                className={`mb-3 block text-left text-xs hover:underline ${scanColorClass}`}
+              >
+                {scanLabel}
+              </button>
+
+              {/* 3. Fact 2 — status + file count, one pill. */}
+              <div
+                className={`mb-3 inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold ${
+                  isCompleted ? "bg-severity-none text-white" : "bg-fraktur-electric text-white"
+                }`}
+              >
+                <span>{isCompleted ? "✓" : "●"}</span>
+                <span>
+                  {wallet.status} — {wallet.filesAudited}/{wallet.filesSelected} files
                 </span>
               </div>
 
-              <dl className="mb-4 grid grid-cols-2 gap-y-1 text-xs text-fraktur-muted">
-                <dt>Status</dt>
-                <dd className="text-right text-fraktur-text">{wallet.status}</dd>
-                <dt>Last review</dt>
-                <dd className="text-right text-fraktur-text">
-                  <a
-                    href="https://mempool.space/"
-                    target="_blank"
-                    rel="noreferrer"
-                    className="hover:text-fraktur-electric hover:underline"
-                  >
-                    {wallet.lastReviewDate}
-                  </a>
-                </dd>
-                <dt>fraKtur</dt>
-                <dd className="text-right text-fraktur-text">
-                  <a
-                    href="https://github.com/fraktur"
-                    target="_blank"
-                    rel="noreferrer"
-                    className="hover:text-fraktur-electric hover:underline"
-                  >
-                    {wallet.auditToolVersion}
-                  </a>
-                </dd>
-              </dl>
-
+              {/* 4. Audit flow diagram — bridges the compact status (fact 2)
+                  and the severity detail (fact 3) below. */}
               <div className="mb-3 rounded-lg bg-fraktur-bg p-3">
                 <AuditFlowDiagram
                   testsRun={wallet.testsRun}
                   filesScanned={wallet.filesScanned}
                   filesSelected={wallet.filesSelected}
-                  filesAudited={wallet.filesAudited}
                   maxTestsRun={maxTestsRun}
                   maxFilesScanned={maxFilesScanned}
                   findings={wallet.findings}
                 />
               </div>
 
+              {/* Fact 3 — severity badges, unchanged style. */}
               <div className="mb-4">
                 <div className="mb-1.5 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-fraktur-muted">
                   <span>Fractures</span>
@@ -228,27 +226,20 @@ export function WalletList({ wallets }: { wallets: Wallet[] }) {
                 </div>
               </div>
 
-              {hasPublicReport && (
+              {/* Footer — click area matches the text, not the full card width. */}
+              <div className="flex justify-end">
                 <button
-                  onClick={() => setHistoryWalletId(wallet.id)}
-                  className="mb-2 flex items-center gap-1 rounded-full bg-severity-none/10 px-3 py-1 text-xs font-semibold text-severity-none hover:bg-severity-none/20"
+                  onClick={() => open({ allocationChoice: "Specific Wallet", walletId: wallet.id, walletName: wallet.name })}
+                  className="text-xs text-fraktur-orange hover:underline"
                 >
-                  🔓 Full report available →
+                  Help us go deeper, faster →
                 </button>
-              )}
-
-              <button
-                onClick={() => open({ allocationChoice: "Specific Wallet", walletId: wallet.id, walletName: wallet.name })}
-                className="block w-full text-right text-xs text-fraktur-orange hover:underline"
-              >
-                Help us go deeper, faster →
-              </button>
-              <Link
-                href={companiesHref(wallet)}
-                className="mt-1 block w-full text-right text-xs text-fraktur-electric hover:underline"
-              >
-                For Companies →
-              </Link>
+              </div>
+              <div className="mt-1 flex justify-end">
+                <Link href={companiesHref(wallet)} className="text-xs text-fraktur-electric hover:underline">
+                  For Companies →
+                </Link>
+              </div>
             </article>
           );
         })}

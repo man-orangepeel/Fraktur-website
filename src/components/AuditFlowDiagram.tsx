@@ -5,14 +5,15 @@ const FRAKTUR_ELECTRIC = "#3b6fed";
 const FRAKTUR_ELECTRIC_DIM = "#1b2a5c";
 const FRAKTUR_TEXT = "#e6e9ee";
 const FRAKTUR_MUTED = "#8a94a3";
-const FRAKTUR_BORDER = "#1c232c";
-const SEVERITY_NONE_HEX = "#3ba55d";
 
 export interface AuditFlowDiagramProps {
   testsRun?: number;
   filesScanned: number;
   filesSelected: number;
-  filesAudited: number;
+  // Accepted (but unused) for backward compatibility with existing call
+  // sites (Companies page) — the audited/selected progress gauge that used
+  // to read this moved to WalletList's own "Fact 2" status pill instead.
+  filesAudited?: number;
   maxTestsRun: number;
   maxFilesScanned: number;
   findings: Finding[];
@@ -47,7 +48,6 @@ export function AuditFlowDiagram({
   testsRun,
   filesScanned,
   filesSelected,
-  filesAudited,
   maxTestsRun,
   maxFilesScanned,
   findings,
@@ -85,10 +85,6 @@ export function AuditFlowDiagram({
   // Width now equals exactly what's needed to reach the blocks — the fusion
   // rectangle hugs its content instead of always spanning the full card.
   const mergePath = taperBand(mergeStartX, 65, mergedW, RIGHT_EDGE + 4, 65, mergedW);
-
-  const auditPct = filesSelected > 0 ? (filesAudited / filesSelected) * 100 : 0;
-  const isComplete = filesSelected > 0 && filesAudited >= filesSelected;
-  const gaugeFill = isComplete ? SEVERITY_NONE_HEX : FRAKTUR_ELECTRIC;
 
   const gradId = `flow-${filesScanned}-${filesSelected}-${totalFindings}`;
 
@@ -162,25 +158,6 @@ export function AuditFlowDiagram({
           {totalFindings === 0 ? "0 findings" : `${totalFindings} finding${totalFindings === 1 ? "" : "s"}`}
         </text>
       </svg>
-
-      <div className="mt-2 flex items-center gap-2 text-xs">
-        <span className="shrink-0 text-fraktur-muted">Audited</span>
-        <div
-          className="h-2 flex-1 overflow-hidden rounded-full border"
-          style={{ backgroundColor: FRAKTUR_BORDER, borderColor: FRAKTUR_ELECTRIC }}
-        >
-          <div
-            className="h-full rounded-full transition-colors"
-            style={{
-              width: `${Math.max(auditPct, filesAudited > 0 ? 3 : 0)}%`,
-              backgroundColor: gaugeFill,
-            }}
-          />
-        </div>
-        <span className="shrink-0 font-semibold text-fraktur-text">
-          {filesAudited}/{filesSelected}
-        </span>
-      </div>
     </div>
   );
 }
