@@ -6,9 +6,9 @@ import { supporterProfileUrl } from "@/lib/format";
 
 const SLOTS = 3;
 const CYCLE_MS = 1200; // how long a group stays whole/at rest before it starts to crack
-const STAGGER_MS = 400; // cascade delay between slots, left -> right
-const CRACK_GROW_MS = 200; // phase 1: hairline fissure appears, still 100% opaque
-const PAUSE_MS = 150; // hold on the fissure so it's clearly visible before it worsens
+const STAGGER_MS = 200; // cascade delay between slots, left -> right
+const CRACK_GROW_MS = 100; // phase 1: hairline fissure appears, still 100% opaque
+const PAUSE_MS = 130; // hold on the fissure so it's clearly visible before it worsens
 const EXPLODE_MS = 550; // phase 2: fissure widens, block separates and fades out
 const EMPTY_MS = 900; // banner shows nothing between one group vanishing and the next appearing
 const APPEAR_MS = 500; // next group fades in (transparent -> opaque) rather than snapping in
@@ -85,7 +85,7 @@ function pieceStyle(piece: "top" | "bottom", phase: Phase, delayMs: number): CSS
     // "appearing", not the block coming apart yet.
     return {
       clipPath,
-      transform: `translate(${dir * 3}px, ${dir * 3}px) rotate(0deg)`,
+      transform: `translate(${dir * 1.5}px, ${dir * 1.5}px) rotate(0deg)`,
       opacity: 1,
       transitionProperty: "transform, opacity",
       transitionDuration: `${CRACK_GROW_MS}ms`,
