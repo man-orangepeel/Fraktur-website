@@ -21,9 +21,11 @@ export default async function HomePage() {
       <section className="border-b border-fraktur-border/60 bg-fraktur-bg">
       <div className="mx-auto max-w-6xl px-4 py-14 text-center">
         <h1 className="text-3xl font-semibold text-fraktur-text sm:text-4xl">
-          Live, verifiable security scores for Bitcoin wallets.
+          Bitcoin-native AI, aimed at what actually breaks.
         </h1>
-        <p className="mx-auto mt-3 max-w-xl text-fraktur-muted">Audited, timestamped, public.</p>
+        <p className="mx-auto mt-3 max-w-xl text-fraktur-muted">
+          Bound to this wallet, this version, this date — proven on-chain, not just claimed.
+        </p>
         <p className="mt-6 text-sm text-fraktur-muted">
           <Link href="/companies" className="font-medium text-fraktur-electric hover:underline">
             For Companies →
