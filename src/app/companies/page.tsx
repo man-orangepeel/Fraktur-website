@@ -9,6 +9,52 @@ import { getWallets } from "@/lib/data";
 
 export const revalidate = 60;
 
+// Three revenue streams, one page. "reason" (passed as ?reason= from the
+// wallet card's "For Companies →" link — see HOME_UX_SPEC.md §7) tells us
+// which of the three to highlight, because the wallet card already knows
+// why the visitor clicked through (stale badge, declared-fixed-not-verified,
+// or just an open finding with no special signal).
+const PRICING_TIERS = [
+  {
+    id: "reverify",
+    name: "Targeted re-verification",
+    price: "Smallest, fastest",
+    description:
+      "Fixed something we flagged? We re-scan exactly that area and re-stamp it — FRAKTUR-verified, not just team-declared. Faster and cheaper than a full report.",
+    cta: "Request re-verification",
+    subject: "Targeted re-verification request",
+  },
+  {
+    id: "report",
+    name: "Complete Findings Report",
+    price: "One-time, no commitment",
+    description:
+      "A full scan across every file, right now — every finding, not just the one free disclosure. No ongoing subscription required.",
+    cta: "Get the report",
+    subject: "Complete Findings Report request",
+  },
+  {
+    id: "subscribe",
+    name: "Continuous coverage",
+    price: "$2K–4K / month",
+    description:
+      "Every commit scanned, every file, ongoing. The only tier that keeps your Wallet Watcher badge fresh instead of aging.",
+    cta: "Start a subscription",
+    subject: "Subscription request",
+  },
+] as const;
+
+function contextForReason(reason?: string) {
+  switch (reason) {
+    case "stale":
+      return { highlight: "subscribe", banner: "A subscription is what keeps your badge from going stale again." };
+    case "declared-fixed":
+      return { highlight: "reverify", banner: "Get that fix FRAKTUR-verified, not just self-reported." };
+    default:
+      return { highlight: "report", banner: "Get every current finding, once, no subscription needed." };
+  }
+}
+
 const OBJECTIONS = [
   {
     q: "Loupe is free — why pay?",
@@ -32,8 +78,14 @@ const OBJECTIONS = [
   },
 ];
 
-export default async function CompaniesPage() {
+export default async function CompaniesPage({
+  searchParams,
+}: {
+  searchParams?: { wallet?: string; reason?: string };
+}) {
   const wallets = await getWallets();
+  const walletName = searchParams?.wallet;
+  const { highlight, banner } = contextForReason(searchParams?.reason);
 
   return (
     <>
@@ -149,26 +201,66 @@ export default async function CompaniesPage() {
         visualSide="left"
       />
 
-      {/* Closing punch + pricing + CTA */}
+      {/* Closing punch + pricing + CTA. Three tiers, not one — see
+          HOME_UX_SPEC.md §5-7: the "pay for the full report" and "pay for a
+          targeted re-verification" revenue streams had no landing spot
+          before this. If a visitor arrived via a wallet card's "For
+          Companies →" link, `searchParams` carries which wallet and why,
+          and the relevant tier is highlighted instead of presenting all
+          three flat. */}
       <Slide
         id="pricing"
         center
-        eyebrow="$2K–4K / month · free scan to start"
+        eyebrow={walletName ? `Checking in about ${walletName}?` : "$2K–4K / month · free scan to start"}
         headline="Full audits weren't built for you. This is."
         visual={<ShardArt variant="closing" className="mx-auto max-w-xs opacity-80" />}
       >
-        <div className="mt-8 flex flex-wrap justify-center gap-3">
+        {walletName && <p className="mt-3 text-sm text-fraktur-electric">{banner}</p>}
+
+        <div className="mt-8 grid w-full max-w-4xl gap-4 sm:grid-cols-3">
+          {PRICING_TIERS.map((tier) => {
+            const isHighlighted = walletName && tier.id === highlight;
+            return (
+              <div
+                key={tier.id}
+                className={`flex flex-col rounded-2xl border p-5 text-left ${
+                  isHighlighted
+                    ? "border-fraktur-electric bg-fraktur-electricDim/30"
+                    : "border-fraktur-border bg-fraktur-panel"
+                }`}
+              >
+                <p className="font-display text-lg text-fraktur-text">{tier.name}</p>
+                <p className="mt-1 text-sm font-semibold text-fraktur-orange">{tier.price}</p>
+                <p className="mt-3 flex-1 text-sm text-fraktur-muted">{tier.description}</p>
+                <a
+                  href={`mailto:contact@fraktur.io?subject=${encodeURIComponent(
+                    tier.subject + (walletName ? ` — ${walletName}` : "")
+                  )}`}
+                  className={`mt-5 rounded-full px-4 py-2 text-center text-sm font-semibold ${
+                    isHighlighted
+                      ? "bg-fraktur-orange text-black hover:bg-fraktur-orangeDim"
+                      : "border border-fraktur-border text-fraktur-text hover:border-fraktur-orange"
+                  }`}
+                >
+                  {tier.cta}
+                </a>
+              </div>
+            );
+          })}
+        </div>
+
+        <p className="mt-6 max-w-2xl text-xs text-fraktur-muted">
+          The free Public Disclosure Report (a specific finding, once it's fixed or its 90-day embargo lapses) is
+          always free on the Wallet Watcher — these three tiers are for complete, current, or ongoing coverage,
+          not for information already owed to you for free.
+        </p>
+
+        <div className="mt-6 flex flex-wrap justify-center gap-3">
           <a
             href="mailto:contact@fraktur.io?subject=Free%20scan%20request"
-            className="rounded-full bg-fraktur-orange px-6 py-3 font-semibold text-black hover:bg-fraktur-orangeDim"
+            className="rounded-full border border-fraktur-border px-5 py-2 text-sm font-medium text-fraktur-text hover:border-fraktur-orange"
           >
-            Get a free scan of your public repo
-          </a>
-          <a
-            href="mailto:contact@fraktur.io?subject=Talk%20to%20FRAKTUR"
-            className="rounded-full border border-fraktur-border px-6 py-3 font-semibold text-fraktur-text hover:border-fraktur-orange"
-          >
-            Talk to us
+            Not sure yet? Get a free scan of your public repo
           </a>
         </div>
       </Slide>

@@ -1,6 +1,6 @@
 # FRAKTUR — Website Generation Brief
 *Master prompt — to be executed to generate the site in `/Fraktur/website/`*
-*Drafted: 2026-07-02 — v6 (Companies copy pass: hero decoupled from narrative, cheaper/smarter conflict resolved, proof reframed around the Layer 1/2 mechanism — 2026-07-07)*
+*Drafted: 2026-07-02 — v7 (Companies pricing: three tiers + wallet-context banner — 2026-07-07)*
 
 > **Parallel work notice:** as of 2026-07-07, the founder is running a second Claude Code session (VS Code) on the Home page and shared components at the same time this session works on Companies. If you're picking this project back up, check `git status`/`git log` before assuming this document is the only source of truth for the whole site — Home-side decisions (e.g. `testsRun`, `AuditFlowDiagram`, the `/legal` page, "The Cast" naming) may have been made in that other session and are real even if not documented here. Commit scoped to the files you actually changed, not `git add -A`, while two sessions are active on the same repo.
 
@@ -367,3 +367,21 @@ Not done in this session (see README.md "Deploying"): actual deployment to a hos
 **Where this shows up in the actual copy:** Annex A5 (`FRAKTUR_Pitch_Brief.md`) tightened — "Disclose vulnerabilities in full, for free" was ambiguous and read as "publish full technical detail immediately," which is exactly the risky reading this decision rules out. New Annex A10 risk row added. `CLAUDE.md` (recreated — see note below) carries the same policy as a standing project rule. Companies page FAQ gets a new objection addressing this directly, since "will you dump my vulnerability details publicly?" is a real, high-stakes question for any B2B prospect evaluating a security vendor. `/legal` gets a short disclosure-policy paragraph alongside the donation terms.
 
 **Note:** `CLAUDE.md` was found missing from the project root while making this change (not flagged as a parallel-session edit) and was recreated with this policy folded in — flag to the founder in case their other session moved or restructured it deliberately rather than it having been deleted by accident.
+
+---
+
+## 16. Companies pricing — three tiers, wallet-context aware
+
+Companion to `HOME_UX_SPEC.md` §5-7 (the Home-side half of this change, implemented separately by the parallel VS Code session). The old pricing slide had one offer (subscribe) and two generic CTAs. It now has three, because two of the three revenue streams had no landing page at all:
+
+| Tier | What it sells | Why it exists |
+|---|---|---|
+| Targeted re-verification | FRAKTUR independently re-scans a specific area a team just fixed, re-stamps it | The moment a team's motivation is highest — right after fixing something — previously had no offer at all; they'd otherwise wait for FRAKTUR's own re-scan schedule for free |
+| Complete Findings Report | One-time, full scan across every file, no subscription | The "pay for the full report" revenue stream had no page to land on before this |
+| Continuous coverage | The existing subscription | Unchanged, still the primary recommended path |
+
+**Wallet-context banner:** `CompaniesPage` now reads `searchParams.wallet` / `searchParams.reason`. If a visitor arrived via a wallet card's `For Companies →` link carrying that context, the eyebrow becomes `"Checking in about {wallet}?"`, a one-line banner states the relevant reasoning, and the matching tier is visually highlighted (electric border/fill instead of the flat default) rather than presenting all three with equal weight. Mapping: `reason=stale` → highlight subscription; `reason=declared-fixed` → highlight re-verification; anything else/absent → highlight the one-time report. This makes `/companies` a page that responds to why someone arrived instead of the same flat pitch regardless of intent.
+
+**Dependency on the Home side (not yet built as of this writing):** the `For Companies →` link on each wallet card needs to actually pass `?wallet=X&reason=Y` for this to activate — currently it's a bare link to `/companies`. Handed to the VS Code session as one of the Home-side implementation prompts (see chat log / their task queue), since that link lives in `WalletList.tsx`. Until that's wired up, this page works fine with no query params (falls back to the generic pitch, one-time report highlighted by default) — nothing breaks, the context-awareness is additive.
+
+**Still explicit in the copy:** the free Public Disclosure Report (a specific already-embargoed finding, once fixed or 90 days pass) is called out directly under the three tiers so nobody confuses it with the paid Complete Findings Report — same distinction established in §15, now enforced in the actual pricing UI, not just the docs.
