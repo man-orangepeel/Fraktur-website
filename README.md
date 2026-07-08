@@ -54,10 +54,21 @@ Five tables, exact schema in `WEBSITE_BRIEF.md` §4:
 6. **FreeScanApplications** — one row per free-scan application (`/apply`
    page, see `WEBSITE_BRIEF.md` §17). Fields: `Repo URL`, `Contact Email`,
    `Project Name`, `Team Size`, `Note`, `Status` (single select, default
-   `Pending`). No automation on this table — the 5/month cap is a human
-   decision made by reviewing rows here, not enforced in code. Set
-   `AIRTABLE_TABLE_FREE_SCAN_APPLICATIONS` in `.env` if you name the table
-   something other than `FreeScanApplications`.
+   `Pending`, other values `Accepted` / `Completed` / `Declined`). No
+   automation on this table — both caps are human decisions made by
+   reviewing rows here, not enforced in code:
+   - **5 accepted per month, across all applicants combined** — not 5 per
+     company.
+   - **One completed free scan per project, ever** — before accepting a new
+     `Pending` row, check `Repo URL` (normalized — trailing slash/case
+     don't count as different) against existing `Completed` rows. A repo
+     that's already had a free scan isn't eligible for another one.
+   - Applications not accepted in a given month aren't rejected outright —
+     they stay `Pending` and are reconsidered next month, no resubmission
+     needed.
+
+   Set `AIRTABLE_TABLE_FREE_SCAN_APPLICATIONS` in `.env` if you name the
+   table something other than `FreeScanApplications`.
 
 ### Airtable automation required
 

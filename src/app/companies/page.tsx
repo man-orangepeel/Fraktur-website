@@ -270,8 +270,8 @@ export default async function CompaniesPage({
             Apply for a free scan →
           </a>
           <p className="max-w-sm text-xs text-fraktur-muted">
-            5 accepted per month, by application — full Layer 1 triage + one finding disclosed in full, free. Not
-            first-come-first-served.
+            5 accepted per month across all applicants, one free scan per project ever — full Layer 1 triage + one
+            finding disclosed in full, free. Not first-come-first-served.
           </p>
         </div>
       </Slide>

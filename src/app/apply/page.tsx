@@ -63,9 +63,19 @@ export default function ApplyPage() {
           <p className="font-semibold text-fraktur-text">How this works</p>
           <ul className="list-disc space-y-2 pl-5">
             <li>
-              <span className="text-fraktur-text">We take a maximum of 5 free scans per month.</span> We choose which
-              applications to accept — this isn&rsquo;t first-come-first-served, and applying isn&rsquo;t a
-              guarantee we&rsquo;ll pick yours, or a promise of a specific timeline.
+              <span className="text-fraktur-text">We accept at most 5 free scans per month, across every applicant
+              combined</span> — not 5 per company. We choose which applications to accept; this isn&rsquo;t
+              first-come-first-served, and applying isn&rsquo;t a guarantee we&rsquo;ll pick yours, or a promise of a
+              specific timeline. Not picked this round? Your application stays in the queue for the next one — no
+              need to resubmit.
+            </li>
+            <li>
+              <span className="text-fraktur-text">One free scan per project, ever.</span> If your project has already
+              received a free scan from us, it isn&rsquo;t eligible for another one — the{" "}
+              <Link href="/companies#pricing" className="text-fraktur-electric hover:underline">
+                Complete Findings Report or a subscription
+              </Link>{" "}
+              are the path after that, not a second free round.
             </li>
             <li>
               <span className="text-fraktur-text">What&rsquo;s included:</span> a full Layer 1 triage of your entire
@@ -74,11 +84,7 @@ export default function ApplyPage() {
             </li>
             <li>
               <span className="text-fraktur-text">What&rsquo;s not included:</span> the rest of what Layer 1 flags
-              beyond that one finding. That&rsquo;s exactly what the{" "}
-              <Link href="/companies#pricing" className="text-fraktur-electric hover:underline">
-                Complete Findings Report or a subscription
-              </Link>{" "}
-              are for.
+              beyond that one finding — same reports/subscription as above.
             </li>
             <li>
               Our{" "}
