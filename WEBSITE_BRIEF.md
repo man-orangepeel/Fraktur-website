@@ -1,6 +1,6 @@
 # FRAKTUR — Website Generation Brief
 *Master prompt — to be executed to generate the site in `/Fraktur/website/`*
-*Drafted: 2026-07-02 — v8 (bounded, qualified free-scan application flow — 2026-07-07)*
+*Drafted: 2026-07-02 — v9 (Companies page rebuilt from scratch as a conventional B2B page, not a slide deck — 2026-07-07)*
 
 > **Parallel work notice:** as of 2026-07-07, the founder is running a second Claude Code session (VS Code) on the Home page and shared components at the same time this session works on Companies. If you're picking this project back up, check `git status`/`git log` before assuming this document is the only source of truth for the whole site — Home-side decisions (e.g. `testsRun`, `AuditFlowDiagram`, the `/legal` page, "The Cast" naming) may have been made in that other session and are real even if not documented here. Commit scoped to the files you actually changed, not `git add -A`, while two sessions are active on the same repo.
 
@@ -414,3 +414,21 @@ Third pass on this one CTA, each version fixing a real problem the previous one 
 
 1. **5/month is a total across every applicant combined, not 5 per company.** The copy said "5 free scans per month" without stating this, which is genuinely ambiguous — fixed on both `/apply` and the Companies CTA to say "across all applicants combined."
 2. **The founder's proposed fix was "one application per company, ever" — pushed back on, and replaced with a sharper rule: one *completed* free scan per project, ever, not one *application* ever.** Reasoning: the scarce, costly resource is a scan actually performed, not the act of submitting a form. Barring a company from ever applying again just because it wasn't selected in a given month — pure volume/timing, not a judgment about the company — throws away a legitimate prospect for no reason. The rule now is: applications that aren't accepted stay `Pending` and roll into the next month's review automatically (no resubmission needed); a project that has already *received* a free scan is the one thing that's permanently ineligible for another. Dedup check is by `Repo URL` (normalized), done manually alongside the monthly review — not automated, same principle as the 5/month cap itself.
+
+---
+
+## 18. Companies page rebuilt from scratch (v2) — not a slide deck anymore
+
+**The ask:** the founder was unsatisfied with the Companies page and asked for a ground-up rebuild — "you know the product, the buyer, the context; detach completely from what exists; best possible UI/UX." Not a copy pass this time, a structural one.
+
+**What was actually wrong with v1-v9:** the page was a vertical sequence of full-viewport "slides" (`Hero.tsx`, `Slide.tsx`, `ShardArt.tsx`) — one idea per screen, forced scroll-through, closer to a pitch-deck-as-a-webpage than a B2B SaaS landing page. That's a defensible aesthetic choice, but it fights against how the actual buyer (a CTO/VP Eng evaluating a security vendor) wants to consume this page: scan the whole thing in under a minute, compare pricing fast, check the proof, move on. Nine screens of forced sequential scrolling optimizes for a *presentation* experience, not a *decision* experience.
+
+**What changed:**
+- **Structure:** conventional, compact, scannable sections (hero, trust bar, 3-card problem grid, 3-step how-it-works, 3-panel proof grid, 3-tier pricing, FAQ accordion, final CTA) — no section requires a full viewport of scroll to get past. A visitor can see problem → solution → proof → pricing without more than a few natural scrolls.
+- **Hero visual:** replaced the abstract `ShardArt` composition with an illustrative product-preview card — a mocked scan result (risk badge, Layer 1/2 progress bars, severity chips) styled consistently with the real Wallet Watcher wallet cards on Home. Shows the actual product instead of brand art; labeled "Illustrative" so it's never mistaken for a live claim.
+- **Trust bar:** a new element that didn't exist before — "Built on Loupe (Spiral/Block)," Bitcoin protocol pills, "No PoC, no report," "OpenTimestamp-verified" — cheap, immediate credibility signals for a visitor who hasn't scrolled far enough to reach the actual proof numbers yet.
+- **Copy:** headline now speaks directly to the buyer's actual situation ("You can't hire a dedicated security engineer. You can still ship like one exists.") rather than opening with brand poetry. The moat-honesty framing from the strategic pass (pipeline = how it's delivered fast, on-chain proof = what's actually durable) is now a single explicit sentence in the "How it works" section instead of buried in a founder-facing doc only.
+- **Removed:** `Hero.tsx`, `Slide.tsx`, `ShardArt.tsx` deleted — confirmed unused anywhere else first (`grep` across `src/`). Not left as dead code.
+- **Kept:** `ProofVisual.tsx` (`CompareBars`, `FindingsCard`) — reused inside a 3-column grid instead of one-per-slide; the pricing tiers, wallet-context `searchParams` logic, and FAQ content are unchanged in substance, only in layout. `Header.tsx`'s companies-variant nav anchors (`#problem #solution #proof #pricing #faq`) were kept intact rather than renamed, since that file belongs to the parallel session — the new page's section ids match what the nav already expects.
+
+**Verification:** `npm run build` clean, all three routes (`/`, `/companies`, `/apply`) return 200 against a local `next start` in this session's sandbox. That sandbox's `localhost` is not reachable from the founder's own browser — see the chat reply for how to view it on their machine (the code is already saved to the real project folder, `npm run dev` there is immediate).

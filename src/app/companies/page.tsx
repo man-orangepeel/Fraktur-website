@@ -1,26 +1,34 @@
+import Link from "next/link";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { DonationDrawer } from "@/components/DonationDrawer";
-import { Hero } from "@/components/Hero";
-import { Slide } from "@/components/Slide";
-import { ShardArt } from "@/components/ShardArt";
 import { CompareBars, FindingsCard } from "@/components/ProofVisual";
 import { getWallets } from "@/lib/data";
 
 export const revalidate = 60;
 
-// Three revenue streams, one page. "reason" (passed as ?reason= from the
-// wallet card's "For Companies →" link — see HOME_UX_SPEC.md §7) tells us
-// which of the three to highlight, because the wallet card already knows
-// why the visitor clicked through (stale badge, declared-fixed-not-verified,
-// or just an open finding with no special signal).
-const PRICING_TIERS = [
+/**
+ * v2 — ground-up rebuild, deliberately not the v1-v9 full-viewport "slide
+ * deck" layout (Hero.tsx / Slide.tsx / ShardArt.tsx are no longer used on
+ * this page). Founder's brief: know the product, know the buyer (CTO/VP Eng,
+ * 5-50 person Bitcoin company, no dedicated security hire), detach
+ * completely from what existed, build the best B2B page from there.
+ *
+ * Structural change that matters most: this is now a conventional, scannable
+ * B2B SaaS page (compact sections, grids, a real product preview in the
+ * hero) instead of one-idea-per-full-screen forced scrolling. A CTO
+ * evaluating a security vendor wants to scan the whole page in under a
+ * minute, not scroll through nine acts of a pitch deck. See
+ * WEBSITE_BRIEF.md §18 for the full rationale.
+ */
+
+const TIERS = [
   {
     id: "reverify",
     name: "Targeted re-verification",
     price: "Smallest, fastest",
     description:
-      "Fixed something we flagged? We re-scan exactly that area and re-stamp it — FRAKTUR-verified, not just team-declared. Faster and cheaper than a full report.",
+      "Fixed something we flagged? We re-scan exactly that area and re-stamp it — FRAKTUR-verified, not just team-declared.",
     cta: "Request re-verification",
     subject: "Targeted re-verification request",
   },
@@ -29,7 +37,7 @@ const PRICING_TIERS = [
     name: "Complete Findings Report",
     price: "One-time, no commitment",
     description:
-      "Your whole repo triaged at Layer 1, every high-risk file flagged (and why), every Layer 2 finding on those files with a working proof-of-concept. Not a line-by-line audit of everything — the same concentration, made complete instead of single-finding.",
+      "Your whole repo triaged at Layer 1, every high-risk file flagged (and why), every Layer 2 finding with a working proof-of-concept. Not a line-by-line audit of everything.",
     cta: "Get the report",
     subject: "Complete Findings Report request",
   },
@@ -38,7 +46,7 @@ const PRICING_TIERS = [
     name: "Continuous coverage",
     price: "$2K–4K / month",
     description:
-      "Every commit triaged at Layer 1 in full, every high-risk file re-audited at Layer 2, ongoing. The only tier that keeps your Wallet Watcher badge fresh instead of aging.",
+      "Every commit triaged at Layer 1 in full, every high-risk file re-audited at Layer 2, ongoing. The tier that keeps your Wallet Watcher badge fresh instead of aging.",
     cta: "Start a subscription",
     subject: "Subscription request",
   },
@@ -66,7 +74,7 @@ const OBJECTIONS = [
   },
   {
     q: "Vaporware?",
-    a: "Layer 1 (fuzz) + Layer 2 (Selective Loupe) are the core product today, not a roadmap slide. We sell what exists — see the proof above.",
+    a: "Layer 1 (fuzz) + Layer 2 (Selective Loupe) are the core product today, not a roadmap slide. We sell what exists — see the proof below.",
   },
   {
     q: "What if the bug is in the code you didn't review?",
@@ -89,210 +97,307 @@ export default async function CompaniesPage({
 
   return (
     <>
-      {/* Faint cracked-glass texture, fixed behind every slide — same asset as
-          the brand background, tying the split-screen "slide" sections back
-          to the rest of the site without competing with the shard art. */}
-      <div
-        className="pointer-events-none fixed inset-0 z-0 bg-cover bg-center opacity-[0.07]"
-        style={{ backgroundImage: "url(/bg-texture.png)" }}
-        aria-hidden
-      />
+      <Header variant="companies" />
 
-      <div className="relative z-10">
-        <Header variant="companies" />
-
-        {/* Hero — its own component, not a `Slide` instance (see Hero.tsx for
-            the full UX rationale: full-viewport, centered, biggest type on the
-            page). Deliberately NOT part of the problem→solution→proof
-            narrative below — it's the brand promise, not step 1 of the pitch.
-            See WEBSITE_BRIEF.md §14. */}
-        <Hero />
-
-      {/* Problem, 3 beats */}
-      <Slide
-        id="problem"
-        headline={<>83 Exploits since April 2026.<br />$755M Lost.<br />No Refund.</>}
-        sub="Every one of those dollars is gone for good. Bitcoin has no chargeback, no support ticket, no do-over."
-        visual={<ShardArt variant="loss" />}
-      />
-
-      <Slide
-        headline={<>One Engineer.<br />Millions at Stake.</>}
-        sub="1–50 person teams protecting millions in user funds. No dedicated security hire. Audits too slow. Too expensive."
-        visual={<ShardArt variant="burden" />}
-        visualSide="left"
-      />
-
-      <Slide
-        headline={<>Static Eyes.<br />Dynamic Threats.</>}
-        sub="Generic scanners read code. They don't run it. Attacks happen at runtime. Static analysis alone leaves the door open."
-        visual={<ShardArt variant="stillmotion" />}
-      />
-
-      {/* The pivot — reframed to resolve a direct wording conflict with the
-          Hero ("Cheaper because smarter" vs. an earlier "Not cheaper.
-          Concentrated."). "Not smaller. Smarter." kills the unspoken
-          objection (cheaper = less thorough) first, then lands on the same
-          word the Hero ends on — both statements now close on "smarter,"
-          reinforcing the callback instead of just avoiding a contradiction. */}
-      <Slide
-        id="solution"
-        eyebrow="Our answer"
-        headline={<>Not smaller.<br />Smarter.</>}
-        sub="We don't read less code. We waste less time reading code that never breaks."
-        visual={<ShardArt variant="concentration" />}
-        visualSide="left"
-      />
-
-      {/* Proof, part 1 — Layer 1 concept leads, the measured -95% is the
-          supporting visual, not the headline. The concrete Wasabi numbers
-          (70+ tests, regtest + mainnet, deterministic-first) are still
-          running as of this writing — this slide states the mechanism, which
-          doesn't change once real numbers are ready to swap in. */}
-      <Slide
-        id="proof"
-        eyebrow="How we're different from a full audit — Layer 1"
-        headline={<>1,000 Attackers.<br />Automated.</>}
-        sub="Random, malformed, adversarial inputs at scale — the same way real attackers probe a system, just automated. Crash sites map the risk landscape and tell Layer 2 exactly where to look."
-        visual={
-          <CompareBars
-            title="L1 — LLM agents launched per scan (first test)"
-            beforeLabel="Loupe-only (whole codebase)"
-            beforeValue={1300}
-            afterLabel="FRAKTUR (triaged)"
-            afterValue={63}
-            result="-95% noise cut"
-          />
-        }
-      />
-
-      {/* Proof, part 2 — Layer 2 concept leads; the concrete finding count
-          from our first test is the supporting visual. */}
-      <Slide
-        headline={<>Bitcoin-Native AI.<br />Targeted by Fuzz.</>}
-        sub="Layer 2 runs AI agents with real Bitcoin protocol knowledge — BIPs, BOLTs, NUTs — laser-focused only on what Layer 1 already flagged as risky."
-        visual={<FindingsCard />}
-        visualSide="left"
-      />
-
-      <Slide
-        headline={<>$3.2k.<br />Down to $150.</>}
-        sub="Better signal, at a lower cost. Same Bitcoin-specific rigor via Loupe — we cut the reading, not the standard."
-        visual={
-          <CompareBars
-            title="Cost per scan (Claude Opus 4.8, API-equivalent)"
-            beforeLabel="Loupe-only (~1,300 agents)"
-            beforeValue={3200}
-            afterLabel="FRAKTUR (63 triaged files)"
-            afterValue={150}
-            unit="$"
-            result="-95% cost"
-          />
-        }
-      />
-
-      {/* Proof, part 4 — verification, deliberately echoing the Home hero
-          ("Live, verifiable security scores... Audited, timestamped,
-          public.") so both pages tell the same story about proof. */}
-      <Slide
-        headline="Don't Trust. Verify."
-        sub="Every audit is hashed and anchored on-chain via OpenTimestamp — live, verifiable, public. The same proof your users can check on the Wallet Watcher, not a PDF you take our word for."
-        visual={<ShardArt variant="verify" />}
-        visualSide="left"
-      />
-
-      {/* Closing punch + pricing + CTA. Three tiers, not one — see
-          HOME_UX_SPEC.md §5-7: the "pay for the full report" and "pay for a
-          targeted re-verification" revenue streams had no landing spot
-          before this. If a visitor arrived via a wallet card's "For
-          Companies →" link, `searchParams` carries which wallet and why,
-          and the relevant tier is highlighted instead of presenting all
-          three flat. */}
-      <Slide
-        id="pricing"
-        center
-        eyebrow={walletName ? `Checking in about ${walletName}?` : "$2K–4K / month, or a one-time report"}
-        headline="Full audits weren't built for you. This is."
-        visual={<ShardArt variant="closing" className="mx-auto max-w-xs opacity-80" />}
-      >
-        {walletName && <p className="mt-3 text-sm text-fraktur-electric">{banner}</p>}
-
-        <div className="mt-8 grid w-full max-w-4xl gap-4 sm:grid-cols-3">
-          {PRICING_TIERS.map((tier) => {
-            const isHighlighted = walletName && tier.id === highlight;
-            return (
-              <div
-                key={tier.id}
-                className={`flex flex-col rounded-2xl border p-5 text-left ${
-                  isHighlighted
-                    ? "border-fraktur-electric bg-fraktur-electricDim/30"
-                    : "border-fraktur-border bg-fraktur-panel"
-                }`}
-              >
-                <p className="font-display text-lg text-fraktur-text">{tier.name}</p>
-                <p className="mt-1 text-sm font-semibold text-fraktur-orange">{tier.price}</p>
-                <p className="mt-3 flex-1 text-sm text-fraktur-muted">{tier.description}</p>
+      <main>
+        {/* ---------------------------------------------------------------- HERO */}
+        <section className="border-b border-fraktur-border">
+          <div className="mx-auto grid max-w-6xl gap-10 px-4 py-16 lg:grid-cols-[1.1fr_0.9fr] lg:items-center lg:py-24">
+            <div>
+              <p className="mb-4 text-xs font-semibold uppercase tracking-[0.2em] text-fraktur-orange">
+                For Bitcoin companies without a security team
+              </p>
+              <h1 className="font-display text-4xl font-medium leading-[1.1] text-fraktur-text sm:text-5xl">
+                You can&rsquo;t hire a dedicated security engineer.
+                <br />
+                You can still ship like one exists.
+              </h1>
+              <p className="mt-5 max-w-xl text-lg text-fraktur-muted">
+                FRAKTUR runs your code instead of just reading it — Bitcoin-native AI, triaged by real attack
+                simulation, every finding proof-backed and verified on-chain.
+              </p>
+              <div className="mt-8 flex flex-wrap gap-3">
                 <a
-                  href={`mailto:contact@fraktur.io?subject=${encodeURIComponent(
-                    tier.subject + (walletName ? ` — ${walletName}` : "")
-                  )}`}
-                  className={`mt-5 rounded-full px-4 py-2 text-center text-sm font-semibold ${
-                    isHighlighted
-                      ? "bg-fraktur-orange text-black hover:bg-fraktur-orangeDim"
-                      : "border border-fraktur-border text-fraktur-text hover:border-fraktur-orange"
-                  }`}
+                  href="/apply"
+                  className="rounded-full bg-fraktur-orange px-6 py-3 text-sm font-semibold text-black transition hover:bg-fraktur-orangeDim"
                 >
-                  {tier.cta}
+                  Apply for a free scan →
+                </a>
+                <a
+                  href="#pricing"
+                  className="rounded-full border border-fraktur-border px-6 py-3 text-sm font-semibold text-fraktur-text transition hover:border-fraktur-electric"
+                >
+                  See pricing
                 </a>
               </div>
-            );
-          })}
-        </div>
+            </div>
 
-        <p className="mt-6 max-w-2xl text-xs text-fraktur-muted">
-          The free Public Disclosure Report (a specific finding, once it's fixed or its 90-day embargo lapses) is
-          always free on the Wallet Watcher — these three tiers are for complete, current, or ongoing coverage,
-          not for information already owed to you for free.
-        </p>
+            {/* Illustrative product preview — a real card, not abstract art.
+                Static/mocked data, clearly labeled as such. */}
+            <div className="rounded-2xl border border-fraktur-electric/30 bg-fraktur-panel p-5 shadow-2xl shadow-black/40">
+              <div className="mb-4 flex items-center justify-between">
+                <div>
+                  <p className="font-display text-lg text-fraktur-text">your-org/your-wallet</p>
+                  <p className="text-xs text-fraktur-muted">Last verified 3 days ago</p>
+                </div>
+                <span className="rounded-full bg-risk-medium px-3 py-1 text-xs font-semibold text-black">Medium</span>
+              </div>
+              <div className="mb-4 space-y-2 text-sm">
+                <div className="flex items-center justify-between">
+                  <span className="text-fraktur-muted">Layer 1 — files triaged</span>
+                  <span className="font-display text-fraktur-text">1,300 → 63</span>
+                </div>
+                <div className="h-2 rounded-full bg-fraktur-bg">
+                  <div className="h-2 w-[5%] rounded-full bg-fraktur-electric" />
+                </div>
+                <div className="flex items-center justify-between pt-1">
+                  <span className="text-fraktur-muted">Layer 2 — files audited</span>
+                  <span className="font-display text-fraktur-text">6 / 63</span>
+                </div>
+                <div className="h-2 rounded-full bg-fraktur-bg">
+                  <div className="h-2 w-[10%] rounded-full bg-fraktur-orange" />
+                </div>
+              </div>
+              <div className="flex flex-wrap gap-2 text-xs">
+                <span className="rounded-full bg-risk-medium px-2 py-0.5 font-medium text-black">2 Medium</span>
+                <span className="rounded-full bg-risk-mediumHigh px-2 py-0.5 font-medium text-black">1 Medium-High</span>
+                <span className="rounded-full bg-risk-low px-2 py-0.5 font-medium text-white">2 Low</span>
+              </div>
+              <p className="mt-4 text-xs text-fraktur-muted">
+                Illustrative — from our first real scan. Every finding ships with a proof-of-concept.
+              </p>
+            </div>
+          </div>
 
-        {/* A bounded, qualified free-scan motion — not an open self-serve
-            invite (see WEBSITE_BRIEF.md §17 for the full reasoning: the
-            unbounded version risked becoming a free-labor cost center and
-            attracted adverse selection). Capped at 5/month, reviewed by a
-            human before any scan runs, plugged into the existing freemium
-            mechanic (Layer 1 always free + one finding disclosed in full)
-            rather than inventing new percentage-based rules. */}
-        <div className="mt-6 flex flex-col items-center gap-2 text-center">
-          <a
-            href="/apply"
-            className="rounded-full border border-fraktur-border px-5 py-2 text-sm font-medium text-fraktur-text hover:border-fraktur-orange"
-          >
-            Apply for a free scan →
-          </a>
-          <p className="max-w-sm text-xs text-fraktur-muted">
-            5 accepted per month across all applicants, one free scan per project ever — full Layer 1 triage + one
-            finding disclosed in full, free. Not first-come-first-served.
-          </p>
-        </div>
-      </Slide>
+          {/* Trust bar */}
+          <div className="border-t border-fraktur-border/60 bg-fraktur-panel">
+            <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-center gap-x-8 gap-y-3 px-4 py-4 text-xs text-fraktur-muted">
+              <span>Built on <span className="text-fraktur-text">Loupe</span> — Spiral / Block, open-source</span>
+              <span className="hidden sm:inline">·</span>
+              <span>Bitcoin-aware: BIPs · BOLTs · NUTs · BLIPs</span>
+              <span className="hidden sm:inline">·</span>
+              <span>No PoC, no report</span>
+              <span className="hidden sm:inline">·</span>
+              <span>OpenTimestamp-verified</span>
+            </div>
+          </div>
+        </section>
 
-      {/* FAQ — utility reference, intentionally plain, not part of the visual arc */}
-      <section id="faq" className="mx-auto max-w-3xl px-6 py-20">
-        <p className="mb-2 text-xs font-semibold uppercase tracking-[0.2em] text-fraktur-orange">FAQ</p>
-        <h2 className="mb-8 font-display text-3xl text-fraktur-text">Key objections</h2>
-        <div className="space-y-3">
-          {OBJECTIONS.map((o) => (
-            <details key={o.q} className="rounded-xl border border-fraktur-border bg-fraktur-panel p-4">
-              <summary className="cursor-pointer font-medium text-fraktur-text">{o.q}</summary>
-              <p className="mt-2 text-sm text-fraktur-muted">{o.a}</p>
-            </details>
-          ))}
-        </div>
-      </section>
+        {/* ---------------------------------------------------------------- PROBLEM */}
+        <section id="problem" className="border-b border-fraktur-border py-16">
+          <div className="mx-auto max-w-6xl px-4">
+            <p className="mb-2 text-xs font-semibold uppercase tracking-[0.2em] text-fraktur-orange">The problem</p>
+            <h2 className="mb-10 max-w-2xl font-display text-3xl text-fraktur-text sm:text-4xl">
+              Bitcoin software is under attack. Most teams have no one watching.
+            </h2>
+            <div className="grid gap-4 sm:grid-cols-3">
+              <div className="rounded-2xl border border-fraktur-border bg-fraktur-panel p-6">
+                <p className="font-display text-3xl text-fraktur-text">$755M lost</p>
+                <p className="mt-1 text-sm text-fraktur-orange">since April 2026</p>
+                <p className="mt-3 text-sm text-fraktur-muted">
+                  83+ exploits. No undo, no chargeback, no refund — a single bug is permanent, unrecoverable loss.
+                </p>
+              </div>
+              <div className="rounded-2xl border border-fraktur-border bg-fraktur-panel p-6">
+                <p className="font-display text-3xl text-fraktur-text">$50–200K</p>
+                <p className="mt-1 text-sm text-fraktur-orange">and stale tomorrow</p>
+                <p className="mt-3 text-sm text-fraktur-muted">
+                  Formal audits are slow and expensive, and cover a snapshot. The next commit ships unaudited.
+                </p>
+              </div>
+              <div className="rounded-2xl border border-fraktur-border bg-fraktur-panel p-6">
+                <p className="font-display text-3xl text-fraktur-text">Reads, doesn&rsquo;t run</p>
+                <p className="mt-1 text-sm text-fraktur-orange">static tools miss runtime bugs</p>
+                <p className="mt-3 text-sm text-fraktur-muted">
+                  Even Bitcoin-aware scanners like Loupe stop at reading the code. Attacks happen when it runs.
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
 
-        <Footer />
-        <DonationDrawer walletOptions={wallets.map((w) => ({ id: w.id, name: w.name }))} />
-      </div>
+        {/* ---------------------------------------------------------------- HOW IT WORKS */}
+        <section id="solution" className="border-b border-fraktur-border bg-fraktur-panel py-16">
+          <div className="mx-auto max-w-6xl px-4">
+            <p className="mb-2 text-xs font-semibold uppercase tracking-[0.2em] text-fraktur-orange">How FRAKTUR works</p>
+            <h2 className="mb-10 max-w-2xl font-display text-3xl text-fraktur-text sm:text-4xl">Not smaller. Smarter.</h2>
+
+            <div className="grid gap-6 sm:grid-cols-3">
+              {[
+                {
+                  n: "01",
+                  t: "Attack-surface triage",
+                  d: "We run your code with random, malformed, adversarial inputs at scale — the same way real attackers probe it. Crash sites map exactly where to look.",
+                },
+                {
+                  n: "02",
+                  t: "Selective Loupe",
+                  d: "Bitcoin-native AI agents (Claude + Codex cross-verification) audit only what Layer 1 flagged. Every finding ships with a proof-of-concept that fails on HEAD — no PoC, no report.",
+                },
+                {
+                  n: "03",
+                  t: "On-chain proof",
+                  d: "Every completed audit is hashed and timestamped via OpenTimestamp — verifiable by anyone, forever, independent of us.",
+                },
+              ].map((step) => (
+                <div key={step.n} className="rounded-2xl border border-fraktur-border bg-fraktur-bg p-6">
+                  <p className="font-display text-2xl text-fraktur-electric">{step.n}</p>
+                  <p className="mt-2 text-lg font-semibold text-fraktur-text">{step.t}</p>
+                  <p className="mt-2 text-sm text-fraktur-muted">{step.d}</p>
+                </div>
+              ))}
+            </div>
+
+            <p className="mt-8 max-w-2xl text-sm text-fraktur-muted">
+              The pipeline is how we work fast today. The proof is what stays yours — verifiable on-chain,
+              independent of any single tool we&rsquo;re built on.
+            </p>
+          </div>
+        </section>
+
+        {/* ---------------------------------------------------------------- PROOF */}
+        <section id="proof" className="border-b border-fraktur-border py-16">
+          <div className="mx-auto max-w-6xl px-4">
+            <p className="mb-2 text-xs font-semibold uppercase tracking-[0.2em] text-fraktur-orange">Proof, not promises</p>
+            <h2 className="mb-2 max-w-2xl font-display text-3xl text-fraktur-text sm:text-4xl">Our first real-world test</h2>
+            <p className="mb-10 text-sm text-fraktur-muted">
+              For the wallet&rsquo;s repo we audited (name withheld per responsible disclosure norms).
+            </p>
+            <div className="grid gap-4 lg:grid-cols-3">
+              <CompareBars
+                title="L1 — files triaged per scan"
+                beforeLabel="Loupe-only (whole codebase)"
+                beforeValue={1300}
+                afterLabel="FRAKTUR (triaged)"
+                afterValue={63}
+                result="-95% noise cut"
+              />
+              <CompareBars
+                title="Cost per scan (Claude Opus 4.8, API-equivalent)"
+                beforeLabel="Loupe-only (~1,300 agents)"
+                beforeValue={3200}
+                afterLabel="FRAKTUR (63 triaged files)"
+                afterValue={150}
+                unit="$"
+                result="-95% cost"
+              />
+              <FindingsCard />
+            </div>
+          </div>
+        </section>
+
+        {/* ---------------------------------------------------------------- PRICING */}
+        <section id="pricing" className="border-b border-fraktur-border bg-fraktur-panel py-16">
+          <div className="mx-auto max-w-6xl px-4">
+            <p className="mb-2 text-xs font-semibold uppercase tracking-[0.2em] text-fraktur-orange">
+              {walletName ? `Checking in about ${walletName}?` : "Pricing"}
+            </p>
+            <h2 className="mb-2 max-w-2xl font-display text-3xl text-fraktur-text sm:text-4xl">
+              Full audits weren&rsquo;t built for you. This is.
+            </h2>
+            {walletName && <p className="mb-6 text-sm text-fraktur-electric">{banner}</p>}
+            {!walletName && (
+              <p className="mb-10 max-w-2xl text-sm text-fraktur-muted">
+                Three ways to pay, matched to what you actually need — not one subscription-or-nothing choice.
+              </p>
+            )}
+
+            <div className="grid gap-4 sm:grid-cols-3">
+              {TIERS.map((tier) => {
+                const isHighlighted = walletName && tier.id === highlight;
+                return (
+                  <div
+                    key={tier.id}
+                    className={`flex flex-col rounded-2xl border p-6 ${
+                      isHighlighted ? "border-fraktur-electric bg-fraktur-electricDim/30" : "border-fraktur-border bg-fraktur-bg"
+                    }`}
+                  >
+                    <p className="font-display text-lg text-fraktur-text">{tier.name}</p>
+                    <p className="mt-1 text-sm font-semibold text-fraktur-orange">{tier.price}</p>
+                    <p className="mt-3 flex-1 text-sm text-fraktur-muted">{tier.description}</p>
+                    <a
+                      href={`mailto:contact@fraktur.io?subject=${encodeURIComponent(
+                        tier.subject + (walletName ? ` — ${walletName}` : "")
+                      )}`}
+                      className={`mt-5 rounded-full px-4 py-2 text-center text-sm font-semibold ${
+                        isHighlighted
+                          ? "bg-fraktur-orange text-black hover:bg-fraktur-orangeDim"
+                          : "border border-fraktur-border text-fraktur-text hover:border-fraktur-orange"
+                      }`}
+                    >
+                      {tier.cta}
+                    </a>
+                  </div>
+                );
+              })}
+            </div>
+
+            <p className="mt-6 max-w-2xl text-xs text-fraktur-muted">
+              The free Public Disclosure Report (a specific finding, once it&rsquo;s fixed or its 90-day embargo
+              lapses) is always free on the Wallet Watcher — these three tiers are for complete, current, or
+              ongoing coverage, not for information already owed to you for free.
+            </p>
+
+            <div className="mt-8 flex flex-col items-start gap-2 rounded-2xl border border-fraktur-border bg-fraktur-bg p-5 sm:flex-row sm:items-center sm:justify-between">
+              <p className="max-w-md text-sm text-fraktur-muted">
+                Not ready to pay yet? Apply for a free scan — 5 accepted per month across all applicants, one free
+                scan per project ever.
+              </p>
+              <a
+                href="/apply"
+                className="shrink-0 rounded-full border border-fraktur-border px-5 py-2 text-sm font-medium text-fraktur-text hover:border-fraktur-orange"
+              >
+                Apply for a free scan →
+              </a>
+            </div>
+          </div>
+        </section>
+
+        {/* ---------------------------------------------------------------- FAQ */}
+        <section id="faq" className="py-16">
+          <div className="mx-auto max-w-3xl px-4">
+            <p className="mb-2 text-xs font-semibold uppercase tracking-[0.2em] text-fraktur-orange">FAQ</p>
+            <h2 className="mb-8 font-display text-3xl text-fraktur-text">Key objections</h2>
+            <div className="space-y-3">
+              {OBJECTIONS.map((o) => (
+                <details key={o.q} className="rounded-xl border border-fraktur-border bg-fraktur-panel p-4">
+                  <summary className="cursor-pointer font-medium text-fraktur-text">{o.q}</summary>
+                  <p className="mt-2 text-sm text-fraktur-muted">{o.a}</p>
+                </details>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ---------------------------------------------------------------- FINAL CTA */}
+        <section className="border-t border-fraktur-border bg-fraktur-panel py-16 text-center">
+          <div className="mx-auto max-w-2xl px-4">
+            <h2 className="font-display text-3xl text-fraktur-text sm:text-4xl">
+              Not smaller. Smarter. Full audits weren&rsquo;t built for you. This is.
+            </h2>
+            <div className="mt-8 flex flex-wrap justify-center gap-3">
+              <a
+                href="/apply"
+                className="rounded-full bg-fraktur-orange px-6 py-3 text-sm font-semibold text-black hover:bg-fraktur-orangeDim"
+              >
+                Apply for a free scan →
+              </a>
+              <a
+                href="mailto:contact@fraktur.io?subject=Talk%20to%20FRAKTUR"
+                className="rounded-full border border-fraktur-border px-6 py-3 text-sm font-semibold text-fraktur-text hover:border-fraktur-orange"
+              >
+                Talk to us
+              </a>
+              <Link href="/" className="rounded-full border border-fraktur-border px-6 py-3 text-sm font-semibold text-fraktur-text hover:border-fraktur-electric">
+                See the Wallet Watcher
+              </Link>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <Footer />
+      <DonationDrawer walletOptions={wallets.map((w) => ({ id: w.id, name: w.name }))} />
     </>
   );
 }
