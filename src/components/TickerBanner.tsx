@@ -5,12 +5,13 @@ import type { Supporter } from "@/lib/types";
 import { supporterProfileUrl } from "@/lib/format";
 
 const SLOTS = 3;
-const CYCLE_MS = 3200; // how long a group stays whole/at rest before it starts to crack
+const CYCLE_MS = 1800; // how long a group stays whole/at rest before it starts to crack
 const STAGGER_MS = 400; // cascade delay between slots, left -> right
 const CRACK_GROW_MS = 500; // phase 1: hairline fissure appears, still 100% opaque
-const PAUSE_MS = 650; // hold on the fissure so it's clearly visible before it worsens
+const PAUSE_MS = 300; // hold on the fissure so it's clearly visible before it worsens
 const EXPLODE_MS = 550; // phase 2: fissure widens, block separates and fades out
-const BUFFER_MS = 150; // small safety margin before swapping in the next group
+const EMPTY_MS = 900; // banner shows nothing between one group vanishing and the next appearing
+const APPEAR_MS = 500; // next group fades in (transparent -> opaque) rather than snapping in
 const STAGGER_MAX = (SLOTS - 1) * STAGGER_MS;
 
 // Same diagonal direction as the FRAKTUR mark's wedge (see ShardArt.tsx's
@@ -19,7 +20,7 @@ const STAGGER_MAX = (SLOTS - 1) * STAGGER_MS;
 const PIECE_TOP_LEFT = "polygon(0% 0%, 100% 0%, 0% 100%)";
 const PIECE_BOTTOM_RIGHT = "polygon(100% 0%, 100% 100%, 0% 100%)";
 
-type Phase = "rest" | "fissure" | "explode";
+type Phase = "appear" | "rest" | "fissure" | "explode";
 
 function chunkIntoGroups(items: Supporter[]): (Supporter | null)[][] {
   if (items.length === 0) return [[null, null, null]];
@@ -92,12 +93,28 @@ function pieceStyle(piece: "top" | "bottom", phase: Phase, delayMs: number): CSS
       transitionDelay: `${delayMs}ms`,
     };
   }
+  if (phase === "appear") {
+    // First-paint state for a freshly mounted group — starts fully
+    // transparent so the very next state change (-> "rest") has something
+    // to transition from.
+    return {
+      clipPath,
+      transform: "translate(0, 0) rotate(0deg)",
+      opacity: 0,
+      transitionProperty: "opacity",
+      transitionDuration: "0ms",
+      transitionDelay: "0ms",
+    };
+  }
+  // "rest" — either the steady intact display, or the fade-in target
+  // reached from "appear" (transparent -> opaque, over APPEAR_MS).
   return {
     clipPath,
     transform: "translate(0, 0) rotate(0deg)",
     opacity: 1,
-    transitionProperty: "transform, opacity",
-    transitionDuration: "0ms",
+    transitionProperty: "opacity",
+    transitionDuration: `${APPEAR_MS}ms`,
+    transitionTimingFunction: "ease-out",
     transitionDelay: "0ms",
   };
 }
@@ -132,21 +149,38 @@ export function TickerBanner({ supporters }: { supporters: Supporter[] }) {
   const active = supporters.filter((s) => s.activeLast30Days);
   const groups = useMemo(() => chunkIntoGroups(active), [active]);
   const [groupIndex, setGroupIndex] = useState(0);
-  const [phase, setPhase] = useState<Phase>("rest");
+  const [phase, setPhase] = useState<Phase>("appear");
+
+  // Drives the fade-in: a freshly (re)mounted group first paints fully
+  // transparent ("appear"), then — once that frame has actually painted —
+  // flips to "rest", so the opacity transition has a real starting point to
+  // animate from instead of just snapping to visible.
+  useEffect(() => {
+    if (phase !== "appear") return;
+    let raf2 = 0;
+    const raf1 = requestAnimationFrame(() => {
+      raf2 = requestAnimationFrame(() => setPhase("rest"));
+    });
+    return () => {
+      cancelAnimationFrame(raf1);
+      cancelAnimationFrame(raf2);
+    };
+  }, [phase, groupIndex]);
 
   useEffect(() => {
     if (groups.length <= 1) {
       setPhase("rest");
       return;
     }
-    const toFissure = setTimeout(() => setPhase("fissure"), CYCLE_MS);
-    const toExplode = setTimeout(() => setPhase("explode"), CYCLE_MS + STAGGER_MAX + CRACK_GROW_MS + PAUSE_MS);
+    setPhase("appear");
+    const toFissure = setTimeout(() => setPhase("fissure"), APPEAR_MS + CYCLE_MS);
+    const toExplode = setTimeout(
+      () => setPhase("explode"),
+      APPEAR_MS + CYCLE_MS + STAGGER_MAX + CRACK_GROW_MS + PAUSE_MS
+    );
     const toNext = setTimeout(
-      () => {
-        setGroupIndex((i) => (i + 1) % groups.length);
-        setPhase("rest");
-      },
-      CYCLE_MS + STAGGER_MAX + CRACK_GROW_MS + PAUSE_MS + STAGGER_MAX + EXPLODE_MS + BUFFER_MS
+      () => setGroupIndex((i) => (i + 1) % groups.length),
+      APPEAR_MS + CYCLE_MS + STAGGER_MAX + CRACK_GROW_MS + PAUSE_MS + STAGGER_MAX + EXPLODE_MS + EMPTY_MS
     );
     return () => {
       clearTimeout(toFissure);
