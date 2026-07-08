@@ -5,10 +5,10 @@ import type { Supporter } from "@/lib/types";
 import { supporterProfileUrl } from "@/lib/format";
 
 const SLOTS = 3;
-const CYCLE_MS = 1800; // how long a group stays whole/at rest before it starts to crack
+const CYCLE_MS = 1200; // how long a group stays whole/at rest before it starts to crack
 const STAGGER_MS = 400; // cascade delay between slots, left -> right
-const CRACK_GROW_MS = 500; // phase 1: hairline fissure appears, still 100% opaque
-const PAUSE_MS = 300; // hold on the fissure so it's clearly visible before it worsens
+const CRACK_GROW_MS = 200; // phase 1: hairline fissure appears, still 100% opaque
+const PAUSE_MS = 150; // hold on the fissure so it's clearly visible before it worsens
 const EXPLODE_MS = 550; // phase 2: fissure widens, block separates and fades out
 const EMPTY_MS = 900; // banner shows nothing between one group vanishing and the next appearing
 const APPEAR_MS = 500; // next group fades in (transparent -> opaque) rather than snapping in
