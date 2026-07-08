@@ -3,10 +3,11 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import type { Wallet } from "@/lib/types";
-import { countBySeverity, highestSeverity } from "@/lib/format";
+import { companiesHref, countBySeverity, freshnessInfo, highestSeverity } from "@/lib/format";
 import { useDonation } from "./DonationContext";
 import { AuditFlowDiagram } from "./AuditFlowDiagram";
 import { SeverityBadge } from "./SeverityBadge";
+import { AuditHistoryModal } from "./AuditHistoryModal";
 
 type SortKey = "risk" | "recent";
 
@@ -83,6 +84,7 @@ export function WalletList({ wallets }: { wallets: Wallet[] }) {
   const [query, setQuery] = useState("");
   const [riskFilter, setRiskFilter] = useState<string>("All");
   const [sortKey, setSortKey] = useState<SortKey>("recent");
+  const [historyWalletId, setHistoryWalletId] = useState<string | null>(null);
   const { open } = useDonation();
 
   const filtered = useMemo(() => {
@@ -136,8 +138,8 @@ export function WalletList({ wallets }: { wallets: Wallet[] }) {
       <div className="grid gap-4 md:grid-cols-2">
         {filtered.map((wallet) => {
           const counts = countBySeverity(wallet.findings);
-          const daysSinceReview = (Date.now() - new Date(wallet.lastReviewDate).getTime()) / 86_400_000;
-          const isStale = daysSinceReview > 30;
+          const freshness = freshnessInfo(wallet.lastReviewDate);
+          const hasPublicReport = (wallet.auditHistory ?? []).some((h) => h.publiclyDisclosed);
           const walletHeader = (
             <>
               {wallet.iconInitials && (
@@ -154,7 +156,7 @@ export function WalletList({ wallets }: { wallets: Wallet[] }) {
           );
           return (
             <article key={wallet.id} className="rounded-xl border border-fraktur-electric/25 bg-fraktur-panel p-5">
-              <div className="mb-3 flex items-start gap-3">
+              <div className="mb-3 flex items-start justify-between gap-3">
                 {wallet.repoUrl ? (
                   <a
                     href={wallet.repoUrl}
@@ -167,6 +169,9 @@ export function WalletList({ wallets }: { wallets: Wallet[] }) {
                 ) : (
                   <div className="flex items-center gap-3">{walletHeader}</div>
                 )}
+                <span className={`shrink-0 whitespace-nowrap rounded-full px-2.5 py-1 text-[10px] font-semibold ${freshness.className}`}>
+                  {freshness.label}
+                </span>
               </div>
 
               <dl className="mb-4 grid grid-cols-2 gap-y-1 text-xs text-fraktur-muted">
@@ -182,14 +187,6 @@ export function WalletList({ wallets }: { wallets: Wallet[] }) {
                   >
                     {wallet.lastReviewDate}
                   </a>
-                  {isStale && (
-                    <span
-                      className="ml-1 cursor-help text-fraktur-orange"
-                      title={`No review in over 30 days (last: ${wallet.lastReviewDate})`}
-                    >
-                      ⓘ
-                    </span>
-                  )}
                 </dd>
                 <dt>fraKtur</dt>
                 <dd className="text-right text-fraktur-text">
@@ -231,6 +228,15 @@ export function WalletList({ wallets }: { wallets: Wallet[] }) {
                 </div>
               </div>
 
+              {hasPublicReport && (
+                <button
+                  onClick={() => setHistoryWalletId(wallet.id)}
+                  className="mb-2 flex items-center gap-1 rounded-full bg-severity-none/10 px-3 py-1 text-xs font-semibold text-severity-none hover:bg-severity-none/20"
+                >
+                  🔓 Full report available →
+                </button>
+              )}
+
               <button
                 onClick={() => open({ allocationChoice: "Specific Wallet", walletId: wallet.id, walletName: wallet.name })}
                 className="block w-full text-right text-xs text-fraktur-orange hover:underline"
@@ -238,7 +244,7 @@ export function WalletList({ wallets }: { wallets: Wallet[] }) {
                 Help us go deeper, faster →
               </button>
               <Link
-                href={`/companies?wallet=${encodeURIComponent(wallet.name)}${isStale ? "&reason=stale" : ""}`}
+                href={companiesHref(wallet)}
                 className="mt-1 block w-full text-right text-xs text-fraktur-electric hover:underline"
               >
                 For Companies →
@@ -247,6 +253,14 @@ export function WalletList({ wallets }: { wallets: Wallet[] }) {
           );
         })}
       </div>
+
+      {historyWalletId &&
+        (() => {
+          const historyWallet = wallets.find((w) => w.id === historyWalletId);
+          return historyWallet ? (
+            <AuditHistoryModal wallet={historyWallet} onClose={() => setHistoryWalletId(null)} />
+          ) : null;
+        })()}
     </div>
     </section>
   );

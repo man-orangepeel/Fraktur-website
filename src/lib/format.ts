@@ -1,4 +1,4 @@
-import type { Severity, Supporter } from "./types";
+import type { Finding, FindingStatus, Severity, Supporter, Wallet } from "./types";
 
 export function severityColorClass(severity: Severity | "None"): string {
   switch (severity) {
@@ -71,4 +71,67 @@ export function supporterProfileUrl(s: Supporter): string | undefined {
   if (s.network === "x") return `https://x.com/${clean}`;
   if (s.network === "nostr") return `https://njump.me/${clean}`;
   return undefined;
+}
+
+// --- Freshness — a gradient signal, not a stale/not-stale binary ---------
+// A "clean" wallet scanned 3 days ago should read as more trustworthy than
+// one scanned 8 months ago, even though both show "0 open findings" today.
+
+export function daysSinceReview(lastReviewDate: string): number {
+  return Math.floor((Date.now() - new Date(lastReviewDate).getTime()) / 86_400_000);
+}
+
+export function isStale(lastReviewDate: string): boolean {
+  return daysSinceReview(lastReviewDate) > 30;
+}
+
+export interface FreshnessInfo {
+  label: string;
+  className: string;
+}
+
+function agoLabel(days: number): string {
+  if (days <= 0) return "today";
+  if (days === 1) return "1 day ago";
+  if (days < 30) return `${days} days ago`;
+  const months = Math.round(days / 30);
+  return `${months} month${months === 1 ? "" : "s"} ago`;
+}
+
+export function freshnessInfo(lastReviewDate: string): FreshnessInfo {
+  const days = daysSinceReview(lastReviewDate);
+  if (days <= 7) return { label: `Verified ${agoLabel(days)}`, className: "bg-severity-none text-white" };
+  if (days <= 30) return { label: `Verified ${agoLabel(days)}`, className: "bg-severity-none/50 text-fraktur-text" };
+  if (days <= 90) return { label: `Verified ${agoLabel(days)}`, className: "bg-severity-low/70 text-black" };
+  return { label: `Last verified ${agoLabel(days)} — re-scan pending`, className: "bg-fraktur-border text-fraktur-muted" };
+}
+
+// --- Finding status badge (Open vs. team-declared vs. FRAKTUR-verified) --
+
+export function findingStatusBadge(status: FindingStatus | undefined): FreshnessInfo {
+  switch (status) {
+    case "Verified Fixed":
+      return { label: "FRAKTUR-verified fixed", className: "bg-fraktur-electric text-white" };
+    case "Declared Fixed":
+      return { label: "Team reports fixed — pending re-verification", className: "bg-fraktur-border text-fraktur-muted" };
+    default:
+      return { label: "Open", className: "bg-severity-high text-white" };
+  }
+}
+
+// --- Context passed to /companies from a wallet card or the audit-history
+// popup — mirrors the `reason` query param Companies already reads (see
+// WEBSITE_BRIEF.md §16). `fallback` lets a specific CTA (e.g. "get the full
+// report") default to a value of its own instead of omitting the param.
+export function urgentReason(wallet: Pick<Wallet, "lastReviewDate" | "findings">, fallback?: string): string | undefined {
+  if (isStale(wallet.lastReviewDate)) return "stale";
+  if (wallet.findings.some((f: Finding) => f.status === "Declared Fixed")) return "declared-fixed";
+  return fallback;
+}
+
+export function companiesHref(wallet: Pick<Wallet, "name" | "lastReviewDate" | "findings">, fallback?: string): string {
+  const reason = urgentReason(wallet, fallback);
+  const params = new URLSearchParams({ wallet: wallet.name });
+  if (reason) params.set("reason", reason);
+  return `/companies?${params.toString()}`;
 }

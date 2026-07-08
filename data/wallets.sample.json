@@ -17,12 +17,17 @@
     "riskBadge": "Low",
     "published": true,
     "findings": [
-      { "id": "wf1", "walletId": "wallet-wasabi-01", "cwe": "CWE-330", "title": "Insufficient entropy in coinjoin output shuffling", "severity": "High", "status": "Fixed" },
-      { "id": "wf2", "walletId": "wallet-wasabi-01", "cwe": "CWE-362", "title": "Race condition during chain-reorg handling", "severity": "High", "status": "Fixed" },
-      { "id": "wf3", "walletId": "wallet-wasabi-01", "cwe": "CWE-20", "title": "Improper validation of PSBT input fields", "severity": "Medium", "status": "Fixed" },
-      { "id": "wf4", "walletId": "wallet-wasabi-01", "cwe": "CWE-704", "title": "Type confusion in wallet-state deserialization", "severity": "Medium", "status": "Fixed" },
-      { "id": "wf5", "walletId": "wallet-wasabi-01", "cwe": "CWE-1188", "title": "Insecure default RPC binding in regtest harness", "severity": "Low", "status": "Fixed" },
+      { "id": "wf1", "walletId": "wallet-wasabi-01", "cwe": "CWE-330", "title": "Insufficient entropy in coinjoin output shuffling", "severity": "High", "status": "Verified Fixed" },
+      { "id": "wf2", "walletId": "wallet-wasabi-01", "cwe": "CWE-362", "title": "Race condition during chain-reorg handling", "severity": "High", "status": "Verified Fixed" },
+      { "id": "wf3", "walletId": "wallet-wasabi-01", "cwe": "CWE-20", "title": "Improper validation of PSBT input fields", "severity": "Medium", "status": "Declared Fixed" },
+      { "id": "wf4", "walletId": "wallet-wasabi-01", "cwe": "CWE-704", "title": "Type confusion in wallet-state deserialization", "severity": "Medium", "status": "Verified Fixed" },
+      { "id": "wf5", "walletId": "wallet-wasabi-01", "cwe": "CWE-1188", "title": "Insecure default RPC binding in regtest harness", "severity": "Low", "status": "Verified Fixed" },
       { "id": "wf6", "walletId": "wallet-wasabi-01", "cwe": "CWE-401", "title": "Key material not cleared after derivation", "severity": "Low", "status": "Open" }
+    ],
+    "auditHistory": [
+      { "date": "2026-05-15", "version": "v0.3.1", "publiclyDisclosed": true, "disclosureDate": "2026-06-01", "findingIds": ["wf1", "wf2"] },
+      { "date": "2026-06-20", "version": "v0.3.5", "publiclyDisclosed": true, "disclosureDate": "2026-06-20", "findingIds": ["wf3", "wf4"] },
+      { "date": "2026-07-02", "version": "v0.4.0", "publiclyDisclosed": false, "disclosureDate": "2026-10-01", "findingIds": ["wf5", "wf6"] }
     ]
   },
   {
@@ -40,7 +45,10 @@
     "filesAudited": 41,
     "riskBadge": "None",
     "published": true,
-    "findings": []
+    "findings": [],
+    "auditHistory": [
+      { "date": "2026-06-20", "version": "v0.4.0", "publiclyDisclosed": false, "disclosureDate": "2026-09-18", "findingIds": [] }
+    ]
   },
   {
     "id": "wallet-sparrow-01",
@@ -63,18 +71,21 @@
       { "id": "sf1", "walletId": "wallet-sparrow-01", "cwe": "CWE-321", "title": "Hardcoded cryptographic key used across all installs", "severity": "Critical", "status": "Open", "disclosureUrl": "https://example.com/disclosure/sparrow-cwe-321" },
       { "id": "sf2", "walletId": "wallet-sparrow-01", "cwe": "CWE-287", "title": "Authentication bypass in watch-only import flow", "severity": "High", "status": "Open" },
       { "id": "sf3", "walletId": "wallet-sparrow-01", "cwe": "CWE-347", "title": "Improper signature verification on update manifest", "severity": "High", "status": "Open" },
-      { "id": "sf4", "walletId": "wallet-sparrow-01", "cwe": "CWE-798", "title": "Hardcoded API credential in build config", "severity": "Medium", "status": "Fixed" },
+      { "id": "sf4", "walletId": "wallet-sparrow-01", "cwe": "CWE-798", "title": "Hardcoded API credential in build config", "severity": "Medium", "status": "Declared Fixed" },
       { "id": "sf5", "walletId": "wallet-sparrow-01", "cwe": "CWE-190", "title": "Integer overflow in fee calculation", "severity": "Medium", "status": "Open" },
-      { "id": "sf6", "walletId": "wallet-sparrow-01", "cwe": "CWE-209", "title": "Verbose error message leaks internal path", "severity": "Medium", "status": "Fixed" },
+      { "id": "sf6", "walletId": "wallet-sparrow-01", "cwe": "CWE-209", "title": "Verbose error message leaks internal path", "severity": "Medium", "status": "Verified Fixed" },
       { "id": "sf7", "walletId": "wallet-sparrow-01", "cwe": "CWE-330", "title": "Predictable change-address derivation under low entropy", "severity": "Low", "status": "Open" },
-      { "id": "sf8", "walletId": "wallet-sparrow-01", "cwe": "CWE-1188", "title": "Insecure default RPC binding in regtest harness", "severity": "Low", "status": "Fixed" },
+      { "id": "sf8", "walletId": "wallet-sparrow-01", "cwe": "CWE-1188", "title": "Insecure default RPC binding in regtest harness", "severity": "Low", "status": "Verified Fixed" },
       { "id": "sf9", "walletId": "wallet-sparrow-01", "cwe": "CWE-401", "title": "Key material not cleared after derivation", "severity": "Low", "status": "Open" },
       { "id": "sf10", "walletId": "wallet-sparrow-01", "cwe": "CWE-362", "title": "Concurrency / race condition in PSBT signing queue", "severity": "Critical", "status": "Open" },
       { "id": "sf11", "walletId": "wallet-sparrow-01", "cwe": "CWE-295", "title": "Improper certificate validation on Electrum server connection", "severity": "High", "status": "Open" },
       { "id": "sf12", "walletId": "wallet-sparrow-01", "cwe": "CWE-770", "title": "No rate limit on PIN entry for encrypted keystore", "severity": "Medium", "status": "Open" },
-      { "id": "sf13", "walletId": "wallet-sparrow-01", "cwe": "CWE-330", "title": "Weak randomness in BIP39 passphrase suggestion", "severity": "Medium", "status": "Fixed" },
+      { "id": "sf13", "walletId": "wallet-sparrow-01", "cwe": "CWE-330", "title": "Weak randomness in BIP39 passphrase suggestion", "severity": "Medium", "status": "Verified Fixed" },
       { "id": "sf14", "walletId": "wallet-sparrow-01", "cwe": "CWE-311", "title": "Unencrypted PSBT cache written to disk", "severity": "Low", "status": "Open" },
-      { "id": "sf15", "walletId": "wallet-sparrow-01", "cwe": "CWE-1188", "title": "Insecure default RPC binding in regtest harness", "severity": "Low", "status": "Fixed" }
+      { "id": "sf15", "walletId": "wallet-sparrow-01", "cwe": "CWE-1188", "title": "Insecure default RPC binding in regtest harness", "severity": "Low", "status": "Verified Fixed" }
+    ],
+    "auditHistory": [
+      { "date": "2026-07-01", "version": "v0.4.0", "publiclyDisclosed": false, "disclosureDate": "2026-09-29", "findingIds": ["sf1", "sf2", "sf3", "sf4", "sf5", "sf6", "sf7", "sf8", "sf9", "sf10", "sf11", "sf12", "sf13", "sf14", "sf15"] }
     ]
   },
   {
@@ -97,7 +108,10 @@
     "findings": [
       { "id": "ef1", "walletId": "wallet-electrum-01", "cwe": "CWE-522", "title": "Insufficiently protected credentials in backup export", "severity": "Critical", "status": "Open" },
       { "id": "ef2", "walletId": "wallet-electrum-01", "cwe": "CWE-732", "title": "Incorrect permission assignment for wallet.dat", "severity": "High", "status": "Open" },
-      { "id": "ef3", "walletId": "wallet-electrum-01", "cwe": "CWE-20", "title": "Improper validation of PSBT input fields", "severity": "Medium", "status": "Fixed" }
+      { "id": "ef3", "walletId": "wallet-electrum-01", "cwe": "CWE-20", "title": "Improper validation of PSBT input fields", "severity": "Medium", "status": "Verified Fixed" }
+    ],
+    "auditHistory": [
+      { "date": "2026-05-20", "version": "v0.3.1", "publiclyDisclosed": false, "disclosureDate": "2026-08-18", "findingIds": ["ef1", "ef2", "ef3"] }
     ]
   },
   {
@@ -117,6 +131,9 @@
     "published": true,
     "findings": [
       { "id": "spf1", "walletId": "wallet-specter-01", "cwe": "CWE-209", "title": "Verbose error message leaks internal path", "severity": "Low", "status": "Open" }
+    ],
+    "auditHistory": [
+      { "date": "2026-07-05", "version": "v0.4.0", "publiclyDisclosed": false, "disclosureDate": "2026-10-03", "findingIds": ["spf1"] }
     ]
   },
   {
@@ -138,15 +155,18 @@
     "published": true,
     "findings": [
       { "id": "mf1", "walletId": "wallet-muun-01", "cwe": "CWE-287", "title": "Authentication bypass in watch-only import flow", "severity": "High", "status": "Open" },
-      { "id": "mf2", "walletId": "wallet-muun-01", "cwe": "CWE-347", "title": "Improper signature verification on update manifest", "severity": "High", "status": "Fixed" },
+      { "id": "mf2", "walletId": "wallet-muun-01", "cwe": "CWE-347", "title": "Improper signature verification on update manifest", "severity": "High", "status": "Declared Fixed" },
       { "id": "mf3", "walletId": "wallet-muun-01", "cwe": "CWE-190", "title": "Integer overflow in fee calculation", "severity": "Medium", "status": "Open" },
       { "id": "mf4", "walletId": "wallet-muun-01", "cwe": "CWE-798", "title": "Hardcoded API credential in build config", "severity": "Medium", "status": "Open" },
-      { "id": "mf5", "walletId": "wallet-muun-01", "cwe": "CWE-209", "title": "Verbose error message leaks internal path", "severity": "Medium", "status": "Fixed" },
+      { "id": "mf5", "walletId": "wallet-muun-01", "cwe": "CWE-209", "title": "Verbose error message leaks internal path", "severity": "Medium", "status": "Verified Fixed" },
       { "id": "mf6", "walletId": "wallet-muun-01", "cwe": "CWE-476", "title": "Signature verification — null client", "severity": "Medium", "status": "Open" },
       { "id": "mf7", "walletId": "wallet-muun-01", "cwe": "CWE-330", "title": "Predictable change-address derivation under low entropy", "severity": "Low", "status": "Open" },
-      { "id": "mf8", "walletId": "wallet-muun-01", "cwe": "CWE-1188", "title": "Insecure default RPC binding in regtest harness", "severity": "Low", "status": "Fixed" },
+      { "id": "mf8", "walletId": "wallet-muun-01", "cwe": "CWE-1188", "title": "Insecure default RPC binding in regtest harness", "severity": "Low", "status": "Verified Fixed" },
       { "id": "mf9", "walletId": "wallet-muun-01", "cwe": "CWE-401", "title": "Key material not cleared after derivation", "severity": "Low", "status": "Open" },
-      { "id": "mf10", "walletId": "wallet-muun-01", "cwe": "CWE-362", "title": "Concurrency / race condition in payment retry logic", "severity": "Low", "status": "Fixed" }
+      { "id": "mf10", "walletId": "wallet-muun-01", "cwe": "CWE-362", "title": "Concurrency / race condition in payment retry logic", "severity": "Low", "status": "Verified Fixed" }
+    ],
+    "auditHistory": [
+      { "date": "2026-06-30", "version": "v0.4.0", "publiclyDisclosed": false, "disclosureDate": "2026-09-28", "findingIds": ["mf1", "mf2", "mf3", "mf4", "mf5", "mf6", "mf7", "mf8", "mf9", "mf10"] }
     ]
   }
 ]

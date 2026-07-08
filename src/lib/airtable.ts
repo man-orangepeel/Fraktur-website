@@ -42,7 +42,7 @@ interface FindingFields {
   "CWE"?: string;
   "Title"?: string;
   "Severity"?: Severity;
-  "Status"?: "Open" | "Fixed";
+  "Status"?: "Open" | "Declared Fixed" | "Verified Fixed";
   "Disclosure URL"?: string;
 }
 
