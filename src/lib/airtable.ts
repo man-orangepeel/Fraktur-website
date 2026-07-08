@@ -196,6 +196,46 @@ export async function markDonationSettled(donationRecordId: string, verifiedSats
   if (!res.ok) throw new Error(`Airtable markDonationSettled failed (${res.status}): ${await res.text()}`);
 }
 
+// --- Free Scan Applications ------------------------------------------------
+// The bounded, qualified version of "request a free scan" (see
+// WEBSITE_BRIEF.md §17). Submitting this form does NOT trigger a scan — it
+// queues an application for manual review. Cap of 5/month is enforced by the
+// founder reviewing this table, not by application logic; there is no
+// auto-approval path, on purpose (that's the whole fix for the
+// unbounded-cost-center problem this replaces).
+
+interface CreateFreeScanApplicationInput {
+  repoUrl: string;
+  contactEmail: string;
+  projectName?: string;
+  teamSize?: string;
+  note?: string;
+}
+
+export async function createFreeScanApplication(input: CreateFreeScanApplicationInput): Promise<string> {
+  const table = process.env.AIRTABLE_TABLE_FREE_SCAN_APPLICATIONS || "FreeScanApplications";
+  const res = await fetch(`${AIRTABLE_API_BASE}/${process.env.AIRTABLE_BASE_ID}/${encodeURIComponent(table)}`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${process.env.AIRTABLE_API_KEY}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      fields: {
+        "Repo URL": input.repoUrl,
+        "Contact Email": input.contactEmail,
+        ...(input.projectName ? { "Project Name": input.projectName } : {}),
+        ...(input.teamSize ? { "Team Size": input.teamSize } : {}),
+        ...(input.note ? { Note: input.note } : {}),
+        Status: "Pending",
+      },
+    }),
+  });
+  if (!res.ok) throw new Error(`Airtable createFreeScanApplication failed (${res.status}): ${await res.text()}`);
+  const data = await res.json();
+  return data.id as string;
+}
+
 // --- Wallets ------------------------------------------------------------
 
 interface WalletFields {

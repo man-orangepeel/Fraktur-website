@@ -1,6 +1,6 @@
 # FRAKTUR — Website Generation Brief
 *Master prompt — to be executed to generate the site in `/Fraktur/website/`*
-*Drafted: 2026-07-02 — v7 (Companies pricing: three tiers + wallet-context banner — 2026-07-07)*
+*Drafted: 2026-07-02 — v8 (bounded, qualified free-scan application flow — 2026-07-07)*
 
 > **Parallel work notice:** as of 2026-07-07, the founder is running a second Claude Code session (VS Code) on the Home page and shared components at the same time this session works on Companies. If you're picking this project back up, check `git status`/`git log` before assuming this document is the only source of truth for the whole site — Home-side decisions (e.g. `testsRun`, `AuditFlowDiagram`, the `/legal` page, "The Cast" naming) may have been made in that other session and are real even if not documented here. Commit scoped to the files you actually changed, not `git add -A`, while two sessions are active on the same repo.
 
@@ -389,3 +389,23 @@ Companion to `HOME_UX_SPEC.md` §5-7 (the Home-side half of this change, impleme
 **Dependency on the Home side (not yet built as of this writing):** the `For Companies →` link on each wallet card needs to actually pass `?wallet=X&reason=Y` for this to activate — currently it's a bare link to `/companies`. Handed to the VS Code session as one of the Home-side implementation prompts (see chat log / their task queue), since that link lives in `WalletList.tsx`. Until that's wired up, this page works fine with no query params (falls back to the generic pitch, one-time report highlighted by default) — nothing breaks, the context-awareness is additive.
 
 **Still explicit in the copy:** the free Public Disclosure Report (a specific already-embargoed finding, once fixed or 90 days pass) is called out directly under the three tiers so nobody confuses it with the paid Complete Findings Report — same distinction established in §15, now enforced in the actual pricing UI, not just the docs.
+
+---
+
+## 17. Free scan — from open self-serve, to nomination-only, to bounded and qualified
+
+Third pass on this one CTA, each version fixing a real problem the previous one had — worth recording the full arc, not just the final state.
+
+**v1 (original):** an unconditional "get a free scan of your public repo" mailto link. Problem: inverts the GTM model (Annex A5 says scanning is FRAKTUR-*proactive*, not on-request) and is an unbounded cost center — every wallet team asks, FRAKTUR does free Layer 2 + PoC + human-review work for all of them, no revenue. Removed.
+
+**v2 (nomination-only):** replaced with "suggest your repo," explicitly no commitment, FRAKTUR decides based on its own roadmap. Safe, but the founder pushed back — a bounded free-trial motion is a legitimate, standard sales tool for converting prospects ("let them taste it"), the fix isn't to remove it, it's to bound it correctly.
+
+**v3 (current) — bounded and qualified, not bounded by file percentage.** The founder's first instinct was to cap *depth per trial* (e.g. "50% of files") — worth stating plainly why that doesn't work: the expensive part of an audit isn't file count, it's Layer 2 depth and the human-review time a real finding triggers (`CLAUDE.md`: "Human reviewers validate high-severity findings before delivery"). A 50%-of-63-flagged-files free trial still commits to roughly half the paid Complete Findings Report's Layer 2 workload — it doesn't bound cost, it just relabels the exposure. The actual levers that bound cost:
+
+- **Depth**, capped by plugging into the *existing* freemium mechanic instead of inventing a new one: Layer 1 triage of the whole repo (cheap, ~$150 per the site's own proof numbers, fine to give unconditionally) + exactly **one** finding disclosed in full with PoC (the same "free single finding" rule already defined for the proactive motion). Not a new percentage rule — the same rule, with a self-serve door added to it.
+- **Volume**, capped at **5 accepted applications per month**, stated in the copy itself so it reads as scarcity (a real sales lever), not an unlimited tap.
+- **Qualification**, via a real form (`/apply`) reviewed by a human before any scan runs — not instant, not automatic. This is the actual fix for adverse selection (an open invite disproportionately attracts companies who can't afford to pay, not the ones worth prioritizing) — a human decides who's worth the marginal cost, the same "we choose" principle already established for the proactive motion, just extended to also weigh inbound applications.
+
+**Built:** `/apply` — a form (repo URL, contact email, project name, team size, a free-text "why now" field) that restates the rules in full above the form itself (5/month, what's included, what's not, disclosure policy still applies), submits to a new Airtable table `FreeScanApplications` via `POST /api/apply-free-scan`, and shows a "you're in the queue" confirmation — never a scan-triggered or auto-approved state. If Airtable isn't configured, the route returns an explicit error telling the applicant to email directly instead of silently losing the submission. The Companies pricing slide's CTA now links here instead of a mailto, with the 5/month + what's-included line restated in miniature next to the button.
+
+**No automation enforces the 5/month cap** — it's a number in the copy and a column (`Status`) a human reviews in Airtable, on purpose. Automating "reject the 6th application" would require deciding *which* 5 to accept programmatically, which is exactly the judgment call ("we choose based on our roadmap and community impact") that shouldn't be automated.

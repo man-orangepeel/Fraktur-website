@@ -51,6 +51,13 @@ Five tables, exact schema in `WEBSITE_BRIEF.md` §4:
    formulas). See "Airtable automation required" below for how rows get linked.
 5. **Settings** — single row: `Gallery Threshold (sats)` = **212121** (confirmed),
    `Active Window (days)` = **30** (confirmed).
+6. **FreeScanApplications** — one row per free-scan application (`/apply`
+   page, see `WEBSITE_BRIEF.md` §17). Fields: `Repo URL`, `Contact Email`,
+   `Project Name`, `Team Size`, `Note`, `Status` (single select, default
+   `Pending`). No automation on this table — the 5/month cap is a human
+   decision made by reviewing rows here, not enforced in code. Set
+   `AIRTABLE_TABLE_FREE_SCAN_APPLICATIONS` in `.env` if you name the table
+   something other than `FreeScanApplications`.
 
 ### Airtable automation required
 

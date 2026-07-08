@@ -255,24 +255,24 @@ export default async function CompaniesPage({
           not for information already owed to you for free.
         </p>
 
-        {/* No open "request a free scan" invitation here — see
-            WEBSITE_BRIEF.md §16. The free-scan motion in this business is
-            FRAKTUR-initiated (Annex A5: "Scan public Bitcoin repos
-            proactively"), not something any visitor can trigger on demand —
-            an unqualified self-serve invite would be an unbounded cost
-            center. This is a low-commitment nomination queue instead: it
-            costs FRAKTUR nothing to receive, and commits to nothing. */}
-        <div className="mt-6 flex flex-wrap items-center justify-center gap-3 text-center">
-          <p className="max-w-sm text-xs text-fraktur-muted">
-            We choose what to scan next based on our own roadmap and community impact — not on request. Still,
-            worth telling us you exist:
-          </p>
+        {/* A bounded, qualified free-scan motion — not an open self-serve
+            invite (see WEBSITE_BRIEF.md §17 for the full reasoning: the
+            unbounded version risked becoming a free-labor cost center and
+            attracted adverse selection). Capped at 5/month, reviewed by a
+            human before any scan runs, plugged into the existing freemium
+            mechanic (Layer 1 always free + one finding disclosed in full)
+            rather than inventing new percentage-based rules. */}
+        <div className="mt-6 flex flex-col items-center gap-2 text-center">
           <a
-            href="mailto:contact@fraktur.io?subject=Repo%20nomination%20%28not%20a%20scan%20request%29"
+            href="/apply"
             className="rounded-full border border-fraktur-border px-5 py-2 text-sm font-medium text-fraktur-text hover:border-fraktur-orange"
           >
-            Suggest your repo →
+            Apply for a free scan →
           </a>
+          <p className="max-w-sm text-xs text-fraktur-muted">
+            5 accepted per month, by application — full Layer 1 triage + one finding disclosed in full, free. Not
+            first-come-first-served.
+          </p>
         </div>
       </Slide>
 
