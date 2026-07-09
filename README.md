@@ -69,6 +69,18 @@ Five tables, exact schema in `WEBSITE_BRIEF.md` §4:
 
    Set `AIRTABLE_TABLE_FREE_SCAN_APPLICATIONS` in `.env` if you name the
    table something other than `FreeScanApplications`.
+7. **Leads** — one row per submission of `/contact` (see `WEBSITE_BRIEF.md`
+   §19). This is where every pricing-tier CTA and the final "Talk to us"
+   button on `/companies` now post, replacing the old `mailto:` links — one
+   Airtable-backed pipeline for every conversion-intent form instead of a mix
+   of Airtable forms and mail clients. Fields: `Name`, `Email`, `Company`,
+   `Tier Interest` (single select: `reverify` / `report` / `subscribe` /
+   blank), `Wallet Context`, `Message`, `Status` (single select, default
+   `New`). No automation — a person reads new rows and reaches out; this is
+   a record of interest, not a queue with a guaranteed response time.
+
+   Set `AIRTABLE_TABLE_LEADS` in `.env` if you name the table something other
+   than `Leads`.
 
 ### Airtable automation required
 

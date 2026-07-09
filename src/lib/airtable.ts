@@ -236,6 +236,48 @@ export async function createFreeScanApplication(input: CreateFreeScanApplication
   return data.id as string;
 }
 
+// --- Leads ------------------------------------------------------------
+// Every "buy a tier" / "talk to us" CTA on the Companies page posts here
+// instead of opening a bare mailto: link (see WEBSITE_BRIEF.md §19 — forms
+// rationalization). Same shape/philosophy as FreeScanApplications: writes a
+// single "New" row, no automation, no auto-reply — a person reads it and
+// reaches out. This is a record of interest, not a contract or a queue
+// position promise.
+
+interface CreateLeadInput {
+  name: string;
+  email: string;
+  company?: string;
+  tierInterest?: string; // "reverify" | "report" | "subscribe" | "" (not sure yet)
+  walletContext?: string; // wallet name, when the CTA was reached from a wallet-specific link
+  message?: string;
+}
+
+export async function createLead(input: CreateLeadInput): Promise<string> {
+  const table = process.env.AIRTABLE_TABLE_LEADS || "Leads";
+  const res = await fetch(`${AIRTABLE_API_BASE}/${process.env.AIRTABLE_BASE_ID}/${encodeURIComponent(table)}`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${process.env.AIRTABLE_API_KEY}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      fields: {
+        Name: input.name,
+        Email: input.email,
+        ...(input.company ? { Company: input.company } : {}),
+        ...(input.tierInterest ? { "Tier Interest": input.tierInterest } : {}),
+        ...(input.walletContext ? { "Wallet Context": input.walletContext } : {}),
+        ...(input.message ? { Message: input.message } : {}),
+        Status: "New",
+      },
+    }),
+  });
+  if (!res.ok) throw new Error(`Airtable createLead failed (${res.status}): ${await res.text()}`);
+  const data = await res.json();
+  return data.id as string;
+}
+
 // --- Wallets ------------------------------------------------------------
 
 interface WalletFields {
