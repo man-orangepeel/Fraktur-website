@@ -414,7 +414,7 @@ export default async function CompaniesPage({
         <section className="border-t border-fraktur-border bg-fraktur-panel py-16 text-center">
           <div className="mx-auto max-w-2xl px-4">
             <h2 className="font-display text-3xl text-fraktur-text sm:text-4xl">
-              Every wallet fractures somewhere. Know where yours does — before your users do.
+              Every wallet fractures somewhere. Know where yours does. Now.
             </h2>
             <div className="mt-8 flex flex-wrap justify-center gap-3">
               <a
