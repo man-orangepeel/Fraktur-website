@@ -386,7 +386,7 @@ export default async function CompaniesPage({
               </p>
               <a
                 href="/apply"
-                className="shrink-0 rounded-full border border-fraktur-border px-5 py-2 text-sm font-medium text-fraktur-text hover:border-fraktur-orange"
+                className="shrink-0 rounded-full bg-fraktur-orange px-6 py-3 text-sm font-semibold text-black transition hover:bg-fraktur-orangeDim"
               >
                 Apply for a free scan →
               </a>

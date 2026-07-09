@@ -12,10 +12,10 @@ import { airtableConfigured, createFreeScanApplication } from "@/lib/airtable";
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { repoUrl, contactEmail, projectName, teamSize, note } = body;
+    const { repoUrl, contactEmail, projectName, teamSize, note, interestedWallets } = body;
 
-    if (!repoUrl || !contactEmail) {
-      return NextResponse.json({ error: "repoUrl and contactEmail are required" }, { status: 400 });
+    if (!repoUrl || !contactEmail || !projectName) {
+      return NextResponse.json({ error: "repoUrl, contactEmail, and projectName are required" }, { status: 400 });
     }
 
     if (!airtableConfigured()) {
@@ -31,7 +31,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    await createFreeScanApplication({ repoUrl, contactEmail, projectName, teamSize, note });
+    await createFreeScanApplication({ repoUrl, contactEmail, projectName, teamSize, note, interestedWallets });
     return NextResponse.json({ ok: true });
   } catch (err) {
     console.error("apply-free-scan failed:", err);

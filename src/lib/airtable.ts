@@ -210,6 +210,7 @@ interface CreateFreeScanApplicationInput {
   projectName?: string;
   teamSize?: string;
   note?: string;
+  interestedWallets?: string[]; // names of tracked wallets the applicant flagged interest in
 }
 
 export async function createFreeScanApplication(input: CreateFreeScanApplicationInput): Promise<string> {
@@ -227,6 +228,7 @@ export async function createFreeScanApplication(input: CreateFreeScanApplication
         ...(input.projectName ? { "Project Name": input.projectName } : {}),
         ...(input.teamSize ? { "Team Size": input.teamSize } : {}),
         ...(input.note ? { Note: input.note } : {}),
+        ...(input.interestedWallets?.length ? { "Interested Wallets": input.interestedWallets.join(", ") } : {}),
         Status: "Pending",
       },
     }),

@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import type { Wallet } from "@/lib/types";
-import { companiesHref, findingStatusBadge, severityColorClass } from "@/lib/format";
+import { findingStatusBadge, severityColorClass } from "@/lib/format";
 import { useDonation } from "./DonationContext";
 
 function formatDate(d: string): string {
@@ -195,7 +195,7 @@ export function AuditHistoryModal({ wallet, onClose }: { wallet: Wallet; onClose
 
         <div className="space-y-2 border-t border-fraktur-border pt-4">
           <a
-            href={companiesHref(wallet, "report")}
+            href={`/apply?wallet=${encodeURIComponent(wallet.name)}`}
             className="block text-sm font-medium text-fraktur-electric hover:underline"
           >
             Get the full report →
