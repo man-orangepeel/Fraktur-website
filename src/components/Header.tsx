@@ -7,12 +7,15 @@ import { useDonation } from "./DonationContext";
 export function Header({ variant }: { variant: "home" | "companies" }) {
   const { open } = useDonation();
 
+  // Absolute path + fragment — this header (variant="companies") is also
+  // reused on /apply, where a bare "#problem" href would just tack the
+  // fragment onto the current URL instead of navigating to the section.
   const companiesAnchors = [
-    { href: "#problem", label: "Problem" },
-    { href: "#solution", label: "Solution" },
-    { href: "#proof", label: "Proof" },
-    { href: "#pricing", label: "Pricing" },
-    { href: "#faq", label: "FAQ" },
+    { href: "/companies#problem", label: "Problem" },
+    { href: "/companies#solution", label: "Solution" },
+    { href: "/companies#proof", label: "Proof" },
+    { href: "/companies#pricing", label: "Pricing" },
+    { href: "/companies#faq", label: "FAQ" },
   ];
 
   return (
@@ -25,9 +28,9 @@ export function Header({ variant }: { variant: "home" | "companies" }) {
         {variant === "companies" && (
           <nav className="hidden items-center gap-6 text-sm text-fraktur-muted md:flex">
             {companiesAnchors.map((a) => (
-              <a key={a.href} href={a.href} className="hover:text-fraktur-text">
+              <Link key={a.href} href={a.href} className="hover:text-fraktur-text">
                 {a.label}
-              </a>
+              </Link>
             ))}
             <Link href="/" className="hover:text-fraktur-text">
               Wallet Watcher
