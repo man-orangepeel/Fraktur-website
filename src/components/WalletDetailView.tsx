@@ -111,8 +111,8 @@ export function WalletDetailView({
   const currentFindings = [...currentEntry.findings].sort((a, b) => SEVERITY_RANK[b.severity] - SEVERITY_RANK[a.severity]);
 
   return (
-    <div>
-      <div className="grid gap-8 lg:grid-cols-[300px_36rem] lg:items-start">
+    <div className="mx-auto max-w-[960px]">
+      <div className="grid gap-8 lg:grid-cols-[360px_36rem] lg:items-start">
         {/* Column 1 — audit history: filters, list, pagination. */}
         <div>
           <h2 className="mb-3 text-lg font-semibold text-fraktur-text">Audit history</h2>
@@ -155,43 +155,57 @@ export function WalletDetailView({
           {filteredSorted.length === 0 ? (
             <p className="text-sm text-fraktur-muted">No scans match these filters.</p>
           ) : (
-            <div className="space-y-1 lg:max-h-[32rem] lg:overflow-y-auto lg:pr-1">
-              {paged.map(({ round, highest, complete }) => {
-                const isSelected = round.date === current.date;
-                return (
-                  <button
-                    key={round.date}
-                    onClick={() => setSelectedDate(round.date)}
-                    className={`flex w-full items-center gap-2 whitespace-nowrap rounded-md border px-2.5 py-2 text-left text-xs transition ${
-                      isSelected
-                        ? "border-fraktur-electric bg-fraktur-electric/10 text-fraktur-text"
-                        : "border-transparent bg-fraktur-panel text-fraktur-muted hover:border-fraktur-electric/50"
-                    }`}
-                  >
-                    <span className="shrink-0">{round.date}</span>
-                    <span
-                      className={`shrink-0 rounded-full px-1.5 py-0.5 text-[9px] font-semibold uppercase ${
-                        complete ? "bg-severity-none text-white" : "bg-fraktur-electric text-white"
+            <div>
+              {/* Column headers — each row below shares this exact grid
+                  template, so every field lands in its own fixed-width
+                  column and stays aligned regardless of how long
+                  "Complete" vs. "Partial" (or any other cell) is. */}
+              <div className="grid grid-cols-[92px_84px_24px_1fr_28px] gap-4 px-3 pb-2 text-[10px] font-semibold uppercase tracking-wide text-fraktur-muted">
+                <span>Date</span>
+                <span>Status</span>
+                <span>Sev.</span>
+                <span></span>
+                <span></span>
+              </div>
+              <div className="space-y-2 lg:max-h-[32rem] lg:overflow-y-auto lg:pr-1">
+                {paged.map(({ round, highest, complete }) => {
+                  const isSelected = round.date === current.date;
+                  return (
+                    <button
+                      key={round.date}
+                      onClick={() => setSelectedDate(round.date)}
+                      className={`grid w-full grid-cols-[92px_84px_24px_1fr_28px] items-center gap-4 rounded-md border px-3 py-3 text-left text-sm transition ${
+                        isSelected
+                          ? "border-fraktur-electric bg-fraktur-electric/10 text-fraktur-text"
+                          : "border-transparent bg-fraktur-panel text-fraktur-muted hover:border-fraktur-electric/50"
                       }`}
                     >
-                      {complete ? "Complete" : "Partial"}
-                    </span>
-                    <span
-                      className="h-3 w-3 shrink-0 rounded-sm"
-                      style={{ backgroundColor: severityHex(highest) }}
-                      title={highest === "None" ? "No findings" : `Highest: ${highest}`}
-                      aria-label={highest === "None" ? "No findings" : `Highest severity: ${highest}`}
-                    />
-                    <span
-                      className="ml-auto shrink-0 text-sm"
-                      title={round.publiclyDisclosed ? "Public" : "Embargoed"}
-                      aria-label={round.publiclyDisclosed ? "Public" : "Embargoed"}
-                    >
-                      {round.publiclyDisclosed ? "🔍" : "🔒"}
-                    </span>
-                  </button>
-                );
-              })}
+                      <span className="whitespace-nowrap">{round.date}</span>
+                      <span
+                        className={`w-fit justify-self-start rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase ${
+                          complete ? "bg-severity-none text-white" : "bg-fraktur-electric text-white"
+                        }`}
+                      >
+                        {complete ? "Complete" : "Partial"}
+                      </span>
+                      <span
+                        className="h-3.5 w-3.5 justify-self-center rounded-sm"
+                        style={{ backgroundColor: severityHex(highest) }}
+                        title={highest === "None" ? "No findings" : `Highest: ${highest}`}
+                        aria-label={highest === "None" ? "No findings" : `Highest severity: ${highest}`}
+                      />
+                      <span />
+                      <span
+                        className="justify-self-center text-base"
+                        title={round.publiclyDisclosed ? "Public" : "Embargoed"}
+                        aria-label={round.publiclyDisclosed ? "Public" : "Embargoed"}
+                      >
+                        {round.publiclyDisclosed ? "🔍" : "🔒"}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
             </div>
           )}
 
