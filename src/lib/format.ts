@@ -106,6 +106,19 @@ export function freshnessInfo(lastReviewDate: string): FreshnessInfo {
   return { label: `Last verified ${agoLabel(days)} — re-scan pending`, className: "bg-fraktur-border text-fraktur-muted" };
 }
 
+// Plain-text variant of freshnessInfo (verb "Scanned", not "Verified" — a
+// date isn't a verdict) shared by the wallet card and the detail page.
+export function scanLabelFor(lastReviewDate: string): { label: string; colorClass: string } {
+  const freshness = freshnessInfo(lastReviewDate);
+  const label = freshness.label.replace(/^Verified/, "Scanned").replace(/^Last verified/, "Last scanned");
+  const days = daysSinceReview(lastReviewDate);
+  // Same green/blue language as the status pill (Fact 2) — a recent scan
+  // reads as "healthy" (green), an older one as "still valid, just less
+  // fresh" (blue), never as a muted/washed-out warning.
+  const colorClass = days < 30 ? "text-severity-none" : "text-fraktur-electric";
+  return { label, colorClass };
+}
+
 // --- Finding status badge (Open vs. team-declared vs. FRAKTUR-verified) --
 
 export function findingStatusBadge(status: FindingStatus | undefined): FreshnessInfo {
@@ -134,4 +147,14 @@ export function companiesHref(wallet: Pick<Wallet, "name" | "lastReviewDate" | "
   const params = new URLSearchParams({ wallet: wallet.name });
   if (reason) params.set("reason", reason);
   return `/companies?${params.toString()}`;
+}
+
+// --- Wallet detail page slug — derived from the name rather than stored,
+// so a real Airtable wallet doesn't need a new field just for this.
+export function walletSlug(name: string): string {
+  return name
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-+|-+$)/g, "");
 }

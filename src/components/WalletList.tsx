@@ -2,12 +2,12 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import type { Wallet } from "@/lib/types";
-import { companiesHref, countBySeverity, daysSinceReview, freshnessInfo, highestSeverity } from "@/lib/format";
+import { companiesHref, countBySeverity, highestSeverity, scanLabelFor, walletSlug } from "@/lib/format";
 import { useDonation } from "./DonationContext";
 import { AuditFlowDiagram } from "./AuditFlowDiagram";
 import { SeverityBadge } from "./SeverityBadge";
-import { AuditHistoryModal } from "./AuditHistoryModal";
 
 type SortKey = "risk" | "recent";
 
@@ -84,8 +84,8 @@ export function WalletList({ wallets }: { wallets: Wallet[] }) {
   const [query, setQuery] = useState("");
   const [riskFilter, setRiskFilter] = useState<string>("All");
   const [sortKey, setSortKey] = useState<SortKey>("recent");
-  const [historyWalletId, setHistoryWalletId] = useState<string | null>(null);
   const { open } = useDonation();
+  const router = useRouter();
 
   const filtered = useMemo(() => {
     let list = wallets.filter((w) => w.name.toLowerCase().includes(query.toLowerCase()));
@@ -145,14 +145,9 @@ export function WalletList({ wallets }: { wallets: Wallet[] }) {
       <div className="grid gap-4 md:grid-cols-2">
         {filtered.map((wallet) => {
           const counts = countBySeverity(wallet.findings);
-          const freshness = freshnessInfo(wallet.lastReviewDate);
-          const scanLabel = freshness.label.replace(/^Verified/, "Scanned").replace(/^Last verified/, "Last scanned");
-          const days = daysSinceReview(wallet.lastReviewDate);
-          // Same green/blue language as the status pill (Fact 2) — a recent
-          // scan reads as "healthy" (green), an older one as "still valid,
-          // just less fresh" (blue), never as a muted/washed-out warning.
-          const scanColorClass = days < 30 ? "text-severity-none" : "text-fraktur-electric";
+          const { label: scanLabel, colorClass: scanColorClass } = scanLabelFor(wallet.lastReviewDate);
           const isCompleted = wallet.status === "Completed";
+          const historyHref = `/wallets/${walletSlug(wallet.name)}`;
           const walletHeader = (
             <>
               {wallet.iconInitials && (
@@ -187,13 +182,10 @@ export function WalletList({ wallets }: { wallets: Wallet[] }) {
 
               {/* 2. Fact 1 — scan date, plain text (deliberately not a filled
                   pill — this is a date, not a verdict), colored by
-                  freshness, clickable straight into the audit history. */}
-              <button
-                onClick={() => setHistoryWalletId(wallet.id)}
-                className={`mb-3 block text-left text-xs hover:underline ${scanColorClass}`}
-              >
+                  freshness, linking straight into the audit history page. */}
+              <Link href={historyHref} className={`mb-3 block text-left text-xs hover:underline ${scanColorClass}`}>
                 {scanLabel}
-              </button>
+              </Link>
 
               {/* 3. Fact 2 — status + file count, one pill. */}
               <div
@@ -233,7 +225,7 @@ export function WalletList({ wallets }: { wallets: Wallet[] }) {
                         key={sev}
                         severity={sev}
                         count={counts[sev]}
-                        onClick={() => setHistoryWalletId(wallet.id)}
+                        onClick={() => router.push(historyHref)}
                       />
                     ) : null
                   )}
@@ -261,14 +253,6 @@ export function WalletList({ wallets }: { wallets: Wallet[] }) {
           );
         })}
       </div>
-
-      {historyWalletId &&
-        (() => {
-          const historyWallet = wallets.find((w) => w.id === historyWalletId);
-          return historyWallet ? (
-            <AuditHistoryModal wallet={historyWallet} onClose={() => setHistoryWalletId(null)} />
-          ) : null;
-        })()}
     </div>
     </section>
   );
