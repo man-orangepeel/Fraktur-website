@@ -11,18 +11,15 @@ function formatDate(d: string): string {
 }
 
 type PeriodFilter = "all" | "30d" | "90d" | "year";
-
-const PERIOD_LABELS: Record<PeriodFilter, string> = {
-  all: "All",
-  "30d": "Last 30 days",
-  "90d": "Last 90 days",
-  year: "This year",
-};
+type SeverityFilter = "All" | Severity | "None";
+type SortKey = "recent" | "risk";
 
 const SEVERITY_RANK: Record<Severity, number> = { Critical: 3, High: 2, Medium: 1, Low: 0 };
-const SEVERITY_FILTERS: (Severity | "None")[] = ["Critical", "High", "Medium", "Low", "None"];
+const SEVERITY_RANK_WITH_NONE: Record<Severity | "None", number> = { ...SEVERITY_RANK, None: -1 };
 
 const PAGE_SIZE = 12;
+const SELECT_CLASS =
+  "rounded-md border border-fraktur-border bg-fraktur-panel px-3 py-1.5 text-xs text-fraktur-text focus:border-fraktur-electric focus:outline-none focus:ring-1 focus:ring-fraktur-electric";
 
 function roundHighestSeverity(findings: Finding[]): Severity | "None" {
   let best: Severity | "None" = "None";
@@ -43,9 +40,11 @@ function roundIsComplete(findings: Finding[]): boolean {
 /**
  * The whole interactive body of the wallet detail page: a history sidebar
  * (filters + list + pagination) on the left, and the wallet's "card" — the
- * exact same text layout/data as the Home page grid, just standalone —
- * plus the selected round's finding detail on the right. Selecting a round
- * updates both the diagram's severity blocks and the finding list below it.
+ * exact same text layout/data/alignment as the Home page grid, just
+ * standalone — plus the selected round's finding detail on the right.
+ * Selecting a round updates the diagram (that round's own files/tests
+ * numbers and severity blocks, not the wallet's current totals) and the
+ * finding list below it.
  */
 export function WalletDetailView({
   wallet,
@@ -60,37 +59,25 @@ export function WalletDetailView({
   const { label: scanLabel, colorClass: scanColorClass } = scanLabelFor(wallet.lastReviewDate);
   const isCompleted = wallet.status === "Completed";
 
-  const history = useMemo(
-    () => [...(wallet.auditHistory ?? [])].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()),
-    [wallet.auditHistory]
-  );
+  const history = useMemo(() => wallet.auditHistory ?? [], [wallet.auditHistory]);
 
   const [periodFilter, setPeriodFilter] = useState<PeriodFilter>("all");
-  const [severityFilters, setSeverityFilters] = useState<Set<Severity | "None">>(new Set());
+  const [severityFilter, setSeverityFilter] = useState<SeverityFilter>("All");
+  const [sortKey, setSortKey] = useState<SortKey>("recent");
   const [page, setPage] = useState(0);
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
 
-  function toggleSeverityFilter(sev: Severity | "None") {
-    setSeverityFilters((prev) => {
-      const next = new Set(prev);
-      if (next.has(sev)) next.delete(sev);
-      else next.add(sev);
-      return next;
-    });
-    setPage(0);
-  }
-
   const roundsWithMeta = useMemo(
     () =>
-      history.map((h) => {
-        const findings = wallet.findings.filter((f) => h.findingIds.includes(f.id));
-        return { round: h, findings, highest: roundHighestSeverity(findings), complete: roundIsComplete(findings) };
+      history.map((round) => {
+        const findings = wallet.findings.filter((f) => round.findingIds.includes(f.id));
+        return { round, findings, highest: roundHighestSeverity(findings), complete: roundIsComplete(findings) };
       }),
     [history, wallet.findings]
   );
 
-  const filtered = useMemo(() => {
-    return roundsWithMeta.filter(({ round, highest }) => {
+  const filteredSorted = useMemo(() => {
+    const filtered = roundsWithMeta.filter(({ round, highest }) => {
       if (periodFilter !== "all") {
         const d = new Date(round.date);
         if (periodFilter === "year") {
@@ -101,67 +88,71 @@ export function WalletDetailView({
           if (periodFilter === "90d" && days > 90) return false;
         }
       }
-      if (severityFilters.size > 0 && !severityFilters.has(highest)) return false;
+      if (severityFilter !== "All" && highest !== severityFilter) return false;
       return true;
     });
-  }, [roundsWithMeta, periodFilter, severityFilters]);
+    return [...filtered].sort((a, b) => {
+      if (sortKey === "risk") return SEVERITY_RANK_WITH_NONE[b.highest] - SEVERITY_RANK_WITH_NONE[a.highest];
+      return new Date(b.round.date).getTime() - new Date(a.round.date).getTime();
+    });
+  }, [roundsWithMeta, periodFilter, severityFilter, sortKey]);
 
-  const pageCount = Math.max(Math.ceil(filtered.length / PAGE_SIZE), 1);
-  const paged = filtered.slice(page * PAGE_SIZE, page * PAGE_SIZE + PAGE_SIZE);
+  const pageCount = Math.max(Math.ceil(filteredSorted.length / PAGE_SIZE), 1);
+  const paged = filteredSorted.slice(page * PAGE_SIZE, page * PAGE_SIZE + PAGE_SIZE);
 
   if (history.length === 0) {
     return <p className="text-sm text-fraktur-muted">No audit rounds recorded for this wallet yet.</p>;
   }
 
+  // Most recent round selected by default (roundsWithMeta preserves the
+  // data's own order — sample/Airtable data lists newest first).
   const currentEntry = roundsWithMeta.find((r) => r.round.date === selectedDate) ?? roundsWithMeta[0];
   const current = currentEntry.round;
   const currentFindings = [...currentEntry.findings].sort((a, b) => SEVERITY_RANK[b.severity] - SEVERITY_RANK[a.severity]);
 
   return (
     <div>
-      <div className="grid gap-8 lg:grid-cols-[340px_1fr] lg:items-start">
+      <div className="grid gap-8 lg:grid-cols-[300px_36rem] lg:items-start">
         {/* Column 1 — audit history: filters, list, pagination. */}
         <div>
           <h2 className="mb-3 text-lg font-semibold text-fraktur-text">Audit history</h2>
 
-          <p className="mb-1.5 text-xs font-medium uppercase tracking-wide text-fraktur-muted">Age</p>
-          <div className="mb-3 flex flex-wrap gap-2 text-xs">
-            {(Object.keys(PERIOD_LABELS) as PeriodFilter[]).map((f) => (
-              <button
-                key={f}
-                onClick={() => {
-                  setPeriodFilter(f);
-                  setPage(0);
-                }}
-                className={`rounded-full border px-3 py-1 font-medium transition ${
-                  periodFilter === f
-                    ? "border-fraktur-electric bg-fraktur-electric/10 text-fraktur-text"
-                    : "border-fraktur-border text-fraktur-muted hover:border-fraktur-electric/50"
-                }`}
-              >
-                {PERIOD_LABELS[f]}
-              </button>
-            ))}
+          <div className="mb-4 flex flex-wrap gap-2">
+            <select
+              value={periodFilter}
+              onChange={(e) => {
+                setPeriodFilter(e.target.value as PeriodFilter);
+                setPage(0);
+              }}
+              className={SELECT_CLASS}
+            >
+              <option value="all">All ages</option>
+              <option value="30d">Last 30 days</option>
+              <option value="90d">Last 90 days</option>
+              <option value="year">This year</option>
+            </select>
+            <select
+              value={severityFilter}
+              onChange={(e) => {
+                setSeverityFilter(e.target.value as SeverityFilter);
+                setPage(0);
+              }}
+              className={SELECT_CLASS}
+            >
+              <option value="All">All vulnerability types</option>
+              <option value="Critical">Critical</option>
+              <option value="High">High</option>
+              <option value="Medium">Medium</option>
+              <option value="Low">Low</option>
+              <option value="None">Clean</option>
+            </select>
+            <select value={sortKey} onChange={(e) => setSortKey(e.target.value as SortKey)} className={SELECT_CLASS}>
+              <option value="recent">Sort: most recent</option>
+              <option value="risk">Sort: risk</option>
+            </select>
           </div>
 
-          <p className="mb-1.5 text-xs font-medium uppercase tracking-wide text-fraktur-muted">Vulnerability type</p>
-          <div className="mb-4 flex flex-wrap gap-2 text-xs">
-            {SEVERITY_FILTERS.map((sev) => (
-              <button
-                key={sev}
-                onClick={() => toggleSeverityFilter(sev)}
-                className={`rounded-full border px-3 py-1 font-medium transition ${
-                  severityFilters.has(sev)
-                    ? "border-fraktur-electric bg-fraktur-electric/10 text-fraktur-text"
-                    : "border-fraktur-border text-fraktur-muted hover:border-fraktur-electric/50"
-                }`}
-              >
-                {sev === "None" ? "Clean" : sev}
-              </button>
-            ))}
-          </div>
-
-          {filtered.length === 0 ? (
+          {filteredSorted.length === 0 ? (
             <p className="text-sm text-fraktur-muted">No scans match these filters.</p>
           ) : (
             <div className="space-y-1 lg:max-h-[32rem] lg:overflow-y-auto lg:pr-1">
@@ -171,38 +162,32 @@ export function WalletDetailView({
                   <button
                     key={round.date}
                     onClick={() => setSelectedDate(round.date)}
-                    className={`flex w-full flex-col gap-1.5 rounded-md border px-3 py-2 text-left text-xs transition ${
+                    className={`flex w-full items-center gap-2 whitespace-nowrap rounded-md border px-2.5 py-2 text-left text-xs transition ${
                       isSelected
                         ? "border-fraktur-electric bg-fraktur-electric/10 text-fraktur-text"
                         : "border-transparent bg-fraktur-panel text-fraktur-muted hover:border-fraktur-electric/50"
                     }`}
                   >
-                    <span>
-                      {round.date} · {round.version}
+                    <span className="shrink-0">{round.date}</span>
+                    <span
+                      className={`shrink-0 rounded-full px-1.5 py-0.5 text-[9px] font-semibold uppercase ${
+                        complete ? "bg-severity-none text-white" : "bg-fraktur-electric text-white"
+                      }`}
+                    >
+                      {complete ? "Complete" : "Partial"}
                     </span>
-                    <span className="flex flex-wrap items-center gap-1.5">
-                      <span
-                        className={`rounded-full px-1.5 py-0.5 text-[9px] font-semibold uppercase ${
-                          complete ? "bg-severity-none text-white" : "bg-fraktur-electric text-white"
-                        }`}
-                      >
-                        {complete ? "Complete" : "Partial"}
-                      </span>
-                      <span
-                        className="h-3 w-3 shrink-0 rounded-sm"
-                        style={{ backgroundColor: severityHex(highest) }}
-                        title={highest === "None" ? "No findings" : `Highest: ${highest}`}
-                        aria-label={highest === "None" ? "No findings" : `Highest severity: ${highest}`}
-                      />
-                      {round.publiclyDisclosed ? (
-                        <span className="rounded-full bg-fraktur-electric px-1.5 py-0.5 text-[9px] font-semibold uppercase text-white">
-                          Public
-                        </span>
-                      ) : (
-                        <span className="rounded-full bg-fraktur-border px-1.5 py-0.5 text-[9px] font-semibold uppercase text-fraktur-muted">
-                          🔒 Embargoed
-                        </span>
-                      )}
+                    <span
+                      className="h-3 w-3 shrink-0 rounded-sm"
+                      style={{ backgroundColor: severityHex(highest) }}
+                      title={highest === "None" ? "No findings" : `Highest: ${highest}`}
+                      aria-label={highest === "None" ? "No findings" : `Highest severity: ${highest}`}
+                    />
+                    <span
+                      className="ml-auto shrink-0 text-sm"
+                      title={round.publiclyDisclosed ? "Public" : "Embargoed"}
+                      aria-label={round.publiclyDisclosed ? "Public" : "Embargoed"}
+                    >
+                      {round.publiclyDisclosed ? "🔍" : "🔒"}
                     </span>
                   </button>
                 );
@@ -210,7 +195,7 @@ export function WalletDetailView({
             </div>
           )}
 
-          {filtered.length > PAGE_SIZE && (
+          {filteredSorted.length > PAGE_SIZE && (
             <div className="mt-4 flex items-center gap-3 text-sm">
               <button
                 disabled={page === 0}
@@ -236,11 +221,7 @@ export function WalletDetailView({
         {/* Column 2 — the wallet "card", same text layout/data/alignment as
             the Home page grid, followed by the selected round's detail. */}
         <div>
-          {/* max-w-xl caps this at roughly the same width a card has in the
-              Home page's 2-up grid, so the diagram's preserveAspectRatio="none"
-              ribbons stretch to the same proportions instead of the whole
-              (much wider) page column. */}
-          <div className="max-w-xl rounded-xl border border-fraktur-electric/25 bg-fraktur-panel p-5">
+          <div className="rounded-xl border border-fraktur-electric/25 bg-fraktur-panel p-5">
             <div className="mb-3 flex items-start gap-3">
               {wallet.iconInitials && (
                 <span
@@ -279,13 +260,14 @@ export function WalletDetailView({
               </span>
             </div>
 
-            {/* Diagram reflects the SELECTED round's findings, not the
-                wallet's all-time list — this is what "updates on click". */}
+            {/* Diagram reflects the SELECTED round's own numbers (files
+                scanned/selected, tests run, severity blocks) — this is what
+                "updates on click", not the wallet's current-state totals. */}
             <div className="rounded-lg bg-fraktur-bg p-3">
               <AuditFlowDiagram
-                testsRun={wallet.testsRun}
-                filesScanned={wallet.filesScanned}
-                filesSelected={wallet.filesSelected}
+                testsRun={current.testsRun}
+                filesScanned={current.filesScanned}
+                filesSelected={current.filesSelected}
                 maxTestsRun={maxTestsRun}
                 maxFilesScanned={maxFilesScanned}
                 findings={currentEntry.findings}

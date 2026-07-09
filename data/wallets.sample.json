@@ -25,9 +25,9 @@
       { "id": "kf6", "walletId": "wallet-kestrel-01", "cwe": "CWE-401", "title": "Key material not cleared after derivation", "severity": "Low", "status": "Open" }
     ],
     "auditHistory": [
-      { "date": "2026-05-15", "version": "v0.3.1", "publiclyDisclosed": true, "disclosureDate": "2026-06-01", "findingIds": ["kf1", "kf2"] },
-      { "date": "2026-06-20", "version": "v0.3.5", "publiclyDisclosed": true, "disclosureDate": "2026-06-20", "findingIds": ["kf3", "kf4"] },
-      { "date": "2026-07-02", "version": "v0.4.0", "publiclyDisclosed": false, "disclosureDate": "2026-10-01", "findingIds": ["kf5", "kf6"] }
+      { "date": "2026-05-15", "version": "v0.3.1", "publiclyDisclosed": true, "disclosureDate": "2026-06-01", "findingIds": ["kf1", "kf2"], "testsRun": 40, "filesScanned": 1800, "filesSelected": 95 },
+      { "date": "2026-06-20", "version": "v0.3.5", "publiclyDisclosed": true, "disclosureDate": "2026-06-20", "findingIds": ["kf3", "kf4"], "testsRun": 58, "filesScanned": 2100, "filesSelected": 112 },
+      { "date": "2026-07-02", "version": "v0.4.0", "publiclyDisclosed": false, "disclosureDate": "2026-10-01", "findingIds": ["kf5", "kf6"], "testsRun": 72, "filesScanned": 2450, "filesSelected": 134 }
     ]
   },
   {
@@ -47,7 +47,7 @@
     "published": true,
     "findings": [],
     "auditHistory": [
-      { "date": "2026-06-20", "version": "v0.4.0", "publiclyDisclosed": false, "disclosureDate": "2026-09-18", "findingIds": [] }
+      { "date": "2026-06-20", "version": "v0.4.0", "publiclyDisclosed": false, "disclosureDate": "2026-09-18", "findingIds": [], "testsRun": 24, "filesScanned": 980, "filesSelected": 41 }
     ]
   },
   {
@@ -85,7 +85,7 @@
       { "id": "tf15", "walletId": "wallet-thornwood-01", "cwe": "CWE-1188", "title": "Insecure default RPC binding in regtest harness", "severity": "Low", "status": "Verified Fixed" }
     ],
     "auditHistory": [
-      { "date": "2026-07-01", "version": "v0.4.0", "publiclyDisclosed": false, "disclosureDate": "2026-09-29", "findingIds": ["tf1", "tf2", "tf3", "tf4", "tf5", "tf6", "tf7", "tf8", "tf9", "tf10", "tf11", "tf12", "tf13", "tf14", "tf15"] }
+      { "date": "2026-07-01", "version": "v0.4.0", "publiclyDisclosed": false, "disclosureDate": "2026-09-29", "findingIds": ["tf1", "tf2", "tf3", "tf4", "tf5", "tf6", "tf7", "tf8", "tf9", "tf10", "tf11", "tf12", "tf13", "tf14", "tf15"], "testsRun": 45, "filesScanned": 3100, "filesSelected": 210 }
     ]
   },
   {
@@ -111,7 +111,7 @@
       { "id": "fw3", "walletId": "wallet-ferrowatch-01", "cwe": "CWE-20", "title": "Improper validation of PSBT input fields", "severity": "Medium", "status": "Verified Fixed" }
     ],
     "auditHistory": [
-      { "date": "2026-05-20", "version": "v0.3.1", "publiclyDisclosed": false, "disclosureDate": "2026-08-18", "findingIds": ["fw1", "fw2", "fw3"] }
+      { "date": "2026-05-20", "version": "v0.3.1", "publiclyDisclosed": false, "disclosureDate": "2026-08-18", "findingIds": ["fw1", "fw2", "fw3"], "testsRun": 60, "filesScanned": 890, "filesSelected": 51 }
     ]
   },
   {
@@ -133,7 +133,7 @@
       { "id": "lf1", "walletId": "wallet-lantern-01", "cwe": "CWE-209", "title": "Verbose error message leaks internal path", "severity": "Low", "status": "Open" }
     ],
     "auditHistory": [
-      { "date": "2026-07-05", "version": "v0.4.0", "publiclyDisclosed": false, "disclosureDate": "2026-10-03", "findingIds": ["lf1"] }
+      { "date": "2026-07-05", "version": "v0.4.0", "publiclyDisclosed": false, "disclosureDate": "2026-10-03", "findingIds": ["lf1"], "testsRun": 12, "filesScanned": 150, "filesSelected": 9 }
     ]
   },
   {
@@ -166,7 +166,7 @@
       { "id": "rf10", "walletId": "wallet-rowan-01", "cwe": "CWE-362", "title": "Concurrency / race condition in payment retry logic", "severity": "Low", "status": "Verified Fixed" }
     ],
     "auditHistory": [
-      { "date": "2026-06-30", "version": "v0.4.0", "publiclyDisclosed": false, "disclosureDate": "2026-09-28", "findingIds": ["rf1", "rf2", "rf3", "rf4", "rf5", "rf6", "rf7", "rf8", "rf9", "rf10"] }
+      { "date": "2026-06-30", "version": "v0.4.0", "publiclyDisclosed": false, "disclosureDate": "2026-09-28", "findingIds": ["rf1", "rf2", "rf3", "rf4", "rf5", "rf6", "rf7", "rf8", "rf9", "rf10"], "testsRun": 38, "filesScanned": 1720, "filesSelected": 88 }
     ]
   },
   {
@@ -193,20 +193,20 @@
       { "id": "dm4", "walletId": "wallet-driftmark-01", "cwe": "CWE-287", "title": "Authentication bypass in watch-only import flow", "severity": "High", "status": "Open" }
     ],
     "auditHistory": [
-      { "date": "2026-07-05", "version": "v0.7.0", "publiclyDisclosed": false, "disclosureDate": "2026-10-03", "findingIds": ["dm4"] },
-      { "date": "2026-06-18", "version": "v0.6.4", "publiclyDisclosed": true, "disclosureDate": "2026-06-18", "findingIds": [] },
-      { "date": "2026-06-01", "version": "v0.6.3", "publiclyDisclosed": true, "disclosureDate": "2026-06-01", "findingIds": ["dm3"] },
-      { "date": "2026-05-15", "version": "v0.6.2", "publiclyDisclosed": true, "disclosureDate": "2026-05-15", "findingIds": [] },
-      { "date": "2026-04-28", "version": "v0.6.1", "publiclyDisclosed": true, "disclosureDate": "2026-04-28", "findingIds": [] },
-      { "date": "2026-04-10", "version": "v0.6.0", "publiclyDisclosed": true, "disclosureDate": "2026-04-10", "findingIds": ["dm2"] },
-      { "date": "2026-03-24", "version": "v0.5.4", "publiclyDisclosed": true, "disclosureDate": "2026-03-24", "findingIds": [] },
-      { "date": "2026-03-07", "version": "v0.5.3", "publiclyDisclosed": true, "disclosureDate": "2026-03-07", "findingIds": [] },
-      { "date": "2026-02-18", "version": "v0.5.2", "publiclyDisclosed": true, "disclosureDate": "2026-02-18", "findingIds": [] },
-      { "date": "2026-02-01", "version": "v0.5.1", "publiclyDisclosed": true, "disclosureDate": "2026-02-01", "findingIds": ["dm1"] },
-      { "date": "2026-01-15", "version": "v0.5.0", "publiclyDisclosed": true, "disclosureDate": "2026-01-15", "findingIds": [] },
-      { "date": "2025-12-29", "version": "v0.4.5", "publiclyDisclosed": true, "disclosureDate": "2025-12-29", "findingIds": [] },
-      { "date": "2025-12-12", "version": "v0.4.4", "publiclyDisclosed": true, "disclosureDate": "2025-12-12", "findingIds": [] },
-      { "date": "2025-11-25", "version": "v0.4.3", "publiclyDisclosed": true, "disclosureDate": "2025-11-25", "findingIds": [] }
+      { "date": "2026-07-05", "version": "v0.7.0", "publiclyDisclosed": false, "disclosureDate": "2026-10-03", "findingIds": ["dm4"], "testsRun": 210, "filesScanned": 4200, "filesSelected": 260 },
+      { "date": "2026-06-18", "version": "v0.6.4", "publiclyDisclosed": true, "disclosureDate": "2026-06-18", "findingIds": [], "testsRun": 198, "filesScanned": 4080, "filesSelected": 250 },
+      { "date": "2026-06-01", "version": "v0.6.3", "publiclyDisclosed": true, "disclosureDate": "2026-06-01", "findingIds": ["dm3"], "testsRun": 185, "filesScanned": 3950, "filesSelected": 240 },
+      { "date": "2026-05-15", "version": "v0.6.2", "publiclyDisclosed": true, "disclosureDate": "2026-05-15", "findingIds": [], "testsRun": 170, "filesScanned": 3750, "filesSelected": 225 },
+      { "date": "2026-04-28", "version": "v0.6.1", "publiclyDisclosed": true, "disclosureDate": "2026-04-28", "findingIds": [], "testsRun": 155, "filesScanned": 3550, "filesSelected": 210 },
+      { "date": "2026-04-10", "version": "v0.6.0", "publiclyDisclosed": true, "disclosureDate": "2026-04-10", "findingIds": ["dm2"], "testsRun": 140, "filesScanned": 3300, "filesSelected": 190 },
+      { "date": "2026-03-24", "version": "v0.5.4", "publiclyDisclosed": true, "disclosureDate": "2026-03-24", "findingIds": [], "testsRun": 125, "filesScanned": 3000, "filesSelected": 170 },
+      { "date": "2026-03-07", "version": "v0.5.3", "publiclyDisclosed": true, "disclosureDate": "2026-03-07", "findingIds": [], "testsRun": 110, "filesScanned": 2700, "filesSelected": 150 },
+      { "date": "2026-02-18", "version": "v0.5.2", "publiclyDisclosed": true, "disclosureDate": "2026-02-18", "findingIds": [], "testsRun": 95, "filesScanned": 2400, "filesSelected": 130 },
+      { "date": "2026-02-01", "version": "v0.5.1", "publiclyDisclosed": true, "disclosureDate": "2026-02-01", "findingIds": ["dm1"], "testsRun": 80, "filesScanned": 2100, "filesSelected": 110 },
+      { "date": "2026-01-15", "version": "v0.5.0", "publiclyDisclosed": true, "disclosureDate": "2026-01-15", "findingIds": [], "testsRun": 65, "filesScanned": 1800, "filesSelected": 90 },
+      { "date": "2025-12-29", "version": "v0.4.5", "publiclyDisclosed": true, "disclosureDate": "2025-12-29", "findingIds": [], "testsRun": 50, "filesScanned": 1500, "filesSelected": 70 },
+      { "date": "2025-12-12", "version": "v0.4.4", "publiclyDisclosed": true, "disclosureDate": "2025-12-12", "findingIds": [], "testsRun": 35, "filesScanned": 1200, "filesSelected": 55 },
+      { "date": "2025-11-25", "version": "v0.4.3", "publiclyDisclosed": true, "disclosureDate": "2025-11-25", "findingIds": [], "testsRun": 20, "filesScanned": 900, "filesSelected": 40 }
     ]
   }
 ]

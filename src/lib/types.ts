@@ -29,6 +29,12 @@ export interface AuditHistoryEntry {
   publiclyDisclosed: boolean;
   disclosureDate?: string; // ISO date this round is/was cleared for public detail
   findingIds: string[];
+  // Per-round Layer 1/2 numbers — these vary round to round (the repo grows,
+  // the triage tightens), unlike the wallet's top-level fields, which
+  // reflect only the latest round.
+  testsRun?: number;
+  filesScanned: number;
+  filesSelected: number;
 }
 
 export interface Wallet {
