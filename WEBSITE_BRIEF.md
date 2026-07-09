@@ -1,8 +1,8 @@
 # FRAKTUR — Website Generation Brief
 *Master prompt — to be executed to generate the site in `/Fraktur/website/`*
-*Drafted: 2026-07-02 — v10 (sample wallet names anonymized; donation-drawer allocation no longer preselected — 2026-07-07)*
+*Drafted: 2026-07-02 — v11 (Home-side ground-up implementation, wallet detail page, and donation-modal change folded in — see §21–§24 — 2026-07-09)*
 
-> **Parallel work notice:** as of 2026-07-07, the founder is running a second Claude Code session (VS Code) on the Home page and shared components at the same time this session works on Companies. If you're picking this project back up, check `git status`/`git log` before assuming this document is the only source of truth for the whole site — Home-side decisions (e.g. `testsRun`, `AuditFlowDiagram`, the `/legal` page, "The Cast" naming) may have been made in that other session and are real even if not documented here. Commit scoped to the files you actually changed, not `git add -A`, while two sessions are active on the same repo.
+> **Parallel work notice:** as of 2026-07-07, the founder is running a second Claude Code session (VS Code) on the Home page and shared components at the same time this session works on Companies. If you're picking this project back up, check `git status`/`git log` before assuming this document is the only source of truth for the whole site — Home-side decisions (e.g. `testsRun`, `AuditFlowDiagram`, the `/legal` page, "the Kast" naming) may have been made in that other session and are real even if not documented here. Commit scoped to the files you actually changed, not `git add -A`, while two sessions are active on the same repo. **Update (2026-07-09):** §21–§24 below now fold in that other session's Home-side work explicitly, so this document no longer relies solely on this disclaimer to stay honest about what's real on Home.
 
 > **How to use:** This is the complete spec, kept in sync with the generated code. Read it before changing anything in `/website`. Decisions below were confirmed by the founder across five rounds — flag only genuine new ambiguities.
 
@@ -201,7 +201,7 @@ Note: vulnerability counts are **not** stored as fixed columns on `Wallets` (v3 
 - Reference texture available: `Images/arriere plan.png` (dark cracked-glass motif) — usable as background texture, consistent with the dark theme forced by the logo constraint.
 - Accent color: Bitcoin-orange, per existing brand assets. Do not invent a new palette.
 - Tone: technical, confident, zero hype. No stock crypto imagery. Typography-led, data-dense.
-- Donation drawer: slide-up panel with visible page content behind it (not a full-screen dimmed modal) — reads as "in-context," not "interruption," for a trust-sensitive audience.
+- Donation drawer: slide-up panel with visible page content behind it (not a full-screen dimmed modal) — reads as "in-context," not "interruption," for a trust-sensitive audience. **Superseded 2026-07-09 — see §24: this is now a vertically centered modal, not a bottom-docked slide-up panel.**
 
 ---
 
@@ -284,7 +284,7 @@ Not done in this session (see README.md "Deploying"): actual deployment to a hos
 - [x] Logo usage is exclusively the two v2-on-black assets (§5); the superseded logos are not referenced anywhere in `/website`.
 - [x] Every non-negotiable in §0 is respected in the copy.
 - [x] Data renders from Airtable when configured, from sample JSON otherwise — structure matches §4 exactly.
-- [x] Mobile-responsive layout (ticker marquee + bottom-sheet drawer use responsive Tailwind classes).
+- [x] Mobile-responsive layout (ticker marquee + bottom-sheet drawer use responsive Tailwind classes). *(Marquee superseded by a fracture animation, and bottom-sheet superseded by a centered modal — both still responsive; see §21 and §24.)*
 - [x] No lorem ipsum — real content from the pitch brief and this document throughout.
 - [x] `npm install && npm run build` verified clean (re-verified after the v5 redesign and the Next.js security patch — see §11).
 - [ ] **Not done:** git commit pushed to a remote — no remote was configured; needs the founder's repository URL.
@@ -458,3 +458,68 @@ Third pass on this one CTA, each version fixing a real problem the previous one 
 `DonationDrawer.tsx` defaulted `allocation` to `"Product Dev"` on open, and to `"Specific Wallet"` whenever a visitor arrived via a wallet card's "Help us go deeper" link (`WalletList.tsx` passes `allocationChoice: "Specific Wallet"` in the prefill). Founder's call: never preselect — let the donor actively choose every time, including after clicking a wallet-specific link. What should carry over from that click is *which wallet to offer*, not *that "Specific Wallet" is the answer*.
 
 Fixed entirely inside `DonationDrawer.tsx` (no change needed on the Home side): `allocation` now starts as `undefined` and is reset to `undefined` every time the drawer opens, regardless of what `prefill.allocationChoice` says — that field is now deliberately ignored. `selectedWallets` still gets pre-populated from `prefill.walletId`, but stays dormant (the wallet-picker panel only renders once the donor manually selects "Specific Wallet") — so clicking "Help us go deeper" on a given wallet still saves the donor a step *if* they end up choosing that allocation, without forcing the choice. Submit is blocked with an inline message ("Please choose where this should go, above.") if no allocation was picked.
+
+---
+
+## 21. Home page — ground-up implementation, post-v10 (two-tone system, wallet card v2, "the Kast")
+
+**Context:** everything below shipped in the parallel VS Code/Claude Code session on Home-side files (`Header.tsx`, `WalletList.tsx`, `SeverityBadge.tsx`, `AuditFlowDiagram.tsx`, `TickerBanner.tsx`, `SupportersGallery.tsx`, `Footer.tsx`, `tailwind.config.ts`, `data/*.sample.json`) between 2026-07-07 and 2026-07-09, largely executing the proposals in `HOME_UX_SPEC.md`. That document is a **pre-implementation proposal draft** — unlike this file, it is not kept in sync with the code after the fact. Treat this section as the as-built record; treat `HOME_UX_SPEC.md` as the rationale/history behind each decision.
+
+**Nav bar — supersedes §1.** The `Wallets` / `Supporters` in-page anchors and the inline `For Companies` text link no longer exist on the Home header. Per `HOME_UX_SPEC.md` §1, `For Companies` is now a ghost/outline electric-blue pill paired directly next to the filled-orange `⚡ Help us fraKtur it before they do` donate button — matched size/weight, so the header's two most important actions read as a pair instead of one looking like a caption next to the other. Both pills stay visible at every width (no `hidden md:flex` collapse). The Companies-variant nav (`Problem/Solution/Proof/Pricing/FAQ`) is unchanged.
+
+**Two-tone color system, now codified in `tailwind.config.ts`:** `fraktur.orange`/`orangeDim` stays the brand/CTA/donation color; `fraktur.electric` (`#3b6fed`) / `electricDim` (`#1b2a5c`) is a second accent reserved for audit/verification visual language (the flow diagram, "Verify" links, selection states), applied deliberately sparingly after the founder flagged early passes as too heavy-handed with it. A **separate `severity.*` token set** (none/low/medium/high/critical — green reserved exclusively for a genuinely clean wallet) now drives every severity color on Home. The original 5-tier `risk.*` tokens (including `Medium-High`, §4.1a) were left in place, untouched, because Companies' `ProofVisual.tsx` still depends on them — two color systems coexist on purpose rather than one being force-migrated mid-flight by a session that doesn't own that file.
+
+**Donor community renamed "the Kast"** — `SupportersGallery.tsx`, `TickerBanner.tsx` (corrects the "The Cast" guess in this file's own parallel-work notice above).
+
+**Ticker banner rebuilt as a fracture animation, replacing the marquee** (`HOME_UX_SPEC.md` §3): 3 donor slots shown at once, not a continuous scroll of everyone — holds for ~1.2s, cracks open in a two-phase animation (hairline fissure, then widen/fade), then the next group of 3 fades in. Retimed across several rounds of feedback; current constants live at the top of `TickerBanner.tsx`. The old CSS `marquee` keyframe is still defined in `tailwind.config.ts` but nothing currently renders it.
+
+**Hero headline replaced** with `HOME_UX_SPEC.md` §2's confirmed option — *"Bitcoin-native AI, aimed at what actually breaks."* + tagline *"Bound to this wallet, this version, this date — proven on-chain, not just claimed."* The tagline deliberately narrows the on-chain-proof claim to binding/authenticity rather than implying the full report is public, consistent with §15's disclosure staging.
+
+**Wallet card rebuilt around 3 "facts," replacing §2.3's flat field list:**
+1. Icon/monogram + name + repo link (unchanged in substance).
+2. Fact 1 — the scan date as plain colored text, not a pill (a date isn't a verdict), colored by the new freshness gradient below, linking straight into that wallet's audit-history page (§22).
+3. Fact 2 — one merged pill: status + files-audited/selected count.
+4. `AuditFlowDiagram.tsx` — a new mempool.space-style SVG (files/tests ribbons merging into severity-colored finding blocks) replacing the plain "1,300 → 63 files, -95% noise cut" text spec §2.3 originally called for; the old inline Layer-2 progress gauge folded into Fact 2's pill instead of living separately.
+5. Fact 3 — "Fractures" severity badges plus a single `ⓘ` disclosure-info popover (hover-intent close, ~250ms grace so crossing from icon to panel doesn't dismiss it — the standard Radix/Tippy/Floating-UI pattern) replacing the original one-tooltip-per-badge design, which had repeated the same disclosure paragraph 3–4 times on a single card.
+
+**Risk-filter bug, fixed.** The wallet grid's risk filter and "sort by risk" compared against `wallet.riskBadge` — a separately curated field reflecting only currently-*open* findings — while the visible severity badges on each card counted every finding regardless of fixed/open status. Filtering "High" could silently exclude a wallet whose card visibly showed "2 High" badges. Fixed with a shared `highestSeverity(findings)` helper (`format.ts`), computed from the wallet's actual findings array and used by both the filter and the sort. `wallet.riskBadge` itself is untouched (still valid for future Airtable-curated nuance) — it's just no longer the source of truth for what the UI filters/sorts by.
+
+**Freshness gradient + two-tier fix status — implements `HOME_UX_SPEC.md` §6's "clean wallet paradox" resolution.** The founder's concern: a wallet showing "0 open findings" looks identical whether it was scanned 3 days ago or 8 months ago, so there was no honest way to reward recency without either overstating freshness or giving reassurance away for free forever. Resolved with two independent mechanisms, both in `format.ts`:
+- `freshnessInfo` / `scanLabelFor` — a 4-band gradient (≤7d bright green → ≤30d dimmer green → ≤90d amber → >90d muted gray, labeled "re-scan pending"), replacing the old binary `isStale` ⓘ. Never hides that a scan is old; the visual reward for recency creates organic pressure on a team to pay for a re-scan rather than let its own badge dull in front of its users.
+- `FindingStatus` (`"Open" | "Declared Fixed" | "Verified Fixed"`) — a team's own self-reported fix gets a free, neutral badge ("Team reports fixed — pending re-verification"); FRAKTUR's own independent re-scan confirming the fix gets a visually stronger badge ("FRAKTUR-verified fixed"). This is the technical seed of the **targeted re-verification** tier §16 already prices on Companies — the Home UI now visibly creates the moment that product sells into.
+
+**Footer rebuilt:** an icon row (X / GitHub / OpenTimestamp / mail — `SocialIcons.tsx`) replaces a text link row, plus a shortened one-line donation disclaimer linking to a new `/legal` page (the full §6 wording now lives there, not inline in the footer).
+
+---
+
+## 22. Wallet detail — from a popup to a dedicated, shareable page (`/wallets/[slug]`)
+
+`HOME_UX_SPEC.md` §4c/§7 specified an audit-history **popup** (built first as `AuditHistoryModal.tsx`, then `WalletHistoryBrowser.tsx`) with prev/next round navigation and public/embargoed badges. After it shipped, the founder asked for a professional opinion on converting it into a dedicated page instead. Argued for it: a per-wallet page is shareable (a URL a team or supporter can actually link to, unlike a modal), better for SEO/reputation — central to the viral/proof mechanic the whole product leans on — gives the history far more room than a modal ever could, and matches the page-per-concept pattern the site already established (`/legal`, `/companies`, `/apply`). Founder agreed. Both modal components were deleted and replaced with:
+
+- `src/app/wallets/[slug]/page.tsx` — server component; fetches wallets, 404s on an unknown slug, sets a per-wallet `<title>`/description via `generateMetadata` so a shared link previews the wallet's own audit status rather than a generic site title.
+- `src/components/WalletDetailView.tsx` — the interactive client body.
+- The slug is **derived, not stored**: `walletSlug()` (`format.ts`) kebab-cases the wallet's name, avoiding a new field on the Airtable `Wallets` schema (§4.1) just for a URL.
+
+**Data-model addition, not yet reflected in the Airtable schema (§4.1):** `AuditHistoryEntry` (`types.ts`) now carries its own `testsRun?` / `filesScanned` / `filesSelected` per round, not just `date` / `version` / `publiclyDisclosed` / `findingIds`. This matters functionally — switching between audit rounds on the detail page now actually changes the flow diagram and file/test counts shown, instead of always displaying the wallet's current-state totals regardless of which historical round is selected. **Open item:** `auditHistory`, with its per-round numbers, exists only in `data/wallets.sample.json` today — a real `AuditHistory`-equivalent Airtable table needs designing before this is backed by live data, the same gap §4.1a once had for `Findings` before that table existed.
+
+**Page layout, current state:** two columns inside a centered `max-w-[960px]` wrapper — left (`360px`) is the filterable/sortable audit-round list, right (fixed `36rem`, sized to match the wallet card's own width rather than stretching to fill a wider grid track) is the wallet card plus the selected round's finding detail. History rows use a **fixed-column CSS grid** (date / Partial-or-Complete badge / highest-severity color swatch / spacer / disclosure icon) rather than a flex row with gaps — a flex row let "Complete" vs. "Partial" text width shift every following element out of alignment between rows; the grid guarantees each field lands in the same position on every row regardless of its own content length. Two `<select>` dropdowns (age, severity/vulnerability-type) plus a sort dropdown (most-recent-first / most-critical-first) reuse the exact pattern already established by the Home page's own wallet-grid filter, for interaction consistency between the two pages.
+
+**Disclosure-state display, refined from §4c's spec:** the popup spec called for a text badge ("Public" vs. "Embargoed until [date]") on every history entry; the page shows a single icon instead (🔍 public / 🔒 embargoed) to keep each row compact, with the full "Public" / "🔒 Embargoed" text badge retained in the "Viewing {date} · {version}" line for whichever round is currently selected. The underlying rule from §15 is unchanged — severity + existence is always visible per round; exploit-level detail only renders once `publiclyDisclosed` is true.
+
+**Bug fixed in passing:** the page's "Get the full report →" CTA at one point pointed at `/apply` (the free-scan-application queue) instead of `/contact?tier=report&wallet=X` (the paid lead-gen form) — a real bug the founder caught. Fixed; the wallet name carries through so the contact form arrives pre-scoped.
+
+---
+
+## 23. `/apply` and `/contact` forms — required project field, wallet interest picker
+
+Both forms (`ApplyForm.tsx` for `/apply`, `ContactForm.tsx` for `/contact`) gained:
+- A **required** "Company / project" field (previously optional or absent) — a submission with no stated company was effectively a dead lead.
+- A **wallet-interest multi-select** — a scrollable checkbox list, visually matching the donation drawer's own wallet picker, pre-checked automatically when the visitor arrived via a wallet-specific link (e.g. a wallet card's "For Companies →", or a wallet page's "Get the full report →"). Stored end-to-end as `interestedWallets` (`ApplyForm`/`ContactForm` → `/api/apply-free-scan` / `/api/contact` → `airtable.ts`'s `createFreeScanApplication` / `createLead`, joined as a comma-separated field). Both routes now also enforce the project/company field server-side, not only in the client form.
+
+**Nav-anchor bug fixed in passing:** `Header.tsx`'s companies-variant anchors were bare `#problem`-style fragments, which only resolve correctly when actually rendered on `/companies` — broke when that header variant is reused on `/apply` (clicking "Problem" there just tacked a fragment onto `/apply`'s own URL instead of navigating anywhere). Fixed to absolute `/companies#problem`-style paths.
+
+---
+
+## 24. Donation drawer — bottom-sheet retired for a centered modal
+
+**Supersedes §5's "slide-up panel... not a full-screen dimmed modal" line and §10's "bottom-sheet drawer" checklist item.** Those described a deliberate earlier choice — docked to the bottom of the viewport, chosen specifically so it wouldn't read as a full-screen interruption for a trust-sensitive donor audience. The founder later asked for it to read as a genuine centered popup instead. Changed in `DonationDrawer.tsx`: `items-end` → `items-center` (the drawer no longer docks to the bottom), `rounded-t-2xl` → `rounded-2xl` (all four corners, not just the top), and added backdrop `p-4` so the panel doesn't touch viewport edges on small screens. The backdrop itself is unchanged — still a translucent `bg-black/30`, not a fully opaque overlay — so the original "page content stays faintly visible behind it, this isn't a jarring interruption" intent survives; only the panel's own position and corner treatment changed.
