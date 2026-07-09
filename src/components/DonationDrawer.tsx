@@ -103,13 +103,14 @@ export function DonationDrawer({ walletOptions }: { walletOptions: { id: string;
     <>
       <Script src={`${process.env.NEXT_PUBLIC_BTCPAY_URL}/modal/btcpay.js`} strategy="lazyOnload" />
 
-      {/* Backdrop keeps page content visible/scrollable behind it, per the
-          founder's explicit call to avoid a full dimmed modal (trust-sensitive
-          audience — see WEBSITE_BRIEF.md §5). */}
-      <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/30" onClick={close}>
+      {/* Centered modal, translucent (not fully opaque) backdrop — page
+          content stays faintly visible behind it, keeping the "in-context,
+          not interruption" feel from WEBSITE_BRIEF.md §5 without docking the
+          panel to the bottom of the viewport. */}
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 p-4" onClick={close}>
         <div
           onClick={(e) => e.stopPropagation()}
-          className="max-h-[85vh] w-full max-w-2xl overflow-y-auto rounded-t-2xl border border-fraktur-electricDim bg-fraktur-panel p-6 shadow-2xl"
+          className="max-h-[85vh] w-full max-w-2xl overflow-y-auto rounded-2xl border border-fraktur-electricDim bg-fraktur-panel p-6 shadow-2xl"
         >
           <div className="mb-5 flex items-start justify-between">
             <h3 className="text-xl font-semibold text-fraktur-text">Support FRAKTUR</h3>
