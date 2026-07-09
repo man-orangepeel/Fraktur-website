@@ -6,7 +6,7 @@ export function Footer() {
   return (
     <footer className="border-t border-fraktur-border bg-fraktur-panel py-10 text-sm text-fraktur-muted">
       <div className="mx-auto max-w-6xl px-4">
-        <div className="mb-6 flex flex-col items-start gap-6 sm:flex-row sm:items-center sm:justify-between">
+        <div className="mb-6 flex flex-col items-start gap-4">
           <Image src="/logo-full.png" alt="FRAKTUR" width={640} height={128} className="h-28 w-auto sm:h-32" />
 
           <div className="flex items-center gap-5">

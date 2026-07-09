@@ -108,6 +108,18 @@ export function SupportersGallery({ supporters }: { supporters: Supporter[] }) {
               </button>
             </div>
           )}
+
+          {expanded && (
+            <button
+              onClick={() => {
+                setExpanded(false);
+                setPage(0);
+              }}
+              className="mt-6 text-sm font-medium text-fraktur-orange hover:underline"
+            >
+              Show fewer supporters ↑
+            </button>
+          )}
         </>
       )}
     </div>

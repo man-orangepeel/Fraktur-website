@@ -6,19 +6,7 @@ import { AuditFlowDiagram } from "@/components/AuditFlowDiagram";
 import { SeverityBadge } from "@/components/SeverityBadge";
 import { CompareBars, FindingsCard } from "@/components/ProofVisual";
 import { getWallets } from "@/lib/data";
-import type { Finding } from "@/lib/types";
-
-// Illustrative-only data for the hero preview card below — rendered through
-// the exact same components (AuditFlowDiagram, SeverityBadge) the real
-// Wallet Watcher cards use on Home, not a simplified lookalike. See
-// WEBSITE_BRIEF.md §18 (revision note) for why this replaced a custom mockup.
-const HERO_PREVIEW_FINDINGS: Finding[] = [
-  { id: "h1", walletId: "preview", cwe: "CWE-476", title: "Signature verification — null client", severity: "High" },
-  { id: "h2", walletId: "preview", cwe: "CWE-22", title: "Path / filesystem handling", severity: "Medium" },
-  { id: "h3", walletId: "preview", cwe: "CWE-23", title: "Path / filesystem handling", severity: "Medium" },
-  { id: "h4", walletId: "preview", cwe: "CWE-362", title: "Concurrency / race condition", severity: "Low" },
-  { id: "h5", walletId: "preview", cwe: "CWE-362", title: "Concurrency / race condition", severity: "Low" },
-];
+import { countBySeverity } from "@/lib/format";
 
 export const revalidate = 60;
 
@@ -114,6 +102,13 @@ export default async function CompaniesPage({
   const walletName = searchParams?.wallet;
   const { highlight, banner } = contextForReason(searchParams?.reason);
 
+  // Hero preview — pulls a real entry straight from the live Wallet Watcher
+  // (Home page) instead of hand-authored mock numbers, so the hero shows
+  // actual proof rather than an illustrative placeholder. See
+  // WEBSITE_BRIEF.md §18 (revision note).
+  const heroWallet = wallets.find((w) => w.id === "wallet-rowan-01") ?? wallets[0];
+  const heroCounts = heroWallet ? countBySeverity(heroWallet.findings) : null;
+
   return (
     <>
       <Header variant="companies" />
@@ -141,14 +136,18 @@ export default async function CompaniesPage({
                   version was illegible/cramped at most widths). */}
               <div className="mt-5 flex flex-wrap gap-2">
                 {[
-                  "Built on Loupe (Spiral / Block)",
-                  "Bitcoin-aware: BIPs · BOLTs · NUTs · BLIPs",
-                  "No PoC, no report",
-                  "OpenTimestamp-verified",
-                ].map((label) => (
+                  { label: "Built on Loupe (Spiral / Block)", accent: true },
+                  { label: "Bitcoin-aware: BIPs · BOLTs · NUTs · BLIPs", accent: false },
+                  { label: "No PoC, no report", accent: false },
+                  { label: "OpenTimestamp-verified", accent: false },
+                ].map(({ label, accent }) => (
                   <span
                     key={label}
-                    className="rounded-full border border-fraktur-border bg-fraktur-panel px-3 py-1.5 text-xs text-fraktur-muted"
+                    className={`rounded-full border px-3 py-1.5 text-xs ${
+                      accent
+                        ? "border-fraktur-electric/40 bg-fraktur-electric/10 text-fraktur-electric"
+                        : "border-fraktur-border bg-fraktur-panel text-fraktur-muted"
+                    }`}
                   >
                     {label}
                   </span>
@@ -171,57 +170,70 @@ export default async function CompaniesPage({
               </div>
             </div>
 
-            {/* Illustrative product preview — rendered through the real
-                Wallet Watcher card components (AuditFlowDiagram,
-                SeverityBadge), not a simplified custom mockup. Static data,
-                clearly labeled. */}
-            <article className="rounded-xl border border-fraktur-electric/25 bg-fraktur-panel p-5">
-              <div className="mb-3 flex items-start justify-between gap-3">
-                <div className="flex items-center gap-3">
-                  <span
-                    className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-xs font-bold text-white"
-                    style={{ backgroundColor: "#8a94a3" }}
-                    aria-hidden
-                  >
-                    YW
-                  </span>
-                  <h3 className="text-lg font-semibold text-fraktur-text">your-org/your-wallet</h3>
+            {/* Real product preview — one live entry pulled straight from the
+                Wallet Watcher (Home page), rendered through the exact same
+                components (AuditFlowDiagram, SeverityBadge). Proof, not a
+                mockup — matches the page's own "Proof, not promises" framing
+                below. */}
+            {heroWallet && heroCounts && (
+              <article className="rounded-xl border border-fraktur-electric/25 bg-fraktur-panel p-5">
+                <div className="mb-3 flex items-start justify-between gap-3">
+                  <div className="flex items-center gap-3">
+                    {heroWallet.iconInitials && (
+                      <span
+                        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-xs font-bold text-white"
+                        style={{ backgroundColor: heroWallet.iconColor || "#8a94a3" }}
+                        aria-hidden
+                      >
+                        {heroWallet.iconInitials}
+                      </span>
+                    )}
+                    <h3 className="text-lg font-semibold text-fraktur-text">{heroWallet.name}</h3>
+                  </div>
                 </div>
-              </div>
 
-              <dl className="mb-4 grid grid-cols-2 gap-y-1 text-xs text-fraktur-muted">
-                <dt>Status</dt>
-                <dd className="text-right text-fraktur-text">In progress</dd>
-                <dt>Last review</dt>
-                <dd className="text-right text-fraktur-text">3 days ago</dd>
-                <dt>fraKtur</dt>
-                <dd className="text-right text-fraktur-text">v0.4.2</dd>
-              </dl>
+                <dl className="mb-4 grid grid-cols-2 gap-y-1 text-xs text-fraktur-muted">
+                  <dt>Status</dt>
+                  <dd className="text-right text-fraktur-text">{heroWallet.status}</dd>
+                  <dt>Last review</dt>
+                  <dd className="text-right text-fraktur-text">
+                    {new Date(heroWallet.lastReviewDate).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+                  </dd>
+                  <dt>fraKtur</dt>
+                  <dd className="text-right text-fraktur-text">{heroWallet.auditToolVersion}</dd>
+                </dl>
 
-              <div className="mb-3 rounded-lg bg-fraktur-bg p-3">
-                <AuditFlowDiagram
-                  filesScanned={1300}
-                  filesSelected={63}
-                  filesAudited={6}
-                  maxTestsRun={1}
-                  maxFilesScanned={1300}
-                  findings={HERO_PREVIEW_FINDINGS}
-                />
-              </div>
+                <div className="mb-3 rounded-lg bg-fraktur-bg p-3">
+                  <AuditFlowDiagram
+                    testsRun={heroWallet.testsRun}
+                    filesScanned={heroWallet.filesScanned}
+                    filesSelected={heroWallet.filesSelected}
+                    filesAudited={heroWallet.filesAudited}
+                    maxTestsRun={heroWallet.testsRun || 1}
+                    maxFilesScanned={heroWallet.filesScanned}
+                    findings={heroWallet.findings}
+                  />
+                </div>
 
-              <div className="mb-2 flex flex-wrap gap-2 text-xs">
-                <SeverityBadge severity="High" count={1} walletName="your-org/your-wallet" />
-                <SeverityBadge severity="Medium" count={2} walletName="your-org/your-wallet" />
-                <SeverityBadge severity="Low" count={2} walletName="your-org/your-wallet" />
-              </div>
+                <div className="mb-2 flex flex-wrap gap-2 text-xs">
+                  {(["Critical", "High", "Medium", "Low"] as const).map((sev) =>
+                    heroCounts[sev] > 0 ? <SeverityBadge key={sev} severity={sev} count={heroCounts[sev]} /> : null
+                  )}
+                </div>
 
-              <p className="mt-3 text-xs text-fraktur-muted">Illustrative — same display as the real Wallet Watcher.</p>
-            </article>
+                <p className="mt-3 text-xs text-fraktur-muted">
+                  One live entry from our Wallet Watcher — not a mockup.{" "}
+                  <Link href="/#wallets" className="text-fraktur-electric hover:underline">
+                    See all wallets →
+                  </Link>
+                </p>
+              </article>
+            )}
           </div>
         </section>
 
         {/* ---------------------------------------------------------------- PROBLEM */}
-        <section id="problem" className="border-b border-fraktur-border py-16">
+        <section id="problem" className="scroll-mt-28 border-b border-fraktur-border py-16">
           <div className="mx-auto max-w-6xl px-4">
             <p className="mb-2 text-xs font-semibold uppercase tracking-[0.2em] text-fraktur-orange">The problem</p>
             <h2 className="mb-3 max-w-2xl font-display text-3xl text-fraktur-text sm:text-4xl">
@@ -258,7 +270,7 @@ export default async function CompaniesPage({
         </section>
 
         {/* ---------------------------------------------------------------- HOW IT WORKS */}
-        <section id="solution" className="border-b border-fraktur-border bg-fraktur-panel py-16">
+        <section id="solution" className="scroll-mt-28 border-b border-fraktur-border bg-fraktur-panel py-16">
           <div className="mx-auto max-w-6xl px-4">
             <p className="mb-2 text-xs font-semibold uppercase tracking-[0.2em] text-fraktur-orange">How FRAKTUR works</p>
             <h2 className="mb-10 max-w-2xl font-display text-3xl text-fraktur-text sm:text-4xl">Not smaller. Smarter.</h2>
@@ -297,7 +309,7 @@ export default async function CompaniesPage({
         </section>
 
         {/* ---------------------------------------------------------------- PROOF */}
-        <section id="proof" className="border-b border-fraktur-border py-16">
+        <section id="proof" className="scroll-mt-28 border-b border-fraktur-border py-16">
           <div className="mx-auto max-w-6xl px-4">
             <p className="mb-2 text-xs font-semibold uppercase tracking-[0.2em] text-fraktur-orange">Proof, not promises</p>
             <h2 className="mb-2 max-w-2xl font-display text-3xl text-fraktur-text sm:text-4xl">Our first real-world test</h2>
@@ -328,7 +340,7 @@ export default async function CompaniesPage({
         </section>
 
         {/* ---------------------------------------------------------------- PRICING */}
-        <section id="pricing" className="border-b border-fraktur-border bg-fraktur-panel py-16">
+        <section id="pricing" className="scroll-mt-28 border-b border-fraktur-border bg-fraktur-panel py-16">
           <div className="mx-auto max-w-6xl px-4">
             <p className="mb-2 text-xs font-semibold uppercase tracking-[0.2em] text-fraktur-orange">
               {walletName ? `Checking in about ${walletName}?` : "Pricing"}
@@ -389,7 +401,7 @@ export default async function CompaniesPage({
         </section>
 
         {/* ---------------------------------------------------------------- FAQ */}
-        <section id="faq" className="py-16">
+        <section id="faq" className="scroll-mt-28 py-16">
           <div className="mx-auto max-w-3xl px-4">
             <p className="mb-2 text-xs font-semibold uppercase tracking-[0.2em] text-fraktur-orange">FAQ</p>
             <h2 className="mb-8 font-display text-3xl text-fraktur-text">Key objections</h2>
@@ -408,7 +420,7 @@ export default async function CompaniesPage({
         <section className="border-t border-fraktur-border bg-fraktur-panel py-16 text-center">
           <div className="mx-auto max-w-2xl px-4">
             <h2 className="font-display text-3xl text-fraktur-text sm:text-4xl">
-              Not smaller. Smarter. Full audits weren&rsquo;t built for you. This is.
+              Every wallet fractures somewhere. Know where yours does — before your users do.
             </h2>
             <div className="mt-8 flex flex-wrap justify-center gap-3">
               <a

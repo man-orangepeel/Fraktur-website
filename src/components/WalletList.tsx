@@ -135,13 +135,23 @@ export function WalletList({ wallets }: { wallets: Wallet[] }) {
         </div>
       </div>
 
+      {filtered.length === 0 && (
+        <p className="rounded-xl border border-fraktur-border bg-fraktur-panel px-4 py-6 text-center text-sm text-fraktur-muted">
+          No wallet matches &ldquo;{query}&rdquo;{riskFilter !== "All" ? ` at ${riskFilter} risk` : ""}. Try a
+          different search or risk filter.
+        </p>
+      )}
+
       <div className="grid gap-4 md:grid-cols-2">
         {filtered.map((wallet) => {
           const counts = countBySeverity(wallet.findings);
           const freshness = freshnessInfo(wallet.lastReviewDate);
           const scanLabel = freshness.label.replace(/^Verified/, "Scanned").replace(/^Last verified/, "Last scanned");
           const days = daysSinceReview(wallet.lastReviewDate);
-          const scanColorClass = days <= 7 ? "text-fraktur-electric" : days <= 90 ? "text-fraktur-text" : "text-fraktur-muted";
+          // Same green/blue language as the status pill (Fact 2) — a recent
+          // scan reads as "healthy" (green), an older one as "still valid,
+          // just less fresh" (blue), never as a muted/washed-out warning.
+          const scanColorClass = days < 30 ? "text-severity-none" : "text-fraktur-electric";
           const isCompleted = wallet.status === "Completed";
           const walletHeader = (
             <>
@@ -218,7 +228,14 @@ export function WalletList({ wallets }: { wallets: Wallet[] }) {
                 </div>
                 <div className="flex flex-wrap gap-2 text-xs">
                   {(["Critical", "High", "Medium", "Low"] as const).map((sev) =>
-                    counts[sev] > 0 ? <SeverityBadge key={sev} severity={sev} count={counts[sev]} /> : null
+                    counts[sev] > 0 ? (
+                      <SeverityBadge
+                        key={sev}
+                        severity={sev}
+                        count={counts[sev]}
+                        onClick={() => setHistoryWalletId(wallet.id)}
+                      />
+                    ) : null
                   )}
                   {wallet.findings.length === 0 && (
                     <span className="rounded-full bg-severity-none px-2 py-0.5 font-medium text-white">0 findings</span>

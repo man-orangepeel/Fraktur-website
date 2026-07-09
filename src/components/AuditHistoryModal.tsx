@@ -198,7 +198,7 @@ export function AuditHistoryModal({ wallet, onClose }: { wallet: Wallet; onClose
             href={companiesHref(wallet, "report")}
             className="block text-sm font-medium text-fraktur-electric hover:underline"
           >
-            Want the complete findings report for this wallet? → Get the full report
+            Get the full report →
           </a>
           <button
             onClick={() => {

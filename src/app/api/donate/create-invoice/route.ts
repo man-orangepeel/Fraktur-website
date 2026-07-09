@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { randomUUID } from "crypto";
 import { createBtcPayInvoice } from "@/lib/btcpay";
-import { createPendingDonation } from "@/lib/airtable";
+import { airtableConfigured, createPendingDonation } from "@/lib/airtable";
 
 /**
  * Step 1 of the donation flow. The donor has just filled the allocation form
@@ -19,6 +19,19 @@ export async function POST(req: NextRequest) {
 
     if (!allocationChoice) {
       return NextResponse.json({ error: "allocationChoice is required" }, { status: 400 });
+    }
+
+    if (!airtableConfigured()) {
+      // Same graceful guard as /api/apply-free-scan — no Airtable base
+      // connected yet, so don't let this fall through to a generic 500. See
+      // README.md "Airtable setup" for the env vars this needs.
+      return NextResponse.json(
+        {
+          error:
+            "Donations aren't wired up to a database yet — please reach out at contact@fraktur.io in the meantime.",
+        },
+        { status: 503 }
+      );
     }
 
     const orderId = randomUUID();

@@ -30,7 +30,7 @@ export function Header({ variant }: { variant: "home" | "companies" }) {
               </a>
             ))}
             <Link href="/" className="hover:text-fraktur-text">
-              Home
+              Wallet Watcher
             </Link>
           </nav>
         )}
