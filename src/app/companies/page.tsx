@@ -136,18 +136,14 @@ export default async function CompaniesPage({
                   version was illegible/cramped at most widths). */}
               <div className="mt-5 flex flex-wrap gap-2">
                 {[
-                  { label: "Built on Loupe (Spiral / Block)", accent: true },
-                  { label: "Bitcoin-aware: BIPs · BOLTs · NUTs · BLIPs", accent: false },
-                  { label: "No PoC, no report", accent: false },
-                  { label: "OpenTimestamp-verified", accent: false },
-                ].map(({ label, accent }) => (
+                  "Built on Loupe (Spiral / Block)",
+                  "Bitcoin-aware: BIPs · BOLTs · NUTs · BLIPs",
+                  "No PoC, no report",
+                  "OpenTimestamp-verified",
+                ].map((label) => (
                   <span
                     key={label}
-                    className={`rounded-full border px-3 py-1.5 text-xs ${
-                      accent
-                        ? "border-fraktur-electric/40 bg-fraktur-electric/10 text-fraktur-electric"
-                        : "border-fraktur-border bg-fraktur-panel text-fraktur-muted"
-                    }`}
+                    className="rounded-full border-2 border-fraktur-electric/50 bg-fraktur-panel px-3 py-1.5 text-xs text-fraktur-muted"
                   >
                     {label}
                   </span>
@@ -368,10 +364,8 @@ export default async function CompaniesPage({
                     <p className="font-display text-lg text-fraktur-text">{tier.name}</p>
                     <p className="mt-1 text-sm font-semibold text-fraktur-electric">{tier.price}</p>
                     <p className="mt-3 flex-1 text-sm text-fraktur-muted">{tier.description}</p>
-                    <a
-                      href={`mailto:contact@fraktur.io?subject=${encodeURIComponent(
-                        tier.subject + (walletName ? ` — ${walletName}` : "")
-                      )}`}
+                    <Link
+                      href={`/contact?tier=${tier.id}${walletName ? `&wallet=${encodeURIComponent(walletName)}` : ""}`}
                       className={`mt-5 rounded-full px-4 py-2 text-center text-sm font-semibold ${
                         isHighlighted
                           ? "bg-fraktur-orange text-black hover:bg-fraktur-orangeDim"
@@ -379,7 +373,7 @@ export default async function CompaniesPage({
                       }`}
                     >
                       {tier.cta}
-                    </a>
+                    </Link>
                   </div>
                 );
               })}
@@ -429,12 +423,12 @@ export default async function CompaniesPage({
               >
                 Apply for a free scan →
               </a>
-              <a
-                href="mailto:contact@fraktur.io?subject=Talk%20to%20FRAKTUR"
+              <Link
+                href="/contact"
                 className="rounded-full border border-fraktur-border px-6 py-3 text-sm font-semibold text-fraktur-text hover:border-fraktur-orange"
               >
                 Talk to us
-              </a>
+              </Link>
               <Link href="/" className="rounded-full border border-fraktur-border px-6 py-3 text-sm font-semibold text-fraktur-text hover:border-fraktur-electric">
                 See the Wallet Watcher
               </Link>
