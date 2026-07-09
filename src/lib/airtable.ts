@@ -252,6 +252,7 @@ interface CreateLeadInput {
   company?: string;
   tierInterest?: string; // "reverify" | "report" | "subscribe" | "" (not sure yet)
   walletContext?: string; // wallet name, when the CTA was reached from a wallet-specific link
+  interestedWallets?: string[]; // names of tracked wallets the lead flagged interest in
   message?: string;
 }
 
@@ -270,6 +271,7 @@ export async function createLead(input: CreateLeadInput): Promise<string> {
         ...(input.company ? { Company: input.company } : {}),
         ...(input.tierInterest ? { "Tier Interest": input.tierInterest } : {}),
         ...(input.walletContext ? { "Wallet Context": input.walletContext } : {}),
+        ...(input.interestedWallets?.length ? { "Interested Wallets": input.interestedWallets.join(", ") } : {}),
         ...(input.message ? { Message: input.message } : {}),
         Status: "New",
       },

@@ -12,10 +12,10 @@ import { airtableConfigured, createLead } from "@/lib/airtable";
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { name, email, company, tierInterest, walletContext, message } = body;
+    const { name, email, company, tierInterest, walletContext, interestedWallets, message } = body;
 
-    if (!name || !email) {
-      return NextResponse.json({ error: "name and email are required" }, { status: 400 });
+    if (!name || !email || !company) {
+      return NextResponse.json({ error: "name, email, and company are required" }, { status: 400 });
     }
 
     if (!airtableConfigured()) {
@@ -28,7 +28,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    await createLead({ name, email, company, tierInterest, walletContext, message });
+    await createLead({ name, email, company, tierInterest, walletContext, interestedWallets, message });
     return NextResponse.json({ ok: true });
   } catch (err) {
     console.error("contact/lead submission failed:", err);

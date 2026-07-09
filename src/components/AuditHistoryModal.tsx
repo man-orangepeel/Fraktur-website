@@ -195,7 +195,7 @@ export function AuditHistoryModal({ wallet, onClose }: { wallet: Wallet; onClose
 
         <div className="space-y-2 border-t border-fraktur-border pt-4">
           <a
-            href={`/apply?wallet=${encodeURIComponent(wallet.name)}`}
+            href={`/contact?tier=report&wallet=${encodeURIComponent(wallet.name)}`}
             className="block text-sm font-medium text-fraktur-electric hover:underline"
           >
             Get the full report →
