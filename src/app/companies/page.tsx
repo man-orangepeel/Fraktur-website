@@ -153,13 +153,13 @@ export default async function CompaniesPage({
               <div className="mt-8 flex flex-wrap gap-3">
                 <a
                   href="/apply"
-                  className="rounded-full bg-fraktur-orange px-6 py-3 text-sm font-semibold text-black transition hover:bg-fraktur-orangeDim"
+                  className="rounded-full bg-fraktur-orange px-6 py-1.5 text-sm font-semibold text-black transition hover:bg-fraktur-orangeDim"
                 >
                   Apply for a free scan →
                 </a>
                 <a
                   href="#pricing"
-                  className="rounded-full border border-fraktur-border px-6 py-3 text-sm font-semibold text-fraktur-text transition hover:border-fraktur-electric"
+                  className="rounded-full border border-fraktur-border px-6 py-1.5 text-sm font-semibold text-fraktur-text transition hover:border-fraktur-electric"
                 >
                   See pricing
                 </a>
@@ -386,7 +386,7 @@ export default async function CompaniesPage({
               </p>
               <a
                 href="/apply"
-                className="shrink-0 rounded-full bg-fraktur-orange px-6 py-3 text-sm font-semibold text-black transition hover:bg-fraktur-orangeDim"
+                className="shrink-0 rounded-full bg-fraktur-orange px-6 py-1.5 text-sm font-semibold text-black transition hover:bg-fraktur-orangeDim"
               >
                 Apply for a free scan →
               </a>
@@ -419,17 +419,17 @@ export default async function CompaniesPage({
             <div className="mt-8 flex flex-wrap justify-center gap-3">
               <a
                 href="/apply"
-                className="rounded-full bg-fraktur-orange px-6 py-3 text-sm font-semibold text-black hover:bg-fraktur-orangeDim"
+                className="rounded-full bg-fraktur-orange px-6 py-1.5 text-sm font-semibold text-black hover:bg-fraktur-orangeDim"
               >
                 Apply for a free scan →
               </a>
               <Link
                 href="/contact"
-                className="rounded-full border border-fraktur-border px-6 py-3 text-sm font-semibold text-fraktur-text hover:border-fraktur-orange"
+                className="rounded-full border border-fraktur-border px-6 py-1.5 text-sm font-semibold text-fraktur-text hover:border-fraktur-orange"
               >
                 Talk to us
               </Link>
-              <Link href="/" className="rounded-full border border-fraktur-border px-6 py-3 text-sm font-semibold text-fraktur-text hover:border-fraktur-electric">
+              <Link href="/" className="rounded-full border border-fraktur-border px-6 py-1.5 text-sm font-semibold text-fraktur-text hover:border-fraktur-electric">
                 See the Wallet Watcher
               </Link>
             </div>
