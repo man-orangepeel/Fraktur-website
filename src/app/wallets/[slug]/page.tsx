@@ -28,7 +28,6 @@ export default async function WalletDetailPage({ params }: { params: { slug: str
   const { wallets, wallet } = await findWallet(params.slug);
   if (!wallet) notFound();
 
-  const maxTestsRun = Math.max(...wallets.map((w) => w.testsRun ?? 0), 1);
   const maxFilesScanned = Math.max(...wallets.map((w) => w.filesScanned), 1);
 
   return (
@@ -40,7 +39,7 @@ export default async function WalletDetailPage({ params }: { params: { slug: str
           ← Back to Wallet Watcher
         </Link>
 
-        <WalletDetailView wallet={wallet} maxTestsRun={maxTestsRun} maxFilesScanned={maxFilesScanned} />
+        <WalletDetailView wallet={wallet} maxFilesScanned={maxFilesScanned} />
       </main>
 
       <Footer />

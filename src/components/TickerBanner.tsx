@@ -47,11 +47,29 @@ function supporterAccent(handle: string): keyof typeof ACCENT {
   return hash % 2 === 0 ? "orange" : "electric";
 }
 
-function SupporterContent({ s }: { s: Supporter | null }) {
+function SupporterContent({ s, compact }: { s: Supporter | null; compact?: boolean }) {
   if (!s) {
-    return <span className="whitespace-nowrap text-sm text-fraktur-muted">Be the first this month</span>;
+    return (
+      <span className={`whitespace-nowrap text-fraktur-muted ${compact ? "text-sm" : "text-sm"}`}>
+        Be the first this month
+      </span>
+    );
   }
   const accent = ACCENT[supporterAccent(s.handle)];
+  if (compact) {
+    // Sticky-header variant: no tier badge — that's the one thing dropped
+    // vs. the full version, to keep this to a single line. Text/avatar size
+    // otherwise stay close to full-size (2026-07-11: an earlier pass shrank
+    // these too far and made the row illegible).
+    return (
+      <span className={`flex items-center gap-2 whitespace-nowrap rounded-full ${accent.chip} px-3 py-1.5 text-sm`}>
+        <span className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[11px] font-semibold ${accent.avatar}`}>
+          {s.handle.replace(/^@|^npub1/, "").slice(0, 1).toUpperCase()}
+        </span>
+        <span className={`font-medium ${accent.text}`}>{s.handle}</span>
+      </span>
+    );
+  }
   return (
     <span className={`flex items-center gap-2 whitespace-nowrap rounded-full ${accent.chip} px-4 py-1.5 text-sm`}>
       <span className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-semibold ${accent.avatar}`}>
@@ -119,19 +137,29 @@ function pieceStyle(piece: "top" | "bottom", phase: Phase, delayMs: number): CSS
   };
 }
 
-function FractureSlot({ s, phase, delayMs }: { s: Supporter | null; phase: Phase; delayMs: number }) {
+function FractureSlot({
+  s,
+  phase,
+  delayMs,
+  compact,
+}: {
+  s: Supporter | null;
+  phase: Phase;
+  delayMs: number;
+  compact?: boolean;
+}) {
   const url = s ? supporterProfileUrl(s) : undefined;
 
   const content = (
-    <span className="relative flex h-10 items-center justify-center px-2">
+    <span className={`relative flex items-center justify-center ${compact ? "h-9 px-2" : "h-10 px-2"}`}>
       <span className="invisible flex items-center">
-        <SupporterContent s={s} />
+        <SupporterContent s={s} compact={compact} />
       </span>
       <span className="absolute inset-0 flex items-center justify-center" style={pieceStyle("top", phase, delayMs)}>
-        <SupporterContent s={s} />
+        <SupporterContent s={s} compact={compact} />
       </span>
       <span className="absolute inset-0 flex items-center justify-center" style={pieceStyle("bottom", phase, delayMs)}>
-        <SupporterContent s={s} />
+        <SupporterContent s={s} compact={compact} />
       </span>
     </span>
   );
@@ -145,7 +173,16 @@ function FractureSlot({ s, phase, delayMs }: { s: Supporter | null; phase: Phase
   );
 }
 
-export function TickerBanner({ supporters }: { supporters: Supporter[] }) {
+/**
+ * `compact` (2026-07-10): the sticky-header variant, rendered inside
+ * Header.tsx (variant="home" only) as a slim second row under the logo —
+ * replaces the old full-bleed mid-page placement (see page.tsx), which ate
+ * too much fixed vertical space once both it and the header were meant to
+ * be visible together. Same fracture animation/timing, just smaller: no
+ * decorative glow, no tier badge, no "active this month" subtitle — those
+ * don't fit a single slim line and aren't essential to the effect.
+ */
+export function TickerBanner({ supporters, compact = false }: { supporters: Supporter[]; compact?: boolean }) {
   const active = supporters.filter((s) => s.activeLast30Days);
   const groups = useMemo(() => chunkIntoGroups(active), [active]);
   const [groupIndex, setGroupIndex] = useState(0);
@@ -190,6 +227,21 @@ export function TickerBanner({ supporters }: { supporters: Supporter[] }) {
   }, [groupIndex, groups.length]);
 
   const current = groups[groupIndex] ?? groups[0];
+
+  if (compact) {
+    // No border/background here — the wrapper in Header.tsx owns that, so
+    // this component stays reusable without assuming its own placement.
+    return (
+      <div key={groupIndex} className="mx-auto flex max-w-6xl items-center gap-4 px-4 py-3">
+        <span className="shrink-0 text-base font-bold text-fraktur-text sm:text-lg">the Kast</span>
+        <div className="flex flex-1 items-center justify-around gap-2 overflow-hidden">
+          {current.map((s, i) => (
+            <FractureSlot key={i} s={s} phase={phase} delayMs={i * STAGGER_MS} compact />
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="relative overflow-hidden border-y-2 border-fraktur-electric/30 bg-fraktur-electric/5 py-6 sm:py-8">

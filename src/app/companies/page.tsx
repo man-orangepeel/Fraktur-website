@@ -4,9 +4,14 @@ import { Footer } from "@/components/Footer";
 import { DonationDrawer } from "@/components/DonationDrawer";
 import { AuditFlowDiagram } from "@/components/AuditFlowDiagram";
 import { SeverityBadge } from "@/components/SeverityBadge";
+import { DisclosureInfo } from "@/components/WalletList";
 import { CompareBars, FindingsCard } from "@/components/ProofVisual";
 import { getWallets } from "@/lib/data";
-import { countBySeverity } from "@/lib/format";
+import { countBySeverity, highestSeverity, scanLabelFor, severityHex, walletSlug } from "@/lib/format";
+
+// Floor so the top bar's risk color is never invisible on a wallet whose
+// audit has barely started — mirrors WalletList.tsx's own constant.
+const MIN_BAR_PCT = 8;
 
 export const revalidate = 60;
 
@@ -168,63 +173,94 @@ export default async function CompaniesPage({
 
             {/* Real product preview — one live entry pulled straight from the
                 Wallet Watcher (Home page), rendered through the exact same
-                components (AuditFlowDiagram, SeverityBadge). Proof, not a
-                mockup — matches the page's own "Proof, not promises" framing
-                below. */}
-            {heroWallet && heroCounts && (
-              <article className="rounded-xl border border-fraktur-electric/25 bg-fraktur-panel p-5">
-                <div className="mb-3 flex items-start justify-between gap-3">
-                  <div className="flex items-center gap-3">
-                    {heroWallet.iconInitials && (
-                      <span
-                        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-xs font-bold text-white"
-                        style={{ backgroundColor: heroWallet.iconColor || "#8a94a3" }}
-                        aria-hidden
-                      >
-                        {heroWallet.iconInitials}
-                      </span>
-                    )}
-                    <h3 className="text-lg font-semibold text-fraktur-text">{heroWallet.name}</h3>
+                components (AuditFlowDiagram, SeverityBadge) and the same
+                visual language (top bar + matching border, fractures before
+                detail) as the Home grid card. Proof, not a mockup — matches
+                the page's own "Proof, not promises" framing below. */}
+            {heroWallet && heroCounts && (() => {
+              const isCompleted = heroWallet.status === "Completed";
+              const barColor = severityHex(highestSeverity(heroWallet.findings));
+              const barPct = isCompleted
+                ? 100
+                : heroWallet.filesSelected > 0
+                  ? Math.min(100, Math.max((heroWallet.filesAudited / heroWallet.filesSelected) * 100, MIN_BAR_PCT))
+                  : 100;
+              const { label: scanLabel, colorClass: scanColorClass } = scanLabelFor(heroWallet.lastReviewDate);
+              const historyHref = `/wallets/${walletSlug(heroWallet.name)}`;
+
+              return (
+                <article
+                  className="relative overflow-hidden rounded-xl border-b border-l border-r bg-fraktur-panel"
+                  style={{ borderColor: barColor }}
+                >
+                  <div
+                    className="h-1.5 w-full bg-fraktur-border"
+                    role="img"
+                    aria-label={`${isCompleted ? "Completed" : "In progress"} audit, highest severity: ${highestSeverity(heroWallet.findings)}`}
+                  >
+                    <div className="h-full rounded-r-full" style={{ width: `${barPct}%`, backgroundColor: barColor }} />
                   </div>
-                </div>
 
-                <dl className="mb-4 grid grid-cols-2 gap-y-1 text-xs text-fraktur-muted">
-                  <dt>Status</dt>
-                  <dd className="text-right text-fraktur-text">{heroWallet.status}</dd>
-                  <dt>Last review</dt>
-                  <dd className="text-right text-fraktur-text">
-                    {new Date(heroWallet.lastReviewDate).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
-                  </dd>
-                  <dt>fraKtur</dt>
-                  <dd className="text-right text-fraktur-text">{heroWallet.auditToolVersion}</dd>
-                </dl>
+                  <div className="p-5">
+                    {/* Same structure/order as the Home grid card
+                        (WalletList.tsx): header links to history, Fractures
+                        right under the name, plain-text status then scan
+                        date, diagram last. */}
+                    <Link href={historyHref} className="mb-3 flex items-center gap-3 hover:opacity-80">
+                      {heroWallet.iconInitials && (
+                        <span
+                          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-xs font-bold text-white"
+                          style={{ backgroundColor: heroWallet.iconColor || "#8a94a3" }}
+                          aria-hidden
+                        >
+                          {heroWallet.iconInitials}
+                        </span>
+                      )}
+                      <h3 className="text-lg font-semibold text-fraktur-text">{heroWallet.name}</h3>
+                    </Link>
 
-                <div className="mb-3 rounded-lg bg-fraktur-bg p-3">
-                  <AuditFlowDiagram
-                    testsRun={heroWallet.testsRun}
-                    filesScanned={heroWallet.filesScanned}
-                    filesSelected={heroWallet.filesSelected}
-                    filesAudited={heroWallet.filesAudited}
-                    maxTestsRun={heroWallet.testsRun || 1}
-                    maxFilesScanned={heroWallet.filesScanned}
-                    findings={heroWallet.findings}
-                  />
-                </div>
+                    <div className="mb-4">
+                      <div className="mb-1.5 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-fraktur-muted">
+                        <span>Fractures</span>
+                        <DisclosureInfo walletName={heroWallet.name} />
+                      </div>
+                      <div className="flex flex-wrap gap-2 text-xs">
+                        {(["Critical", "High", "Medium", "Low"] as const).map((sev) =>
+                          heroCounts[sev] > 0 ? <SeverityBadge key={sev} severity={sev} count={heroCounts[sev]} /> : null
+                        )}
+                        {heroWallet.findings.length === 0 && (
+                          <span className="rounded-full bg-severity-none px-2 py-0.5 font-medium text-white">0 findings</span>
+                        )}
+                      </div>
+                    </div>
 
-                <div className="mb-2 flex flex-wrap gap-2 text-xs">
-                  {(["Critical", "High", "Medium", "Low"] as const).map((sev) =>
-                    heroCounts[sev] > 0 ? <SeverityBadge key={sev} severity={sev} count={heroCounts[sev]} /> : null
-                  )}
-                </div>
+                    <p className="mb-1.5 text-xs font-medium text-fraktur-text">
+                      {isCompleted ? "✓" : "●"} {heroWallet.status} — {heroWallet.filesAudited}/{heroWallet.filesSelected}{" "}
+                      files
+                    </p>
 
-                <p className="mt-3 text-xs text-fraktur-muted">
-                  One live entry from our Wallet Watcher — not a mockup.{" "}
-                  <Link href="/#wallets" className="text-fraktur-electric hover:underline">
-                    See all wallets →
-                  </Link>
-                </p>
-              </article>
-            )}
+                    <p className={`mb-3 text-left text-xs ${scanColorClass}`}>{scanLabel}</p>
+
+                    <div className="mb-4 rounded-lg bg-fraktur-bg p-3">
+                      <AuditFlowDiagram
+                        filesScanned={heroWallet.filesScanned}
+                        filesSelected={heroWallet.filesSelected}
+                        filesAudited={heroWallet.filesAudited}
+                        maxFilesScanned={heroWallet.filesScanned}
+                        findings={heroWallet.findings}
+                      />
+                    </div>
+
+                    <p className="text-xs text-fraktur-muted">
+                      One live entry from our Wallet Watcher — not a mockup.{" "}
+                      <Link href="/#wallets" className="text-fraktur-electric hover:underline">
+                        See all wallets →
+                      </Link>
+                    </p>
+                  </div>
+                </article>
+              );
+            })()}
           </div>
         </section>
 
@@ -269,37 +305,57 @@ export default async function CompaniesPage({
         <section id="solution" className="scroll-mt-28 border-b border-fraktur-border bg-fraktur-panel py-16">
           <div className="mx-auto max-w-6xl px-4">
             <p className="mb-2 text-xs font-semibold uppercase tracking-[0.2em] text-fraktur-orange">How FRAKTUR works</p>
-            <h2 className="mb-10 max-w-2xl font-display text-3xl text-fraktur-text sm:text-4xl">Not smaller. Smarter.</h2>
+            <h2 className="mb-3 max-w-2xl font-display text-3xl text-fraktur-text sm:text-4xl">
+              Full coverage, finally affordable.
+            </h2>
+            <p className="mb-10 max-w-2xl text-sm text-fraktur-muted">
+              A full audit costs too much for most teams — so it never happens. FRAKTUR covers 100% of the code
+              through automated checks and real execution under stress, at zero AI cost. Only what&rsquo;s still
+              uncertain moves to AI — first a broad pass, then a strict one that confirms nothing without
+              triggering it for real.
+            </p>
 
-            <div className="grid gap-6 sm:grid-cols-3">
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
               {[
                 {
                   n: "01",
-                  t: "Attack-surface triage",
-                  d: "We run your code with random, malformed, adversarial inputs at scale — the same way real attackers probe it. Crash sites map exactly where to look.",
+                  t: "Pre-test + fuzz",
+                  d: "Automated checks and structure-aware fuzzing across every file. Deterministic, ~0 AI cost.",
+                  r: "1,334 files covered",
                 },
                 {
                   n: "02",
-                  t: "Selective Loupe",
-                  d: "Bitcoin-native AI agents (Claude + Codex cross-verification) audit only what Layer 1 flagged. Every finding ships with a proof-of-concept that fails on HEAD — no PoC, no report.",
+                  t: "Regtest stress",
+                  d: "Runs the wallet for real, on a controlled test chain, under adversarial network conditions.",
+                  r: "Catches live failures, not theoretical ones",
                 },
                 {
                   n: "03",
-                  t: "On-chain proof",
-                  d: "Every completed audit is hashed and timestamped via OpenTimestamp — verifiable by anyone, forever, independent of us.",
+                  t: "Multi-file analysis",
+                  d: "AI reasoning guided by a deterministic call-graph narrows candidates — not a blind full read.",
+                  r: "Down to 7 files worth a deep read",
+                },
+                {
+                  n: "04",
+                  t: "Surgical deep-read",
+                  d: "No claim ships without a working proof that triggers it. No PoC, no report.",
+                  r: "6 code-verified findings, 0 refuted",
                 },
               ].map((step) => (
                 <div key={step.n} className="rounded-2xl border border-fraktur-border bg-fraktur-bg p-6">
                   <p className="font-display text-2xl text-fraktur-electric">{step.n}</p>
                   <p className="mt-2 text-lg font-semibold text-fraktur-text">{step.t}</p>
                   <p className="mt-2 text-sm text-fraktur-muted">{step.d}</p>
+                  <p className="mt-3 text-xs font-semibold text-fraktur-electric">{step.r}</p>
                 </div>
               ))}
             </div>
 
             <p className="mt-8 max-w-2xl text-sm text-fraktur-muted">
-              The pipeline is how we work fast today. The proof is what stays yours — verifiable on-chain,
-              independent of any single tool we&rsquo;re built on.
+              Every finding is proven, not assumed: replayed until it actually happens — on a controlled test
+              chain (regtest) for network-related scenarios, in a dedicated harness for everything else. Every
+              reported finding is demonstrated. None is guessed. Every completed audit is also hashed and
+              timestamped via OpenTimestamp — verifiable by anyone, forever, independent of us.
             </p>
           </div>
         </section>
@@ -308,27 +364,28 @@ export default async function CompaniesPage({
         <section id="proof" className="scroll-mt-28 border-b border-fraktur-border py-16">
           <div className="mx-auto max-w-6xl px-4">
             <p className="mb-2 text-xs font-semibold uppercase tracking-[0.2em] text-fraktur-orange">Proof, not promises</p>
-            <h2 className="mb-2 max-w-2xl font-display text-3xl text-fraktur-text sm:text-4xl">Our first real-world test</h2>
+            <h2 className="mb-2 max-w-2xl font-display text-3xl text-fraktur-text sm:text-4xl">Our first real-world run</h2>
             <p className="mb-10 text-sm text-fraktur-muted">
-              For the wallet&rsquo;s repo we audited (name withheld per responsible disclosure norms).
+              Real numbers from a production audit. Wallet name withheld per responsible disclosure norms — every
+              figure below is real and aggregate.
             </p>
             <div className="grid gap-4 lg:grid-cols-3">
               <CompareBars
-                title="L1 — files triaged per scan"
-                beforeLabel="Loupe-only (whole codebase)"
-                beforeValue={1300}
+                title="Files needing a deep AI read"
+                beforeLabel="Deep-read everything"
+                beforeValue={1334}
                 afterLabel="FRAKTUR (triaged)"
-                afterValue={63}
-                result="-95% noise cut"
+                afterValue={7}
+                result="-99.5% noise cut"
               />
               <CompareBars
-                title="Cost per scan (Claude Opus 4.8, API-equivalent)"
-                beforeLabel="Loupe-only (~1,300 agents)"
-                beforeValue={3200}
-                afterLabel="FRAKTUR (63 triaged files)"
-                afterValue={150}
+                title="AI cost per scan (list-price-equivalent)"
+                beforeLabel="Deep-read everything (~50.5M tokens)"
+                beforeValue={1515}
+                afterLabel="FRAKTUR (~3.55M tokens)"
+                afterValue={107}
                 unit="$"
-                result="-95% cost"
+                result="-93% cost"
               />
               <FindingsCard />
             </div>

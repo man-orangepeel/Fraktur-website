@@ -25,14 +25,22 @@ export function SupportersGallery({ supporters }: { supporters: Supporter[] }) {
   const paged = expanded ? visible.slice(page * pageSize, page * pageSize + pageSize) : visible;
 
   return (
-    <section id="supporters" className="border-b border-fraktur-border bg-fraktur-electric/10">
-    <div className="mx-auto max-w-6xl px-4 py-12">
+    // Contained rounded card (2026-07-11, was a full-bleed band) — same
+    // treatment as "What FRAKTUR does" above it, sitting on the page's own
+    // background instead of stacking as another edge-to-edge stripe.
+    <section id="supporters" className="mx-auto max-w-6xl px-4 py-10">
+    <div className="rounded-2xl border border-fraktur-electric/40 bg-fraktur-electric/10 p-8 shadow-2xl shadow-black/30 sm:p-10">
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+        {/* Small orange kicker for the section name, big bold text for the
+            actual line (2026-07-11: matches "What FRAKTUR does" — the
+            punchy sentence, not the label, is what deserves the emphasis). */}
         <div>
-          <h2 className="text-3xl font-bold text-fraktur-text">the Kast</h2>
-          <p className="mt-1 text-sm text-fraktur-muted">
-            A fracture heals because someone holds it together. This is who&rsquo;s holding ours.
-          </p>
+          <p className="mb-2 text-xs font-semibold uppercase tracking-[0.2em] text-fraktur-orange">the Kast</p>
+          <h2 className="font-display text-2xl text-fraktur-text sm:text-3xl">
+            A fracture heals because someone holds it together.
+            <br />
+            This is who&rsquo;s holding ours.
+          </h2>
         </div>
         {expanded && (
           <select

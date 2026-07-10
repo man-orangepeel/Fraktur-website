@@ -108,14 +108,17 @@ export function freshnessInfo(lastReviewDate: string): FreshnessInfo {
 
 // Plain-text variant of freshnessInfo (verb "Scanned", not "Verified" — a
 // date isn't a verdict) shared by the wallet card and the detail page.
+//
+// Three-tier freshness color (2026-07-10 revision, replacing the earlier
+// green/blue 2-tier scheme): 0-7 days green, 8-30 days amber, 31+ days red.
+// The 31-day cutoff is deliberately the same one `isStale()` already uses
+// (which drives the "badge going stale" pitch on /companies) — one freshness
+// rule across the site, not two slightly different ones.
 export function scanLabelFor(lastReviewDate: string): { label: string; colorClass: string } {
   const freshness = freshnessInfo(lastReviewDate);
   const label = freshness.label.replace(/^Verified/, "Scanned").replace(/^Last verified/, "Last scanned");
   const days = daysSinceReview(lastReviewDate);
-  // Same green/blue language as the status pill (Fact 2) — a recent scan
-  // reads as "healthy" (green), an older one as "still valid, just less
-  // fresh" (blue), never as a muted/washed-out warning.
-  const colorClass = days < 30 ? "text-severity-none" : "text-fraktur-electric";
+  const colorClass = days <= 7 ? "text-severity-none" : days <= 30 ? "text-amber-400" : "text-red-400";
   return { label, colorClass };
 }
 

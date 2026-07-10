@@ -18,6 +18,9 @@ const SEVERITY_RANK: Record<Severity, number> = { Critical: 3, High: 2, Medium: 
 const SEVERITY_RANK_WITH_NONE: Record<Severity | "None", number> = { ...SEVERITY_RANK, None: -1 };
 
 const PAGE_SIZE = 12;
+// Floor so the top bar's risk color is never invisible on a wallet whose
+// latest round has barely started — mirrors WalletList.tsx's own constant.
+const MIN_BAR_PCT = 8;
 const SELECT_CLASS =
   "rounded-md border border-fraktur-border bg-fraktur-panel px-3 py-1.5 text-xs text-fraktur-text focus:border-fraktur-electric focus:outline-none focus:ring-1 focus:ring-fraktur-electric";
 
@@ -48,11 +51,9 @@ function roundIsComplete(findings: Finding[]): boolean {
  */
 export function WalletDetailView({
   wallet,
-  maxTestsRun,
   maxFilesScanned,
 }: {
   wallet: Wallet;
-  maxTestsRun: number;
   maxFilesScanned: number;
 }) {
   const { open: openDonation } = useDonation();
@@ -109,6 +110,20 @@ export function WalletDetailView({
   const currentEntry = roundsWithMeta.find((r) => r.round.date === selectedDate) ?? roundsWithMeta[0];
   const current = currentEntry.round;
   const currentFindings = [...currentEntry.findings].sort((a, b) => SEVERITY_RANK[b.severity] - SEVERITY_RANK[a.severity]);
+
+  // Top bar color/width for the round card, aligned with WalletList.tsx's
+  // grid card: color is always this round's highest severity. Every past
+  // round is a finished record (full bar) — only the most recent round, if
+  // the wallet's overall status is still "In progress", shows partial
+  // progress (deep-read files audited so far / selected).
+  const isLatestRound = currentEntry === roundsWithMeta[0];
+  const cardBarColor = severityHex(currentEntry.highest);
+  const cardBarPct =
+    isCompleted || !isLatestRound
+      ? 100
+      : wallet.filesSelected > 0
+        ? Math.min(100, Math.max((wallet.filesAudited / wallet.filesSelected) * 100, MIN_BAR_PCT))
+        : 100;
 
   return (
     <div className="mx-auto max-w-[960px]">
@@ -232,60 +247,69 @@ export function WalletDetailView({
           )}
         </div>
 
-        {/* Column 2 — the wallet "card", same text layout/data/alignment as
-            the Home page grid, followed by the selected round's detail. */}
+        {/* Column 2 — the wallet "card", same visual language as the Home
+            page grid (top bar + matching 3-side border, plain-text status),
+            followed by the selected round's detail. */}
         <div>
-          <div className="rounded-xl border border-fraktur-electric/25 bg-fraktur-panel p-5">
-            <div className="mb-3 flex items-start gap-3">
-              {wallet.iconInitials && (
-                <span
-                  className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-xs font-bold text-white"
-                  style={{ backgroundColor: wallet.iconColor || "#8a94a3" }}
-                  aria-hidden
-                >
-                  {wallet.iconInitials}
-                </span>
-              )}
-              <div>
-                <h1 className="text-lg font-semibold text-fraktur-text">{wallet.name}</h1>
-                {wallet.repoUrl && (
-                  <a
-                    href={wallet.repoUrl}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="text-xs text-fraktur-muted hover:text-fraktur-electric"
-                  >
-                    Repository ↗
-                  </a>
-                )}
-              </div>
-            </div>
-
-            <p className={`mb-3 text-left text-xs ${scanColorClass}`}>{scanLabel}</p>
-
+          <div
+            className="relative overflow-hidden rounded-xl border-b border-l border-r bg-fraktur-panel"
+            style={{ borderColor: cardBarColor }}
+          >
             <div
-              className={`mb-3 inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold ${
-                isCompleted ? "bg-severity-none text-white" : "bg-fraktur-electric text-white"
-              }`}
+              className="h-1.5 w-full bg-fraktur-border"
+              role="img"
+              aria-label={`${cardBarPct >= 100 ? "Complete" : "In progress"} round, highest severity: ${currentEntry.highest}`}
             >
-              <span>{isCompleted ? "✓" : "●"}</span>
-              <span>
-                {wallet.status} — {wallet.filesAudited}/{wallet.filesSelected} files
-              </span>
+              <div className="h-full rounded-r-full" style={{ width: `${cardBarPct}%`, backgroundColor: cardBarColor }} />
             </div>
 
-            {/* Diagram reflects the SELECTED round's own numbers (files
-                scanned/selected, tests run, severity blocks) — this is what
-                "updates on click", not the wallet's current-state totals. */}
-            <div className="rounded-lg bg-fraktur-bg p-3">
-              <AuditFlowDiagram
-                testsRun={current.testsRun}
-                filesScanned={current.filesScanned}
-                filesSelected={current.filesSelected}
-                maxTestsRun={maxTestsRun}
-                maxFilesScanned={maxFilesScanned}
-                findings={currentEntry.findings}
-              />
+            <div className="p-5">
+              <div className="mb-3 flex items-start gap-3">
+                {wallet.iconInitials && (
+                  <span
+                    className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-xs font-bold text-white"
+                    style={{ backgroundColor: wallet.iconColor || "#8a94a3" }}
+                    aria-hidden
+                  >
+                    {wallet.iconInitials}
+                  </span>
+                )}
+                <div>
+                  <h1 className="text-lg font-semibold text-fraktur-text">{wallet.name}</h1>
+                  {wallet.repoUrl && (
+                    <a
+                      href={wallet.repoUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="text-xs text-fraktur-muted hover:text-fraktur-electric"
+                    >
+                      Repository ↗
+                    </a>
+                  )}
+                </div>
+              </div>
+
+              {/* Off-white, not severity-colored (2026-07-10) — matches the
+                  Home grid card: the bar/border already carry the risk
+                  color, this line is neutral detail. Reordered before the
+                  scan date (2026-07-10) — same order as the grid card. */}
+              <p className="mb-1.5 text-xs font-medium text-fraktur-text">
+                {isCompleted ? "✓" : "●"} {wallet.status} — {wallet.filesAudited}/{wallet.filesSelected} files
+              </p>
+
+              <p className={`mb-3 text-left text-xs ${scanColorClass}`}>{scanLabel}</p>
+
+              {/* Diagram reflects the SELECTED round's own numbers (files
+                  scanned/selected, severity blocks) — this is what "updates
+                  on click", not the wallet's current-state totals. */}
+              <div className="rounded-lg bg-fraktur-bg p-3">
+                <AuditFlowDiagram
+                  filesScanned={current.filesScanned}
+                  filesSelected={current.filesSelected}
+                  maxFilesScanned={maxFilesScanned}
+                  findings={currentEntry.findings}
+                />
+              </div>
             </div>
           </div>
 
